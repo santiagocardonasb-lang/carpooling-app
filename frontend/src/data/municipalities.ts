@@ -1,0 +1,26 @@
+export const MUNICIPALITIES = [
+  // Sabana Centro - Cundinamarca
+  'Zipaquirá',
+  'Cajicá',
+  'Chía',
+  'Cogua',
+  'Cota',
+  'Gachancipá',
+  'Nemocón',
+  'Sopó',
+  'Tabio',
+  'Tenjo',
+  'Tocancipá',
+  'Briceño',
+  // Destinos cercanos
+  'Bogotá D.C.',
+  'La Calera',
+  'Sesquilé',
+  'Guatavita',
+  'Suesca',
+  'Chocontá',
+  'Nemoné',
+  'Gacheta',
+  'Ubaté',
+  'Facatativá',
+];
