@@ -1,8 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 * {
   font-family: 'Inter', sans-serif;
@@ -15,3 +15,69 @@ body {
 input, textarea, select {
   @apply outline-none;
 }
+
+/* ─────────────────────────────────────────────────────────────
+   MODO CLARO — overrides cuando html.light está activo.
+   Mantenemos toda la app en clases dark por defecto y aquí
+   invertimos las superficies y textos a una paleta clara.
+   ───────────────────────────────────────────────────────────── */
+
+html.light { color-scheme: light; }
+html.light body { background-color: #ffffff; color: #18181b; }
+
+/* Backgrounds */
+html.light .bg-black           { background-color: #ffffff; }
+html.light .bg-zinc-950        { background-color: #fafafa; }
+html.light .bg-zinc-900        { background-color: #f4f4f5; }
+html.light .bg-zinc-800        { background-color: #e4e4e7; }
+html.light .bg-zinc-700        { background-color: #d4d4d8; }
+html.light .bg-zinc-800\/50    { background-color: #e4e4e7cc; }
+
+/* Botones primarios — invertir: fondo oscuro con texto claro */
+html.light .bg-white           { background-color: #18181b; }
+html.light .text-black         { color: #ffffff; }
+html.light .hover\:bg-zinc-200:hover { background-color: #3f3f46; }
+html.light .hover\:bg-zinc-100:hover { background-color: #27272a; }
+
+/* Hover backgrounds */
+html.light .hover\:bg-zinc-900:hover { background-color: #f4f4f5; }
+html.light .hover\:bg-zinc-800:hover { background-color: #e4e4e7; }
+html.light .hover\:bg-zinc-700:hover { background-color: #d4d4d8; }
+
+/* Texto */
+html.light .text-white         { color: #18181b; }
+html.light .text-zinc-300      { color: #3f3f46; }
+html.light .text-zinc-400      { color: #52525b; }
+html.light .text-zinc-500      { color: #71717a; }
+html.light .text-zinc-600      { color: #a1a1aa; }
+html.light .text-zinc-700      { color: #d4d4d8; }
+html.light .text-zinc-800      { color: #e4e4e7; }
+
+/* Hover text */
+html.light .hover\:text-white:hover { color: #18181b; }
+
+/* Bordes */
+html.light .border-zinc-900    { border-color: #f4f4f5; }
+html.light .border-zinc-800    { border-color: #e4e4e7; }
+html.light .border-zinc-700    { border-color: #d4d4d8; }
+html.light .border-zinc-600    { border-color: #a1a1aa; }
+html.light .border-white       { border-color: #18181b; }
+html.light .hover\:border-white:hover { border-color: #18181b; }
+html.light .hover\:border-zinc-600:hover { border-color: #a1a1aa; }
+html.light .hover\:border-zinc-500:hover { border-color: #71717a; }
+
+/* Rings de focus */
+html.light .focus\:ring-white:focus { --tw-ring-color: #18181b; }
+html.light .ring-white { --tw-ring-color: #18181b; }
+html.light .hover\:ring-white:hover { --tw-ring-color: #18181b; }
+html.light .ring-zinc-700 { --tw-ring-color: #d4d4d8; }
+
+/* Placeholders */
+html.light .placeholder-zinc-500::placeholder,
+html.light .placeholder-zinc-600::placeholder { color: #a1a1aa; }
+
+/* Inputs con [color-scheme:dark] — quitar para que se vean nativos en claro */
+html.light .\[color-scheme\:dark\] { color-scheme: light; }
+
+/* Mantener el color de los semáforos (rojo/verde/amarillo/azul) tal cual,
+   y el rojo de notificaciones tal cual. No tocar text-red-*, bg-red-500, etc. */

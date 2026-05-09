@@ -8,11 +8,11 @@ frontend/dist/
 frontend/build/
 
 # Database (SQLite file with user data)
-backend/src/*.db
-backend/src/*.db-journal
-backend/src/*.db-wal
-backend/src/*.db-shm
 *.db
+*.db-journal
+*.db-wal
+*.db-shm
+backend/carpooling.db*
 
 # Environment variables
 .env

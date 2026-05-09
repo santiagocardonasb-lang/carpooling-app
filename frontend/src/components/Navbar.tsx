@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Search, Plus, BookOpen, Bell, User, Car, LogOut } from 'lucide-react';
+import { Search, Plus, BookOpen, Bell, User, Car, LogOut, Settings as SettingsIcon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api';
 
@@ -149,6 +149,14 @@ export default function Navbar() {
                         {unreadCount > 9 ? '9+' : unreadCount}
                       </span>
                     )}
+                  </Link>
+
+                  <Link
+                    to="/settings"
+                    className="flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-zinc-800 transition-colors"
+                  >
+                    <SettingsIcon size={15} className="text-zinc-400 flex-shrink-0" />
+                    Configuración
                   </Link>
 
                   <div className="border-t border-zinc-800 my-1" />

@@ -92,7 +92,7 @@ export default function EditRide() {
   };
 
   const today = new Date().toISOString().split('T')[0];
-  const hasErrors = Object.keys(fieldErrors).length > 0;
+  const hasErrors = Object.values(fieldErrors).some(Boolean);
 
   const inputCls = (field: keyof FieldErrors) =>
     `w-full bg-zinc-900 text-white placeholder-zinc-600 px-4 py-3.5 rounded-xl text-sm transition [color-scheme:dark] ${

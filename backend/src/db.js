@@ -3,6 +3,13 @@ const path = require('path');
 
 const db = new DatabaseSync(path.join(__dirname, '../carpooling.db'));
 
+// Performance + integridad
+db.exec(`
+  PRAGMA foreign_keys = ON;
+  PRAGMA journal_mode = WAL;
+  PRAGMA synchronous = NORMAL;
+`);
+
 db.exec(`
   CREATE TABLE IF NOT EXISTS notifications (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -55,6 +62,21 @@ db.exec(`
     FOREIGN KEY (ride_id) REFERENCES rides(id),
     FOREIGN KEY (passenger_id) REFERENCES users(id)
   );
+
+  CREATE TABLE IF NOT EXISTS ratings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    booking_id INTEGER NOT NULL,
+    rater_id INTEGER NOT NULL,
+    ratee_id INTEGER NOT NULL,
+    rating INTEGER NOT NULL CHECK(rating BETWEEN 1 AND 5),
+    comment TEXT,
+    type TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(booking_id, rater_id),
+    FOREIGN KEY (booking_id) REFERENCES bookings(id),
+    FOREIGN KEY (rater_id) REFERENCES users(id),
+    FOREIGN KEY (ratee_id) REFERENCES users(id)
+  );
 `);
 
 const migrations = [
@@ -69,6 +91,8 @@ const migrations = [
   `ALTER TABLE users ADD COLUMN car_brand TEXT`,
   `ALTER TABLE users ADD COLUMN car_color TEXT`,
   `ALTER TABLE users ADD COLUMN car_plate TEXT`,
+  `ALTER TABLE bookings ADD COLUMN completed_at DATETIME`,
+  `ALTER TABLE bookings ADD COLUMN cancelled_dates TEXT`,
 ];
 for (const sql of migrations) {
   try { db.exec(sql); } catch { /* already exists */ }
@@ -109,6 +133,24 @@ try {
   }
 } catch (e) {
   console.error('Error en migración de rides.date:', e.message);
+}
+
+// Índices para acelerar las consultas más frecuentes
+const indexes = [
+  `CREATE INDEX IF NOT EXISTS idx_rides_status_seats ON rides(status, seats_available)`,
+  `CREATE INDEX IF NOT EXISTS idx_rides_driver ON rides(driver_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_rides_date ON rides(date)`,
+  `CREATE INDEX IF NOT EXISTS idx_bookings_passenger ON bookings(passenger_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_bookings_ride ON bookings(ride_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_bookings_status ON bookings(status)`,
+  `CREATE INDEX IF NOT EXISTS idx_notif_user_read ON notifications(user_id, read)`,
+  `CREATE INDEX IF NOT EXISTS idx_notif_user_created ON notifications(user_id, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`,
+  `CREATE INDEX IF NOT EXISTS idx_ratings_ratee ON ratings(ratee_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_ratings_booking ON ratings(booking_id)`,
+];
+for (const sql of indexes) {
+  try { db.exec(sql); } catch (e) { console.error('Index error:', e.message); }
 }
 
 module.exports = db;

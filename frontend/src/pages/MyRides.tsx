@@ -1,9 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
+import { Share2, Star, CheckCircle } from 'lucide-react';
 import api from '../api';
 import RideCard from '../components/RideCard';
+import RatingModal from '../components/RatingModal';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { shareTrip } from '../utils/share';
 
 const DAY_NAMES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
@@ -46,6 +49,10 @@ interface Booking {
   car_brand?: string;
   car_color?: string;
   car_plate?: string;
+  cancelled_dates?: string;
+  completed_at?: string;
+  driver_id?: number;
+  passenger_id?: number;
 }
 
 interface Request {
@@ -74,11 +81,20 @@ export default function MyRides() {
   const isDriver = user?.role !== 'passenger';
   const { showToast } = useToast();
 
-  const [tab, setTab] = useState<'rides' | 'requests'>('rides');
+  // Tab derivado del URL: si una notificación navega a ?tab=requests, la pestaña
+  // cambia automáticamente sin lógica adicional de sincronización.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab: 'rides' | 'requests' = searchParams.get('tab') === 'requests' ? 'requests' : 'rides';
+  const setTab = (t: 'rides' | 'requests') => {
+    if (t === 'requests') setSearchParams({ tab: 'requests' }, { replace: true });
+    else setSearchParams({}, { replace: true });
+  };
   const [myRides, setMyRides] = useState<Ride[]>([]);
   const [allRequests, setAllRequests] = useState<Request[]>([]);
   const [myBookings, setMyBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [ratingFor, setRatingFor] = useState<{ bookingId: number; name: string; role: 'driver' | 'passenger' } | null>(null);
+  const [ratedSet, setRatedSet] = useState<Set<number>>(new Set());
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -133,6 +149,38 @@ export default function MyRides() {
     }
   };
 
+  const completeBooking = async (id: number) => {
+    if (!confirm('¿Marcar este viaje como completado?')) return;
+    try {
+      await api.patch(`/bookings/${id}/complete`);
+      showToast('Viaje completado');
+      fetchData();
+    } catch (err: unknown) {
+      showToast((err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Error', 'error');
+    }
+  };
+
+  const cancelRecurringDate = async (bookingId: number, date: string) => {
+    if (!confirm(`¿Cancelar el viaje del ${date}?`)) return;
+    try {
+      await api.patch(`/bookings/${bookingId}/cancel-date`, { date });
+      showToast('Día cancelado');
+      fetchData();
+    } catch {
+      showToast('Error al cancelar día', 'error');
+    }
+  };
+
+  // Cargar qué bookings ya califiqué (ambos roles)
+  useEffect(() => {
+    const completed = isDriver
+      ? allRequests.filter(r => r.status === 'completed').map(r => r.id)
+      : myBookings.filter(b => b.status === 'completed').map(b => b.id);
+    if (completed.length === 0) { setRatedSet(new Set()); return; }
+    Promise.all(completed.map(id => api.get(`/ratings/booking/${id}/mine`).then(r => r.data.rated ? id : null).catch(() => null)))
+      .then(rated => setRatedSet(new Set(rated.filter((x): x is number => x !== null))));
+  }, [myBookings, allRequests, isDriver]);
+
   const formatDate = (d?: string) => {
     if (!d) return null;
     return new Date(d + 'T00:00:00').toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
@@ -146,6 +194,11 @@ export default function MyRides() {
   const activeRides    = myRides.filter(r => r.status === 'active');
   const activeBookings = myBookings.filter(b => b.status !== 'cancelled');
   const pendingCount   = allRequests.filter(r => r.status === 'pending').length;
+
+  const parseCancelled = (s?: string): string[] => {
+    if (!s) return [];
+    try { return JSON.parse(s); } catch { return []; }
+  };
 
   // ── Passenger view ────────────────────────────────────────────────────────
   if (!isDriver) {
@@ -202,21 +255,90 @@ export default function MyRides() {
                       {b.status === 'confirmed' ? 'Confirmado' : b.status === 'pending' ? 'Pendiente' : b.status === 'rejected' ? 'Rechazado' : 'Cancelado'}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between mt-3">
+                  {/* Acciones según estado */}
+                  <div className="flex items-center justify-between mt-3 flex-wrap gap-2">
                     <p className="text-white font-bold text-sm">
                       ${b.price.toLocaleString()} · {b.seats} asiento{b.seats !== 1 ? 's' : ''}
                     </p>
-                    {['pending', 'confirmed'].includes(b.status) && (
-                      <button onClick={() => cancelBooking(b.id)} className="text-xs text-red-500 hover:text-red-400 transition-colors">
-                        Cancelar reserva
-                      </button>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {b.status === 'confirmed' && (
+                        <button
+                          onClick={() => shareTrip(b)}
+                          className="flex items-center gap-1 text-xs text-zinc-400 hover:text-white transition-colors"
+                          title="Compartir viaje"
+                        >
+                          <Share2 size={13} /> Compartir
+                        </button>
+                      )}
+                      {b.status === 'completed' && !ratedSet.has(b.id) && (
+                        <button
+                          onClick={() => setRatingFor({ bookingId: b.id, name: b.driver_name, role: 'driver' })}
+                          className="flex items-center gap-1 text-xs text-yellow-400 hover:text-yellow-300 font-semibold transition-colors"
+                        >
+                          <Star size={13} /> Calificar
+                        </button>
+                      )}
+                      {b.status === 'completed' && ratedSet.has(b.id) && (
+                        <span className="text-xs text-zinc-600 flex items-center gap-1">
+                          <Star size={13} className="fill-yellow-400 text-yellow-400" /> Calificado
+                        </span>
+                      )}
+                      {['pending', 'confirmed'].includes(b.status) && (
+                        <button onClick={() => cancelBooking(b.id)} className="text-xs text-red-500 hover:text-red-400 transition-colors">
+                          Cancelar
+                        </button>
+                      )}
+                    </div>
                   </div>
+
+                  {/* Días recurrentes con opción de cancelar uno */}
+                  {b.is_recurring && b.booking_days && b.status === 'confirmed' && (() => {
+                    const cancelled = parseCancelled(b.cancelled_dates);
+                    return (
+                      <div className="mt-3 pt-3 border-t border-zinc-800">
+                        <p className="text-zinc-500 text-xs mb-2">Cancelar un día específico:</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {b.booking_days.split(',').map(d => {
+                            // Fecha = booking_date + offset al día d de esa semana
+                            const base = b.booking_date ? new Date(b.booking_date + 'T12:00:00') : new Date();
+                            const target = new Date(base);
+                            const diff = (Number(d) - base.getDay() + 7) % 7;
+                            target.setDate(target.getDate() + diff);
+                            const iso = target.toISOString().split('T')[0];
+                            const isCancelled = cancelled.includes(iso);
+                            return (
+                              <button
+                                key={d}
+                                disabled={isCancelled}
+                                onClick={() => cancelRecurringDate(b.id, iso)}
+                                className={`px-2 py-1 rounded-lg text-[10px] transition-colors ${
+                                  isCancelled
+                                    ? 'bg-zinc-800 text-zinc-600 line-through'
+                                    : 'bg-zinc-800 text-zinc-400 hover:bg-red-900/30 hover:text-red-400'
+                                }`}
+                              >
+                                {DAY_NAMES[Number(d)]} {target.getDate()}/{target.getMonth() + 1}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               ))}
             </div>
           )}
         </div>
+        {ratingFor && (
+          <RatingModal
+            bookingId={ratingFor.bookingId}
+            rateeName={ratingFor.name}
+            rateeRole={ratingFor.role}
+            onClose={() => setRatingFor(null)}
+            onDone={fetchData}
+          />
+        )}
       </div>
     );
   }
@@ -349,11 +471,33 @@ export default function MyRides() {
                             Confirmar
                           </button>
                         </div>
-                      ) : (
-                        <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-green-900/40 text-green-400 flex-shrink-0">
-                          Confirmado
-                        </span>
-                      )}
+                      ) : req.status === 'confirmed' ? (
+                        <div className="flex flex-col gap-1.5 flex-shrink-0">
+                          <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-green-900/40 text-green-400 text-center">
+                            Confirmado
+                          </span>
+                          <button
+                            onClick={() => completeBooking(req.id)}
+                            className="flex items-center gap-1 text-[10px] text-zinc-400 hover:text-white transition-colors"
+                            title="Marcar viaje como completado"
+                          >
+                            <CheckCircle size={11} /> Completar
+                          </button>
+                        </div>
+                      ) : req.status === 'completed' ? (
+                        !ratedSet.has(req.id) ? (
+                          <button
+                            onClick={() => setRatingFor({ bookingId: req.id, name: req.passenger_name, role: 'passenger' })}
+                            className="flex items-center gap-1 text-xs text-yellow-400 hover:text-yellow-300 font-semibold flex-shrink-0"
+                          >
+                            <Star size={13} /> Calificar
+                          </button>
+                        ) : (
+                          <span className="text-xs text-zinc-600 flex items-center gap-1 flex-shrink-0">
+                            <Star size={13} className="fill-yellow-400 text-yellow-400" /> Calificado
+                          </span>
+                        )
+                      ) : null}
                     </div>
                   </div>
                 </div>
@@ -362,6 +506,15 @@ export default function MyRides() {
           )
         )}
       </div>
+      {ratingFor && (
+        <RatingModal
+          bookingId={ratingFor.bookingId}
+          rateeName={ratingFor.name}
+          rateeRole={ratingFor.role}
+          onClose={() => setRatingFor(null)}
+          onDone={fetchData}
+        />
+      )}
     </div>
   );
 }

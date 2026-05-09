@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Car, Bike, Clock, Calendar, Users, Phone, RefreshCw, Pencil } from 'lucide-react';
+import { Car, Bike, Clock, Calendar, Users, Phone, RefreshCw, Pencil, Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
@@ -30,6 +30,8 @@ interface Ride {
   car_brand?: string;
   car_color?: string;
   car_plate?: string;
+  driver_rating?: number;
+  driver_rating_count?: number;
 }
 
 interface Props {
@@ -148,7 +150,16 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
               <span>{ride.destination}</span>
             </div>
             {ride.driver_name && (
-              <p className="text-zinc-500 text-xs mt-0.5">{ride.driver_name}</p>
+              <p className="text-zinc-500 text-xs mt-0.5 flex items-center gap-1.5">
+                <span>{ride.driver_name}</span>
+                {(ride.driver_rating_count ?? 0) > 0 && (
+                  <span className="flex items-center gap-0.5 text-yellow-400">
+                    <Star size={10} className="fill-yellow-400" strokeWidth={0} />
+                    <span>{ride.driver_rating?.toFixed(1)}</span>
+                    <span className="text-zinc-700">({ride.driver_rating_count})</span>
+                  </span>
+                )}
+              </p>
             )}
             {(ride.car_brand || ride.car_color || ride.car_plate) && (
               <p className="text-zinc-600 text-xs mt-0.5">
