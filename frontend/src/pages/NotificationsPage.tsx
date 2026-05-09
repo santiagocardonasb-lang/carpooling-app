@@ -1,11 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Bell, Trash2, Users } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Bell, Trash2, Users, ChevronRight, Star } from 'lucide-react';
 import api from '../api';
+import { useAuth } from '../context/AuthContext';
+
+type NotifType =
+  | 'ride_cancelled'
+  | 'booking_accepted'
+  | 'booking_rejected'
+  | 'booking_request'
+  | 'booking_completed';
 
 interface Notif {
   id: number;
-  type: 'ride_cancelled' | 'booking_accepted' | 'booking_rejected' | 'booking_request';
+  type: NotifType;
   title: string;
   message: string;
   read: number;
@@ -14,6 +22,8 @@ interface Notif {
 
 export default function NotificationsPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isDriver = user?.role !== 'passenger';
   const [notifs, setNotifs] = useState<Notif[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -26,7 +36,8 @@ export default function NotificationsPage() {
 
   useEffect(() => { load(); }, []);
 
-  const deleteOne = async (id: number) => {
+  const deleteOne = async (e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
     try {
       await api.delete(`/notifications/${id}`);
       setNotifs(prev => prev.filter(n => n.id !== id));
@@ -41,10 +52,42 @@ export default function NotificationsPage() {
     } catch {}
   };
 
-  const icon = (type: Notif['type']) => {
-    if (type === 'booking_accepted') return <CheckCircle size={22} className="text-green-400" strokeWidth={1.5} />;
-    if (type === 'booking_rejected') return <XCircle size={22} className="text-red-400" strokeWidth={1.5} />;
-    if (type === 'booking_request')  return <Users size={22} className="text-blue-400" strokeWidth={1.5} />;
+  // Mapa de tipo → ruta destino. Depende del rol porque el conductor y pasajero
+  // van a vistas distintas dentro de /my-rides.
+  const getDestination = (type: NotifType): string | null => {
+    switch (type) {
+      case 'booking_request':
+        // Sólo el conductor recibe esto → tab "Solicitudes"
+        return '/my-rides?tab=requests';
+      case 'booking_accepted':
+      case 'booking_rejected':
+      case 'ride_cancelled':
+        // El pasajero recibe estas → su lista de reservas
+        return '/my-rides';
+      case 'booking_completed':
+        // Pasajero: puede calificar al conductor desde ahí
+        return '/my-rides';
+      default:
+        return null;
+    }
+  };
+
+  const handleClick = (n: Notif) => {
+    const dest = getDestination(n.type);
+    if (!dest) return;
+    // Si por alguna razón llegan tipos cruzados con el rol, llevamos a my-rides genérico
+    if (n.type === 'booking_request' && !isDriver) {
+      navigate('/my-rides');
+    } else {
+      navigate(dest);
+    }
+  };
+
+  const icon = (type: NotifType) => {
+    if (type === 'booking_accepted')  return <CheckCircle size={22} className="text-green-400"  strokeWidth={1.5} />;
+    if (type === 'booking_rejected')  return <XCircle     size={22} className="text-red-400"    strokeWidth={1.5} />;
+    if (type === 'booking_request')   return <Users       size={22} className="text-blue-400"   strokeWidth={1.5} />;
+    if (type === 'booking_completed') return <Star        size={22} className="text-yellow-400" strokeWidth={1.5} />;
     return <AlertCircle size={22} className="text-yellow-400" strokeWidth={1.5} />;
   };
 
@@ -82,28 +125,43 @@ export default function NotificationsPage() {
           </div>
         ) : (
           <div className="space-y-2">
-            {notifs.map(n => (
-              <div key={n.id} className={`flex gap-3 bg-zinc-900 rounded-2xl p-4 border transition-colors ${
-                !n.read ? 'border-zinc-700' : 'border-zinc-800'
-              }`}>
-                <div className="flex-shrink-0 mt-0.5">{icon(n.type)}</div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className={`text-sm font-semibold ${!n.read ? 'text-white' : 'text-zinc-300'}`}>{n.title}</p>
-                    {!n.read && <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />}
-                  </div>
-                  <p className="text-zinc-500 text-xs mt-0.5 leading-relaxed">{n.message}</p>
-                  <p className="text-zinc-700 text-xs mt-1.5">{timeAgo(n.created_at)}</p>
-                </div>
-                <button
-                  onClick={() => deleteOne(n.id)}
-                  className="flex-shrink-0 self-start mt-0.5 p-1 text-zinc-700 hover:text-red-400 transition-colors rounded"
-                  title="Eliminar"
+            {notifs.map(n => {
+              const clickable = !!getDestination(n.type);
+              return (
+                <div
+                  key={n.id}
+                  onClick={clickable ? () => handleClick(n) : undefined}
+                  role={clickable ? 'button' : undefined}
+                  tabIndex={clickable ? 0 : undefined}
+                  onKeyDown={(e) => { if (clickable && (e.key === 'Enter' || e.key === ' ')) handleClick(n); }}
+                  className={`flex gap-3 bg-zinc-900 rounded-2xl p-4 border transition-all ${
+                    !n.read ? 'border-zinc-700' : 'border-zinc-800'
+                  } ${clickable ? 'cursor-pointer hover:bg-zinc-800/60 hover:border-zinc-600 active:scale-[0.99]' : ''}`}
                 >
-                  <Trash2 size={14} />
-                </button>
-              </div>
-            ))}
+                  <div className="flex-shrink-0 mt-0.5">{icon(n.type)}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className={`text-sm font-semibold ${!n.read ? 'text-white' : 'text-zinc-300'}`}>{n.title}</p>
+                      {!n.read && <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />}
+                    </div>
+                    <p className="text-zinc-500 text-xs mt-0.5 leading-relaxed">{n.message}</p>
+                    <p className="text-zinc-700 text-xs mt-1.5">{timeAgo(n.created_at)}</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                    <button
+                      onClick={(e) => deleteOne(e, n.id)}
+                      className="p-1 text-zinc-700 hover:text-red-400 transition-colors rounded"
+                      title="Eliminar"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                    {clickable && (
+                      <ChevronRight size={14} className="text-zinc-700" />
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

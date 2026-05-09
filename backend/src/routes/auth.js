@@ -12,6 +12,18 @@ router.post('/register', (req, res) => {
   if (!name || !email || !password) {
     return res.status(400).json({ error: 'Nombre, email y contraseña son requeridos' });
   }
+  if (typeof name !== 'string' || name.trim().length < 2 || name.length > 100) {
+    return res.status(400).json({ error: 'Nombre debe tener entre 2 y 100 caracteres' });
+  }
+  if (typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ error: 'Email inválido' });
+  }
+  if (typeof password !== 'string' || password.length < 6 || password.length > 200) {
+    return res.status(400).json({ error: 'La contraseña debe tener entre 6 y 200 caracteres' });
+  }
+  if (phone && (typeof phone !== 'string' || !/^[+\d\s-]{7,20}$/.test(phone))) {
+    return res.status(400).json({ error: 'Teléfono inválido' });
+  }
   if (!email.toLowerCase().endsWith(ALLOWED_DOMAIN)) {
     return res.status(400).json({
       error: `Solo se permiten correos institucionales con dominio ${ALLOWED_DOMAIN}`,
@@ -27,7 +39,7 @@ router.post('/register', (req, res) => {
 
     const token = jwt.sign(
       { id: result.lastInsertRowid, name, email: email.toLowerCase() },
-      process.env.JWT_SECRET,
+      require('../middleware/auth').SECRET,
       { expiresIn: '7d' }
     );
     res.json({ token, user: { id: result.lastInsertRowid, name, email: email.toLowerCase(), phone, role: userRole } });
@@ -52,7 +64,7 @@ router.post('/login', (req, res) => {
 
   const token = jwt.sign(
     { id: user.id, name: user.name, email: user.email },
-    process.env.JWT_SECRET,
+    require('../middleware/auth').SECRET,
     { expiresIn: '7d' }
   );
   res.json({

@@ -9,7 +9,9 @@ router.get('/', (req, res) => {
 
   let query = `
     SELECT r.*, u.name as driver_name, u.phone as driver_phone,
-           u.car_brand, u.car_color, u.car_plate
+           u.car_brand, u.car_color, u.car_plate,
+           COALESCE((SELECT ROUND(AVG(rating),1) FROM ratings WHERE ratee_id = u.id), 0) as driver_rating,
+           (SELECT COUNT(*) FROM ratings WHERE ratee_id = u.id) as driver_rating_count
     FROM rides r
     JOIN users u ON r.driver_id = u.id
     WHERE r.status = 'active' AND r.seats_available > 0
@@ -58,8 +60,10 @@ router.get('/my/requests', auth, (req, res) => {
     FROM bookings b
     JOIN rides r ON b.ride_id = r.id
     JOIN users u ON b.passenger_id = u.id
-    WHERE r.driver_id = ? AND r.status = 'active' AND b.status IN ('pending','confirmed')
-    ORDER BY b.status DESC, b.created_at ASC
+    WHERE r.driver_id = ? AND r.status = 'active' AND b.status IN ('pending','confirmed','completed')
+    ORDER BY
+      CASE b.status WHEN 'pending' THEN 0 WHEN 'confirmed' THEN 1 ELSE 2 END,
+      b.created_at DESC
   `).all(req.user.id);
   res.json(requests);
 });
