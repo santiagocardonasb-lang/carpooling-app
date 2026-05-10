@@ -150,7 +150,7 @@ router.patch('/:id/start', auth, async (req, res) => {
     await query("UPDATE bookings SET status='in_progress', started_at=NOW() WHERE id=$1", [req.params.id]);
     await query(
       'INSERT INTO notifications (user_id, type, title, message, related_id) VALUES ($1,$2,$3,$4,$5)',
-      [booking.passenger_id, 'booking_started', '🚗 Viaje iniciado',
+      [booking.passenger_id, 'booking_started', 'Viaje iniciado',
        `El conductor inició el viaje ${ride.origin} → ${ride.destination}. ¡Buen viaje!`, booking.id]
     );
     res.json({ message: 'Viaje iniciado' });
@@ -237,7 +237,7 @@ router.patch('/:id/passenger-delay', auth, async (req, res) => {
 
     await query(
       'INSERT INTO notifications (user_id, type, title, message, related_id) VALUES ($1,$2,$3,$4,$5)',
-      [ride.driver_id, 'passenger_delay', `⏰ ${passenger.name} pide ${minutes} min`,
+      [ride.driver_id, 'passenger_delay', `${passenger.name} pide ${minutes} min`,
        `${passenger.name} pide ${minutes} minutos de espera para llegar al punto de recogida en ${ride.origin}.`, booking.id]
     );
     res.json({ ok: true });
@@ -270,7 +270,7 @@ router.patch('/:id/passenger-decline', auth, async (req, res) => {
 
     await query(
       'INSERT INTO notifications (user_id, type, title, message, related_id) VALUES ($1,$2,$3,$4,$5)',
-      [ride.driver_id, 'passenger_declined', '❌ Pasajero canceló',
+      [ride.driver_id, 'passenger_declined', 'Pasajero canceló',
        `${passenger.name} canceló su reserva en ${ride.origin} → ${ride.destination}.`, booking.id]
     );
     res.json({ ok: true });
@@ -300,7 +300,7 @@ router.patch('/:id/passenger-ready', auth, async (req, res) => {
     await query('UPDATE bookings SET passenger_ready=1 WHERE id=$1', [booking.id]);
     await query(
       'INSERT INTO notifications (user_id, type, title, message, related_id) VALUES ($1,$2,$3,$4,$5)',
-      [ride.driver_id, 'passenger_ready', '✅ Pasajero listo',
+      [ride.driver_id, 'passenger_ready', 'Pasajero listo',
        `${passenger.name} ya está listo y puede adelantar la salida.`, booking.id]
     );
     res.json({ ok: true });

@@ -50,12 +50,12 @@ async function sendDepartureReminders() {
     for (const pb of pbRes.rows) {
       await query(
         'INSERT INTO notifications (user_id, type, title, message, related_id) VALUES ($1,$2,$3,$4,$5)',
-        [pb.passenger_id, 'departure_reminder', '⏰ Tu viaje sale en 15 minutos', `Recuerda: ${msg}`, pb.id]
+        [pb.passenger_id, 'departure_reminder', 'Tu viaje sale en 15 minutos', `Recuerda: ${msg}`, pb.id]
       );
     }
     await query(
       'INSERT INTO notifications (user_id, type, title, message, related_id) VALUES ($1,$2,$3,$4,$5)',
-      [ride.driver_id, 'departure_reminder', '⏰ Sale en 15 minutos', `Tu viaje: ${msg}`, ride.id]
+      [ride.driver_id, 'departure_reminder', 'Sale en 15 minutos', `Tu viaje: ${msg}`, ride.id]
     );
     await query('UPDATE rides SET reminder_sent=1 WHERE id=$1', [ride.id]);
     console.log(`[scheduler] recordatorio ride ${ride.id} (${pbRes.rows.length + 1} usuarios)`);

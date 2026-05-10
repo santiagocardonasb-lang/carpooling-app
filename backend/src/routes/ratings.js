@@ -83,9 +83,8 @@ router.post('/', auth, async (req, res) => {
     // Notificar al calificado
     const raterRes = await query('SELECT name FROM users WHERE id=$1', [req.user.id]);
     const rater = raterRes.rows[0];
-    const starsLabel = '⭐'.repeat(stars);
-    const roleLabel  = type === 'passenger_to_driver' ? 'pasajero' : 'conductor';
-    const msgTail    = comment
+    const roleLabel = type === 'passenger_to_driver' ? 'pasajero' : 'conductor';
+    const msgTail   = comment
       ? `: "${comment.slice(0, 80)}${comment.length > 80 ? '…' : ''}"`
       : '.';
 
@@ -93,7 +92,7 @@ router.post('/', auth, async (req, res) => {
       'INSERT INTO notifications (user_id, type, title, message, related_id) VALUES ($1,$2,$3,$4,$5)',
       [
         rateeId, 'new_rating',
-        `${starsLabel} Te calificaron`,
+        'Te calificaron',
         `${rater.name} (${roleLabel}) te dio ${stars} estrella${stars !== 1 ? 's' : ''}${msgTail}`,
         bookingId,
       ]
