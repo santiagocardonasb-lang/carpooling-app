@@ -33,6 +33,12 @@ html.light body { background-color: #ffffff; color: #18181b; }
 
 /* Backgrounds */
 html.light .bg-black           { background-color: #ffffff; }
+html.light .bg-black\/95       { background-color: rgba(255,255,255,0.95); }
+html.light .bg-black\/85       { background-color: rgba(255,255,255,0.92); }
+html.light .bg-black\/80       { background-color: rgba(255,255,255,0.92); }
+html.light .bg-black\/70       { background-color: rgba(0,0,0,0.35); }
+html.light .bg-zinc-950\/70    { background-color: rgba(255,255,255,0.7); }
+html.light .bg-zinc-950\/60    { background-color: rgba(255,255,255,0.6); }
 html.light .bg-zinc-950        { background-color: #fafafa; }
 html.light .bg-zinc-900        { background-color: #f4f4f5; }
 html.light .bg-zinc-800        { background-color: #e4e4e7; }

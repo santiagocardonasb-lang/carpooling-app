@@ -2,6 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { Clock } from '@phosphor-icons/react';
+import { useTheme } from '../context/ThemeContext';
+
+// CARTO basemaps gratuitos — sin API key, calidad alta
+const STYLE_DARK  = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
+const STYLE_LIGHT = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
 
 interface Props {
   driverLat: number | null;
@@ -57,11 +62,16 @@ function formatEta(seconds: number): string {
 }
 
 export default function TripMap({ driverLat, driverLng, destination, isDriver }: Props) {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
+  const routeColor = isLight ? '#18181b' : '#ffffff';
+
   const containerRef     = useRef<HTMLDivElement>(null);
   const mapRef           = useRef<maplibregl.Map | null>(null);
   const driverMarkerRef  = useRef<maplibregl.Marker | null>(null);
   const destMarkerRef    = useRef<maplibregl.Marker | null>(null);
   const routeReadyRef    = useRef(false);
+  const lastRouteRef     = useRef<GeoJSON.LineString | null>(null);
 
   const [eta, setEta]             = useState<string | null>(null);
   const [destCoords, setDestCoords] = useState<[number, number] | null>(null);
@@ -86,7 +96,7 @@ export default function TripMap({ driverLat, driverLng, destination, isDriver }:
 
     const m = new maplibregl.Map({
       container: containerRef.current,
-      style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+      style: isLight ? STYLE_LIGHT : STYLE_DARK,
       center,
       zoom: driverLat ? 13 : 6,
       attributionControl: false,
@@ -118,7 +128,7 @@ export default function TripMap({ driverLat, driverLng, destination, isDriver }:
         type: 'line',
         source: 'route',
         layout: { 'line-join': 'round', 'line-cap': 'round' },
-        paint: { 'line-color': '#ffffff', 'line-width': 7, 'line-opacity': 0.15 },
+        paint: { 'line-color': routeColor, 'line-width': 7, 'line-opacity': 0.15 },
       });
 
       // Línea principal
@@ -127,7 +137,7 @@ export default function TripMap({ driverLat, driverLng, destination, isDriver }:
         type: 'line',
         source: 'route',
         layout: { 'line-join': 'round', 'line-cap': 'round' },
-        paint: { 'line-color': '#ffffff', 'line-width': 3, 'line-opacity': 0.85 },
+        paint: { 'line-color': routeColor, 'line-width': 3, 'line-opacity': 0.85 },
       });
 
       routeReadyRef.current = true;
@@ -141,21 +151,70 @@ export default function TripMap({ driverLat, driverLng, destination, isDriver }:
       driverMarkerRef.current = null;
       destMarkerRef.current   = null;
       routeReadyRef.current   = false;
+      lastRouteRef.current    = null;
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── 3. Marcador de destino ───────────────────────────────────────────────
+  // ── Cambiar estilo del mapa cuando cambia el tema ────────────────────────
+  useEffect(() => {
+    if (!mapRef.current || !mapReady) return;
+    const m = mapRef.current;
+    routeReadyRef.current = false;
+    setMapReady(false);
+
+    m.setStyle(isLight ? STYLE_LIGHT : STYLE_DARK);
+
+    m.once('styledata', () => {
+      // Re-crear el source y los layers de la ruta tras el cambio de estilo
+      if (!m.getSource('route')) {
+        m.addSource('route', {
+          type: 'geojson',
+          data: lastRouteRef.current
+            ? { type: 'Feature', geometry: lastRouteRef.current, properties: {} }
+            : { type: 'Feature', geometry: { type: 'LineString', coordinates: [] }, properties: {} },
+        });
+        m.addLayer({
+          id: 'route-shadow',
+          type: 'line',
+          source: 'route',
+          layout: { 'line-join': 'round', 'line-cap': 'round' },
+          paint: { 'line-color': routeColor, 'line-width': 7, 'line-opacity': 0.15 },
+        });
+        m.addLayer({
+          id: 'route-line',
+          type: 'line',
+          source: 'route',
+          layout: { 'line-join': 'round', 'line-cap': 'round' },
+          paint: { 'line-color': routeColor, 'line-width': 3, 'line-opacity': 0.85 },
+        });
+      }
+      routeReadyRef.current = true;
+      setMapReady(true);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLight]);
+
+  // ── 3. Marcador de destino (se recrea al cambiar de tema) ────────────────
   useEffect(() => {
     if (!mapReady || !mapRef.current || !destCoords) return;
-    if (destMarkerRef.current) return; // ya existe
+
+    // Si ya existe, eliminarlo para recrearlo con los colores del tema actual
+    if (destMarkerRef.current) {
+      destMarkerRef.current.remove();
+      destMarkerRef.current = null;
+    }
+
+    const fill   = isLight ? '#18181b' : '#ffffff';
+    const border = isLight ? '#ffffff' : '#000000';
+    const halo   = isLight ? 'rgba(0,0,0,0.18)' : 'rgba(255,255,255,0.3)';
 
     const el = document.createElement('div');
     el.style.cssText = `
       width: 14px; height: 14px;
-      background: #ffffff; border-radius: 3px;
-      border: 2px solid #000;
-      box-shadow: 0 0 0 3px rgba(255,255,255,0.3);
+      background: ${fill}; border-radius: 3px;
+      border: 2px solid ${border};
+      box-shadow: 0 0 0 3px ${halo};
     `;
     destMarkerRef.current = new maplibregl.Marker({ element: el, anchor: 'center' })
       .setLngLat(destCoords)
@@ -164,7 +223,7 @@ export default function TripMap({ driverLat, driverLng, destination, isDriver }:
           .setHTML(`<span style="color:#18181b;font-size:12px;font-weight:600">📍 ${destination}</span>`)
       )
       .addTo(mapRef.current);
-  }, [mapReady, destCoords, destination]);
+  }, [mapReady, destCoords, destination, isLight]);
 
   // ── 4. Marcador del conductor + ruta + ETA (se actualiza en cada posición) ─
   useEffect(() => {
@@ -193,6 +252,7 @@ export default function TripMap({ driverLat, driverLng, destination, isDriver }:
       if (!route || !mapRef.current) return;
 
       // Actualizar línea de ruta
+      lastRouteRef.current = route.geometry as GeoJSON.LineString;
       const src = mapRef.current.getSource('route') as maplibregl.GeoJSONSource | undefined;
       src?.setData(route.geometry);
 
