@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useRef } from 'react';
-import { CheckCircle, XCircle, X } from 'lucide-react';
+import { CheckCircle, XCircle, X } from '@phosphor-icons/react';
 
 interface Toast {
   id: number;
@@ -69,15 +69,15 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               onClick={dismiss}
               className="absolute top-4 right-4 text-zinc-300 hover:text-zinc-500 transition-colors"
             >
-              <X size={18} />
+              <X size={18} weight="bold" />
             </button>
 
             {/* icon */}
             <div className={`w-20 h-20 rounded-full flex items-center justify-center
               ${toast.type === 'success' ? 'bg-green-50' : 'bg-red-50'}`}>
               {toast.type === 'success'
-                ? <CheckCircle size={44} className="text-green-500" strokeWidth={1.5} />
-                : <XCircle    size={44} className="text-red-500"   strokeWidth={1.5} />
+                ? <CheckCircle size={44} weight="duotone" className="text-green-500" />
+                : <XCircle    size={44} weight="duotone" className="text-red-500"   />
               }
             </div>
 

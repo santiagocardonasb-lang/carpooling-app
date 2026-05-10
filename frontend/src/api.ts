@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const api = axios.create({ baseURL: '/api' });
+// En producción (Vercel) VITE_API_URL apunta al backend en Render.
+// En desarrollo el proxy de Vite redirige /api → localhost:3001.
+const api = axios.create({ baseURL: import.meta.env.VITE_API_URL || '/api' });
 
 // sessionStorage tiene prioridad: cada pestaña/ventana puede tener su propio usuario.
 function readToken(): string | null {

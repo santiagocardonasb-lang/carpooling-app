@@ -1,32 +1,39 @@
 import { useState, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AlertCircle, Car, Users } from 'lucide-react';
+import { WarningCircle, Car, Users } from '@phosphor-icons/react';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
 
-const DOMAIN = '@ucundinamarca.edu.co';
+const DOMAIN = 'ucundinamarca.edu.co';
 
 export default function Register() {
   const [step, setStep] = useState<'role' | 'info'>('role');
   const [role, setRole] = useState<'driver' | 'passenger' | null>(null);
-  const [form, setForm] = useState({ name: '', email: '', password: '', phone: '' });
+  const [form, setForm] = useState({ name: '', emailUser: '', password: '', phone: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const emailOk = !form.email || form.email.toLowerCase().endsWith(DOMAIN);
+  // El correo completo se arma uniendo la parte local + dominio
+  const fullEmail = form.emailUser.trim() ? `${form.emailUser.trim()}@${DOMAIN}` : '';
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!form.email.toLowerCase().endsWith(DOMAIN)) {
-      setError(`Solo puedes registrarte con un correo ${DOMAIN}`);
+    if (!form.emailUser.trim()) {
+      setError('Ingresa tu correo institucional');
       return;
     }
     setError('');
     setLoading(true);
     try {
-      const { data } = await api.post('/auth/register', { ...form, role });
+      const { data } = await api.post('/auth/register', {
+        name: form.name,
+        email: fullEmail,
+        password: form.password,
+        phone: form.phone,
+        role,
+      });
       login(data.token, data.user);
       // Driver → home (publish CTA); Passenger → search
       navigate('/');
@@ -55,7 +62,7 @@ export default function Register() {
             >
               <div className="flex items-center gap-4">
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${role === 'driver' ? 'bg-black' : 'bg-zinc-800'}`}>
-                  <Car size={22} className={role === 'driver' ? 'text-white' : 'text-zinc-400'} />
+                  <Car size={22} weight="duotone" className={role === 'driver' ? 'text-white' : 'text-zinc-400'} />
                 </div>
                 <div>
                   <p className={`font-semibold text-base ${role === 'driver' ? 'text-black' : 'text-white'}`}>Soy conductor</p>
@@ -76,7 +83,7 @@ export default function Register() {
             >
               <div className="flex items-center gap-4">
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${role === 'passenger' ? 'bg-black' : 'bg-zinc-800'}`}>
-                  <Users size={22} className={role === 'passenger' ? 'text-white' : 'text-zinc-400'} />
+                  <Users size={22} weight="duotone" className={role === 'passenger' ? 'text-white' : 'text-zinc-400'} />
                 </div>
                 <div>
                   <p className={`font-semibold text-base ${role === 'passenger' ? 'text-black' : 'text-white'}`}>Soy pasajero</p>
@@ -116,11 +123,6 @@ export default function Register() {
           {role === 'driver' ? 'Conductor · ' : 'Pasajero · '}
           <span className="text-zinc-400">Solo correo institucional</span>
         </p>
-        <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 mb-5">
-          <AlertCircle size={13} className="text-zinc-500 flex-shrink-0" />
-          <p className="text-zinc-500 text-xs">Requiere <span className="text-zinc-300 font-medium">{DOMAIN}</span></p>
-        </div>
-
         <form onSubmit={handleSubmit} className="space-y-3">
           <input
             type="text"
@@ -128,22 +130,32 @@ export default function Register() {
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             required
             placeholder="Nombre completo"
+            autoComplete="name"
             className="w-full bg-zinc-900 text-white placeholder-zinc-500 px-4 py-4 rounded-xl text-sm focus:ring-2 focus:ring-white transition"
           />
-          <div>
+
+          {/* Email dividido: usuario | @dominio fijo */}
+          <div className="flex items-stretch bg-zinc-900 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-white transition">
             <input
-              type="email"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              type="text"
+              value={form.emailUser}
+              onChange={(e) => {
+                // No dejar que escriban @ ni espacios
+                const val = e.target.value.replace(/[@\s]/g, '');
+                setForm({ ...form, emailUser: val });
+              }}
               required
-              placeholder={`correo${DOMAIN}`}
-              className={`w-full bg-zinc-900 text-white placeholder-zinc-500 px-4 py-4 rounded-xl text-sm transition ${!emailOk ? 'ring-2 ring-red-500' : 'focus:ring-2 focus:ring-white'}`}
+              placeholder="usuario"
+              autoComplete="username"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              inputMode="email"
+              className="flex-1 bg-transparent text-white placeholder-zinc-500 px-4 py-4 text-sm outline-none min-w-0"
             />
-            {!emailOk && (
-              <p className="text-red-400 text-xs mt-1.5 flex items-center gap-1.5 px-1">
-                <AlertCircle size={11} /> Debe terminar en {DOMAIN}
-              </p>
-            )}
+            <div className="flex items-center pr-4 text-zinc-500 text-sm select-none whitespace-nowrap">
+              @{DOMAIN}
+            </div>
           </div>
           <input
             type="password"
@@ -163,13 +175,13 @@ export default function Register() {
 
           {error && (
             <p className="text-red-400 text-xs text-center bg-red-900/20 py-2 rounded-lg flex items-center justify-center gap-1.5">
-              <AlertCircle size={12} /> {error}
+              <WarningCircle size={12} weight="duotone" /> {error}
             </p>
           )}
 
           <button
             type="submit"
-            disabled={loading || !emailOk}
+            disabled={loading || !form.emailUser.trim()}
             className="w-full bg-white text-black font-semibold py-4 rounded-xl hover:bg-zinc-200 disabled:opacity-50 transition-colors text-sm mt-2"
           >
             {loading ? 'Creando cuenta...' : 'Crear cuenta'}

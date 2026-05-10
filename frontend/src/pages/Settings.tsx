@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Sun, Moon, Check } from 'lucide-react';
+import { ArrowLeft, Sun, Moon, Check } from '@phosphor-icons/react';
 import { useTheme } from '../context/ThemeContext';
 
 export default function Settings() {
@@ -15,7 +15,7 @@ export default function Settings() {
     <div className="min-h-screen bg-black pt-20 px-6 pb-12">
       <div className="max-w-sm mx-auto mt-4">
         <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors text-sm mb-6">
-          <ArrowLeft size={16} /> Volver
+          <ArrowLeft size={16} weight="bold" /> Volver
         </button>
 
         <h1 className="text-2xl font-black text-white mb-2">Configuración</h1>
@@ -35,13 +35,13 @@ export default function Settings() {
                   }`}
                 >
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${selected ? 'bg-black' : 'bg-zinc-800'}`}>
-                    <Icon size={18} className={selected ? 'text-white' : 'text-zinc-400'} />
+                    <Icon size={18} weight="duotone" className={selected ? 'text-white' : 'text-zinc-400'} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className={`font-semibold text-sm ${selected ? 'text-black' : 'text-white'}`}>{label}</p>
                     <p className={`text-xs mt-0.5 ${selected ? 'text-zinc-600' : 'text-zinc-500'}`}>{desc}</p>
                   </div>
-                  {selected && <Check size={16} className="text-black flex-shrink-0" />}
+                  {selected && <Check size={16} weight="bold" className="text-black flex-shrink-0" />}
                 </button>
               );
             })}

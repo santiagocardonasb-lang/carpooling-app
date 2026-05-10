@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, Lock, User, Phone, Mail, ArrowLeft, Check, AlertCircle, Car, Users } from 'lucide-react';
+import { Camera, LockSimple, User, Phone, Envelope, ArrowLeft, Check, WarningCircle, Car, Users } from '@phosphor-icons/react';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
 
@@ -84,27 +84,47 @@ export default function Profile() {
     }
   };
 
+  // Comprime la imagen en canvas: máx 1024px, calidad JPEG 0.85 (≈ 100-300 KB)
+  const compressImage = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const MAX = 1024;
+        let { width, height } = img;
+        if (width > MAX || height > MAX) {
+          if (width >= height) { height = Math.round(height * MAX / width); width = MAX; }
+          else { width = Math.round(width * MAX / height); height = MAX; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d')!.drawImage(img, 0, 0, width, height);
+        let b64 = canvas.toDataURL('image/jpeg', 0.85);
+        // Si aún pesa demasiado (>3 MB en base64), bajar calidad
+        if (b64.length > 3_000_000) b64 = canvas.toDataURL('image/jpeg', 0.70);
+        if (b64.length > 3_000_000) b64 = canvas.toDataURL('image/jpeg', 0.50);
+        resolve(b64);
+      };
+      img.onerror = reject;
+      img.src = url;
+    });
+
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) { alert('Selecciona una imagen válida'); return; }
-    if (file.size > 2_000_000) { alert('La imagen debe ser menor a 2MB'); return; }
-
     setAvatarLoading(true);
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const base64 = reader.result as string;
-      try {
-        await api.put('/profile/avatar', { avatar: base64 });
-        updateUser({ avatar: base64 });
-        setProfile(prev => prev ? { ...prev, avatar: base64 } : prev);
-      } catch {
-        alert('Error al subir la foto');
-      } finally {
-        setAvatarLoading(false);
-      }
-    };
-    reader.readAsDataURL(file);
+    try {
+      const base64 = await compressImage(file);
+      await api.put('/profile/avatar', { avatar: base64 });
+      updateUser({ avatar: base64 });
+      setProfile(prev => prev ? { ...prev, avatar: base64 } : prev);
+    } catch {
+      alert('Error al subir la foto');
+    } finally {
+      setAvatarLoading(false);
+    }
   };
 
   const changeRole = async (newRole: 'driver' | 'passenger') => {
@@ -143,7 +163,7 @@ export default function Profile() {
       <div className="max-w-sm mx-auto mt-4">
         {/* Back */}
         <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors text-sm mb-6">
-          <ArrowLeft size={16} />
+          <ArrowLeft size={16} weight="bold" />
           Volver
         </button>
 
@@ -164,7 +184,7 @@ export default function Profile() {
             >
               {avatarLoading
                 ? <div className="w-4 h-4 border-2 border-zinc-400 border-t-zinc-800 rounded-full animate-spin" />
-                : <Camera size={14} className="text-black" />
+                : <Camera size={14} weight="duotone" className="text-black" />
               }
             </button>
             <input ref={fileRef} type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
@@ -181,7 +201,7 @@ export default function Profile() {
           <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-3">Información personal</h3>
           <div className="bg-zinc-900 rounded-2xl overflow-hidden space-y-0">
             <div className="flex items-center gap-3 px-4 py-3.5 border-b border-zinc-800">
-              <User size={15} className="text-zinc-500 flex-shrink-0" />
+              <User size={15} weight="duotone" className="text-zinc-500 flex-shrink-0" />
               <input
                 type="text"
                 value={editName}
@@ -191,12 +211,12 @@ export default function Profile() {
               />
             </div>
             <div className="flex items-center gap-3 px-4 py-3.5 border-b border-zinc-800">
-              <Mail size={15} className="text-zinc-500 flex-shrink-0" />
+              <Envelope size={15} weight="duotone" className="text-zinc-500 flex-shrink-0" />
               <span className="text-zinc-500 text-sm flex-1 truncate">{profile.email}</span>
               <span className="text-zinc-700 text-xs">No editable</span>
             </div>
             <div className="flex items-center gap-3 px-4 py-3.5">
-              <Phone size={15} className="text-zinc-500 flex-shrink-0" />
+              <Phone size={15} weight="duotone" className="text-zinc-500 flex-shrink-0" />
               <input
                 type="tel"
                 value={editPhone}
@@ -211,7 +231,7 @@ export default function Profile() {
             <div className={`flex items-center gap-2 mt-3 px-3 py-2 rounded-xl text-xs ${
               infoMsg.type === 'ok' ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400'
             }`}>
-              {infoMsg.type === 'ok' ? <Check size={13} /> : <AlertCircle size={13} />}
+              {infoMsg.type === 'ok' ? <Check size={13} weight="bold" /> : <WarningCircle size={13} weight="duotone" />}
               {infoMsg.text}
             </div>
           )}
@@ -235,7 +255,7 @@ export default function Profile() {
               { key: 'confirm', placeholder: 'Confirmar nueva contraseña' },
             ].map(({ key, placeholder }, i) => (
               <div key={key} className={`flex items-center gap-3 px-4 py-3.5 ${i < 2 ? 'border-b border-zinc-800' : ''}`}>
-                <Lock size={15} className="text-zinc-500 flex-shrink-0" />
+                <LockSimple size={15} weight="duotone" className="text-zinc-500 flex-shrink-0" />
                 <input
                   type="password"
                   value={pwForm[key as keyof typeof pwForm]}
@@ -251,7 +271,7 @@ export default function Profile() {
             <div className={`flex items-center gap-2 mt-3 px-3 py-2 rounded-xl text-xs ${
               pwMsg.type === 'ok' ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400'
             }`}>
-              {pwMsg.type === 'ok' ? <Check size={13} /> : <AlertCircle size={13} />}
+              {pwMsg.type === 'ok' ? <Check size={13} weight="bold" /> : <WarningCircle size={13} weight="duotone" />}
               {pwMsg.text}
             </div>
           )}
@@ -284,13 +304,13 @@ export default function Profile() {
                   }`}
                 >
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${isSelected ? 'bg-black' : 'bg-zinc-800'}`}>
-                    <Icon size={18} className={isSelected ? 'text-white' : 'text-zinc-400'} />
+                    <Icon size={18} weight="duotone" className={isSelected ? 'text-white' : 'text-zinc-400'} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className={`font-semibold text-sm ${isSelected ? 'text-black' : 'text-white'}`}>{label}</p>
                     <p className={`text-xs mt-0.5 ${isSelected ? 'text-zinc-600' : 'text-zinc-500'}`}>{desc}</p>
                   </div>
-                  {isSelected && <Check size={16} className="text-black flex-shrink-0" />}
+                  {isSelected && <Check size={16} weight="bold" className="text-black flex-shrink-0" />}
                 </button>
               );
             })}

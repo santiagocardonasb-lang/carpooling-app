@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import LocationInput from '../components/LocationInput';
-import { Plus, Search } from 'lucide-react';
+import { Plus, MagnifyingGlass } from '@phosphor-icons/react';
 
 export default function Home() {
   const [origin, setOrigin] = useState('');
@@ -36,7 +36,7 @@ export default function Home() {
             onClick={() => navigate('/create-ride')}
             className="w-full bg-white text-black font-semibold py-4 rounded-2xl hover:bg-zinc-200 transition-colors text-sm flex items-center justify-center gap-2 mb-3"
           >
-            <Plus size={16} />
+            <Plus size={16} weight="bold" />
             Publicar un viaje
           </button>
 
@@ -82,7 +82,7 @@ export default function Home() {
             onClick={() => navigate('/search')}
             className="w-full bg-white text-black font-semibold py-4 rounded-2xl hover:bg-zinc-200 transition-colors text-sm flex items-center justify-center gap-2 mb-3"
           >
-            <Search size={16} />
+            <MagnifyingGlass size={16} weight="duotone" />
             Buscar viaje
           </button>
 

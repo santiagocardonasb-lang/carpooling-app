@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Search, Plus, BookOpen, Bell, User, Car, LogOut, Settings as SettingsIcon } from 'lucide-react';
+import { MagnifyingGlass, Plus, BookOpen, Bell, User, Car, SignOut, GearSix, ChatCircle } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api';
 
@@ -9,7 +9,8 @@ export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadNotifs, setUnreadNotifs] = useState(0);
+  const [unreadMsgs, setUnreadMsgs] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const isActive = (path: string) => location.pathname === path;
@@ -18,14 +19,18 @@ export default function Navbar() {
   const fetchUnread = useCallback(async () => {
     if (!isAuthenticated) return;
     try {
-      const { data } = await api.get('/notifications/unread-count');
-      setUnreadCount(data.count);
+      const [notifsRes, msgsRes] = await Promise.all([
+        api.get('/notifications/unread-count'),
+        api.get('/messages/unread-count'),
+      ]);
+      setUnreadNotifs(notifsRes.data.count);
+      setUnreadMsgs(msgsRes.data.count);
     } catch {}
   }, [isAuthenticated]);
 
   useEffect(() => {
     fetchUnread();
-    const interval = setInterval(fetchUnread, 8000);
+    const interval = setInterval(fetchUnread, 6000);
     const onVisible = () => { if (document.visibilityState === 'visible') fetchUnread(); };
     document.addEventListener('visibilitychange', onVisible);
     return () => {
@@ -35,8 +40,12 @@ export default function Navbar() {
   }, [fetchUnread]);
 
   useEffect(() => {
-    if (location.pathname === '/notifications') setUnreadCount(0);
+    if (location.pathname === '/notifications') setUnreadNotifs(0);
+    if (location.pathname === '/messages') setUnreadMsgs(0);
   }, [location.pathname]);
+
+  // Total visible en el avatar — engloba notifs + msgs sin leer
+  const unreadTotal = unreadNotifs + unreadMsgs;
 
   useEffect(() => {
     setDropdownOpen(false);
@@ -72,7 +81,7 @@ export default function Navbar() {
                 to="/search"
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium transition-colors ${isActive('/search') ? 'bg-white text-black' : 'text-zinc-400 hover:text-white'}`}
               >
-                <Search size={14} />
+                <MagnifyingGlass size={14} weight="duotone" />
                 <span className="hidden sm:inline">Buscar</span>
               </Link>
             )}
@@ -82,7 +91,7 @@ export default function Navbar() {
                 to="/create-ride"
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium transition-colors ${isActive('/create-ride') ? 'bg-white text-black' : 'text-zinc-400 hover:text-white'}`}
               >
-                <Plus size={14} />
+                <Plus size={14} weight="duotone" />
                 <span className="hidden sm:inline">Publicar</span>
               </Link>
             )}
@@ -91,7 +100,7 @@ export default function Navbar() {
               to="/my-rides"
               className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium transition-colors ${isActive('/my-rides') ? 'bg-white text-black' : 'text-zinc-400 hover:text-white'}`}
             >
-              <BookOpen size={14} />
+              <BookOpen size={14} weight="duotone" />
               <span className="hidden sm:inline">{isDriver ? 'Mis viajes' : 'Mis reservas'}</span>
             </Link>
 
@@ -111,9 +120,9 @@ export default function Navbar() {
                     </span>
                   )}
                 </div>
-                {unreadCount > 0 && (
+                {unreadTotal > 0 && (
                   <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 rounded-full flex items-center justify-center px-1 pointer-events-none z-10">
-                    <span className="text-white text-[9px] font-bold leading-none">{unreadCount > 9 ? '9+' : unreadCount}</span>
+                    <span className="text-white text-[9px] font-bold leading-none">{unreadTotal > 9 ? '9+' : unreadTotal}</span>
                   </span>
                 )}
               </button>
@@ -124,7 +133,7 @@ export default function Navbar() {
                     to="/profile"
                     className="flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-zinc-800 transition-colors"
                   >
-                    <User size={15} className="text-zinc-400 flex-shrink-0" />
+                    <User size={15} weight="duotone" className="text-zinc-400 flex-shrink-0" />
                     Ajustar perfil
                   </Link>
 
@@ -133,20 +142,33 @@ export default function Navbar() {
                       to="/vehicle"
                       className="flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-zinc-800 transition-colors"
                     >
-                      <Car size={15} className="text-zinc-400 flex-shrink-0" />
+                      <Car size={15} weight="duotone" className="text-zinc-400 flex-shrink-0" />
                       Información del vehículo
                     </Link>
                   )}
 
                   <Link
+                    to="/messages"
+                    className="flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-zinc-800 transition-colors"
+                  >
+                    <ChatCircle size={15} weight="duotone" className="text-zinc-400 flex-shrink-0" />
+                    <span className="flex-1">Mensajes</span>
+                    {unreadMsgs > 0 && (
+                      <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
+                        {unreadMsgs > 9 ? '9+' : unreadMsgs}
+                      </span>
+                    )}
+                  </Link>
+
+                  <Link
                     to="/notifications"
                     className="flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-zinc-800 transition-colors"
                   >
-                    <Bell size={15} className="text-zinc-400 flex-shrink-0" />
+                    <Bell size={15} weight="duotone" className="text-zinc-400 flex-shrink-0" />
                     <span className="flex-1">Notificaciones</span>
-                    {unreadCount > 0 && (
+                    {unreadNotifs > 0 && (
                       <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
-                        {unreadCount > 9 ? '9+' : unreadCount}
+                        {unreadNotifs > 9 ? '9+' : unreadNotifs}
                       </span>
                     )}
                   </Link>
@@ -155,7 +177,7 @@ export default function Navbar() {
                     to="/settings"
                     className="flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-zinc-800 transition-colors"
                   >
-                    <SettingsIcon size={15} className="text-zinc-400 flex-shrink-0" />
+                    <GearSix size={15} weight="duotone" className="text-zinc-400 flex-shrink-0" />
                     Configuración
                   </Link>
 
@@ -165,7 +187,7 @@ export default function Navbar() {
                     onClick={handleLogout}
                     className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-zinc-800 transition-colors"
                   >
-                    <LogOut size={15} className="flex-shrink-0" />
+                    <SignOut size={15} weight="duotone" className="flex-shrink-0" />
                     Cerrar sesión
                   </button>
                 </div>

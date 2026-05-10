@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import { CaretLeft, CaretRight, CalendarBlank } from '@phosphor-icons/react';
 
 interface Props {
   value: string;          // 'YYYY-MM-DD' or ''
@@ -108,14 +108,14 @@ export default function DatePicker({ value, onChange, min, error, placeholder = 
       <div className="flex items-center justify-between px-4 py-3.5 border-b border-zinc-800">
         <button type="button" onClick={prevMonth}
           className="w-7 h-7 flex items-center justify-center text-zinc-500 hover:text-white rounded-lg hover:bg-zinc-800 transition-colors">
-          <ChevronLeft size={15} />
+          <CaretLeft size={15} weight="bold" />
         </button>
         <span className="text-white text-sm font-bold tracking-wide">
           {MONTHS[viewMonth]} {viewYear}
         </span>
         <button type="button" onClick={nextMonth}
           className="w-7 h-7 flex items-center justify-center text-zinc-500 hover:text-white rounded-lg hover:bg-zinc-800 transition-colors">
-          <ChevronRight size={15} />
+          <CaretRight size={15} weight="bold" />
         </button>
       </div>
 
@@ -169,7 +169,7 @@ export default function DatePicker({ value, onChange, min, error, placeholder = 
           error ? 'ring-2 ring-red-500' : open ? 'ring-2 ring-white' : ''
         }`}
       >
-        <Calendar size={15} className="text-zinc-500 flex-shrink-0" />
+        <CalendarBlank size={15} weight="duotone" className="text-zinc-500 flex-shrink-0" />
         <span className={`truncate ${displayLabel ? 'text-white' : 'text-zinc-600'}`}>
           {displayLabel || placeholder}
         </span>

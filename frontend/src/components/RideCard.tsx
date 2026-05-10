@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Car, Bike, Clock, Calendar, Users, Phone, RefreshCw, Pencil, Star } from 'lucide-react';
+import { Car, Motorcycle, Clock, CalendarBlank, Users, Phone, ArrowsClockwise, PencilSimple, Star } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
@@ -57,7 +57,9 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
   const isCancelled = ride.status === 'cancelled';
   const seatsUsed = ride.seats - ride.seats_available;
   const seatsPercent = ride.seats > 0 ? (seatsUsed / ride.seats) * 100 : 0;
-  const today = new Date().toISOString().split('T')[0];
+  // Fecha local (toISOString usa UTC y puede dar "mañana" en zonas -UTC)
+  const _d = new Date();
+  const today = `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`;
 
   const formatDate = (d?: string) => {
     if (!d) return null;
@@ -139,8 +141,8 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 bg-zinc-800 rounded-xl flex items-center justify-center flex-shrink-0">
             {ride.vehicle_type === 'moto'
-              ? <Bike size={18} className="text-zinc-300" />
-              : <Car size={18} className="text-zinc-300" />
+              ? <Motorcycle size={18} weight="duotone" className="text-zinc-300" />
+              : <Car size={18} weight="duotone" className="text-zinc-300" />
             }
           </div>
           <div>
@@ -154,7 +156,7 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
                 <span>{ride.driver_name}</span>
                 {(ride.driver_rating_count ?? 0) > 0 && (
                   <span className="flex items-center gap-0.5 text-yellow-400">
-                    <Star size={10} className="fill-yellow-400" strokeWidth={0} />
+                    <Star size={10} weight="fill" className="text-yellow-400" />
                     <span>{ride.driver_rating?.toFixed(1)}</span>
                     <span className="text-zinc-700">({ride.driver_rating_count})</span>
                   </span>
@@ -178,14 +180,14 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
       <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-500 mb-3">
         {ride.is_recurring ? (
           <span className="flex items-center gap-1.5 bg-zinc-800 text-zinc-300 px-2.5 py-1 rounded-full">
-            <RefreshCw size={11} /> {ride.days_label}
+            <ArrowsClockwise size={11} weight="duotone" /> {ride.days_label}
           </span>
         ) : ride.date && (
-          <span className="flex items-center gap-1.5"><Calendar size={12} /> {formatDate(ride.date)}</span>
+          <span className="flex items-center gap-1.5"><CalendarBlank size={12} weight="duotone" /> {formatDate(ride.date)}</span>
         )}
-        <span className="flex items-center gap-1.5"><Clock size={12} /> {ride.time}</span>
+        <span className="flex items-center gap-1.5"><Clock size={12} weight="duotone" /> {ride.time}</span>
         {ride.driver_phone && (
-          <span className="flex items-center gap-1.5"><Phone size={12} /> {ride.driver_phone}</span>
+          <span className="flex items-center gap-1.5"><Phone size={12} weight="duotone" /> {ride.driver_phone}</span>
         )}
       </div>
 
@@ -193,7 +195,7 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
       <div className="mb-4">
         <div className="flex justify-between items-center text-xs mb-1.5">
           <span className="flex items-center gap-1.5 text-zinc-500">
-            <Users size={12} />
+            <Users size={12} weight="duotone" />
             {ride.seats_available} de {ride.seats} asiento{ride.seats !== 1 ? 's' : ''} libre{ride.seats_available !== 1 ? 's' : ''}
           </span>
           {isOwnRide && (ride.pending_requests ?? 0) > 0 && (
@@ -216,7 +218,7 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
       {showActions && !isCancelled && (
         <>
           {/* ── Recurring ride booking form ── */}
-          {!isOwnRide && ride.is_recurring && ride.seats_available > 0 && (
+          {!isOwnRide && !!ride.is_recurring && ride.seats_available > 0 && (
             <>
               {!requesting ? (
                 <button
@@ -344,7 +346,7 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
                 onClick={() => navigate(`/edit-ride/${ride.id}`)}
                 className="flex-1 flex items-center justify-center gap-1.5 border border-zinc-700 text-zinc-300 py-3 rounded-xl text-sm hover:border-white hover:text-white transition-colors"
               >
-                <Pencil size={13} /> Editar
+                <PencilSimple size={13} weight="duotone" /> Editar
               </button>
               <button
                 onClick={handleCancel}

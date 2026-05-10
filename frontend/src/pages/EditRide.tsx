@@ -1,6 +1,6 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Car, Bike, RefreshCw, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Car, Motorcycle, ArrowsClockwise, WarningCircle, ArrowLeft } from '@phosphor-icons/react';
 import api from '../api';
 import LocationInput from '../components/LocationInput';
 import Toggle from '../components/Toggle';
@@ -111,7 +111,7 @@ export default function EditRide() {
     <div className="min-h-screen bg-black pt-20 px-6 pb-10">
       <div className="max-w-sm mx-auto mt-4">
         <button onClick={() => navigate('/my-rides')} className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors text-sm mb-4">
-          <ArrowLeft size={15} /> Volver
+          <ArrowLeft size={15} weight="bold" /> Volver
         </button>
         <h1 className="text-2xl font-black text-white mb-1">Editar viaje</h1>
         <p className="text-zinc-600 text-sm mb-6">Los cambios se aplicarán a las solicitudes pendientes.</p>
@@ -125,7 +125,7 @@ export default function EditRide() {
               {(['car', 'moto'] as const).map((type) => (
                 <button key={type} type="button" onClick={() => setVehicleType(type)}
                   className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium transition-all border ${vehicleType === type ? 'bg-white text-black border-white' : 'bg-transparent text-zinc-500 border-zinc-800 hover:border-zinc-600'}`}>
-                  {type === 'car' ? <Car size={16} /> : <Bike size={16} />}
+                  {type === 'car' ? <Car size={16} weight="duotone" /> : <Motorcycle size={16} weight="duotone" />}
                   {type === 'car' ? 'Carro' : 'Moto'}
                 </button>
               ))}
@@ -151,7 +151,7 @@ export default function EditRide() {
           <div className="bg-zinc-900 rounded-xl px-4 py-3.5">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 min-w-0 flex-1">
-                <RefreshCw size={15} className="text-zinc-500 flex-shrink-0" />
+                <ArrowsClockwise size={15} weight="duotone" className="text-zinc-500 flex-shrink-0" />
                 <div className="min-w-0">
                   <p className="text-white text-sm font-medium">Viaje recurrente</p>
                   <p className="text-zinc-600 text-xs">Sale varios días a la semana</p>
@@ -222,7 +222,7 @@ export default function EditRide() {
 
           {hasErrors && (
             <div className="flex items-center gap-2 bg-red-900/20 border border-red-900/50 px-3 py-2.5 rounded-xl">
-              <AlertCircle size={14} className="text-red-400 flex-shrink-0" />
+              <WarningCircle size={14} weight="duotone" className="text-red-400 flex-shrink-0" />
               <p className="text-red-400 text-xs">Completa los campos marcados en rojo.</p>
             </div>
           )}
