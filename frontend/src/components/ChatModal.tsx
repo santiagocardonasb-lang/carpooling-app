@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, PaperPlaneRight } from '@phosphor-icons/react';
+import { X, PaperPlaneRight, HandWaving } from '@phosphor-icons/react';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
 
@@ -75,7 +75,10 @@ export default function ChatModal({ bookingId, onClose }: Props) {
 
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {messages.length === 0 ? (
-            <p className="text-center text-zinc-600 text-sm py-8">No hay mensajes aún. Saluda 👋</p>
+            <div className="text-center py-8 flex flex-col items-center gap-2">
+              <HandWaving size={20} weight="duotone" className="text-zinc-600" />
+              <p className="text-zinc-600 text-sm">No hay mensajes aún. Saluda.</p>
+            </div>
           ) : messages.map(m => {
             const mine = m.sender_id === user?.id;
             return (

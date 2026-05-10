@@ -22,12 +22,6 @@ export function buildTripMessage(t: ShareTrip): string {
   return lines.join('\n');
 }
 
-// Abre Google Maps con la ruta. Funciona web y mobile (deeplink → app nativa de mapas).
-export function openMapDirections(origin: string, destination: string) {
-  const url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&travelmode=driving`;
-  window.open(url, '_blank', 'noopener,noreferrer');
-}
-
 export async function shareTrip(t: ShareTrip) {
   const text = buildTripMessage(t);
   // 1) Native share sheet (móvil moderno)

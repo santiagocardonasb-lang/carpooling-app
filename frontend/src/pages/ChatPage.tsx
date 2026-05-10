@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, PaperPlaneRight } from '@phosphor-icons/react';
+import { ArrowLeft, PaperPlaneRight, HandWaving } from '@phosphor-icons/react';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
 import { parseDate } from '../utils/date';
@@ -144,7 +144,9 @@ export default function ChatPage() {
           </div>
         ) : messages.length === 0 ? (
           <div className="text-center py-16">
-            <p className="text-4xl mb-3">👋</p>
+            <div className="w-12 h-12 rounded-2xl bg-zinc-900 flex items-center justify-center mx-auto mb-3">
+              <HandWaving size={22} weight="duotone" className="text-zinc-500" />
+            </div>
             <p className="text-zinc-500 text-sm">No hay mensajes aún</p>
             <p className="text-zinc-700 text-xs mt-1">Saluda a {otherName?.split(' ')[0]}</p>
           </div>

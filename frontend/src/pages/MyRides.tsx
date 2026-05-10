@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
-import { ShareNetwork, ChatCircle, MapPin, CaretRight } from '@phosphor-icons/react';
+import { ShareNetwork, ChatCircle, CaretRight } from '@phosphor-icons/react';
 import api from '../api';
 import RideCard from '../components/RideCard';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { shareTrip, openMapDirections } from '../utils/share';
+import { shareTrip } from '../utils/share';
 
 const DAY_NAMES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
@@ -227,12 +227,6 @@ export default function MyRides() {
                       ${b.price.toLocaleString()} · {b.seats} asiento{b.seats !== 1 ? 's' : ''}
                     </p>
                     <div className="flex items-center gap-3 flex-wrap">
-                      <button
-                        onClick={() => openMapDirections(b.origin, b.destination)}
-                        className="flex items-center gap-1 text-xs text-zinc-400 hover:text-white transition-colors"
-                      >
-                        <MapPin size={13} weight="duotone" /> Mapa
-                      </button>
                       {['confirmed', 'in_progress'].includes(b.status) && (
                         <button
                           onClick={() => navigate(`/chat/${b.id}`)}
@@ -438,14 +432,6 @@ export default function MyRides() {
                         {/* Chat + mapa para el conductor */}
                         {['confirmed', 'in_progress'].includes(req.status) && (
                           <div className="flex items-center gap-3 mt-2">
-                            {req.origin && req.destination && (
-                              <button
-                                onClick={() => openMapDirections(req.origin!, req.destination!)}
-                                className="flex items-center gap-1 text-[11px] text-zinc-400 hover:text-white transition-colors"
-                              >
-                                <MapPin size={12} weight="duotone" /> Mapa
-                              </button>
-                            )}
                             <button
                               onClick={() => navigate(`/chat/${req.id}`)}
                               className="flex items-center gap-1 text-[11px] text-zinc-400 hover:text-white transition-colors"

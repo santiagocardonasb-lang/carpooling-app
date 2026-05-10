@@ -1,11 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
-  MapPin, ChatCircle, Phone, Star, Flag, Play, Car,
+  ChatCircle, Phone, Star, Flag, Play, Car,
   Clock, User, Bell, GearSix, SignOut, CreditCard, CheckCircle,
 } from '@phosphor-icons/react';
 import api from '../api';
-import { openMapDirections } from '../utils/share';
 import { parseDate } from '../utils/date';
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
@@ -276,12 +275,6 @@ export default function TripInProgress() {
               </div>
             </div>
           </div>
-          <button
-            onClick={() => openMapDirections(data.ride.origin, data.ride.destination)}
-            className="mt-4 w-full flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white text-sm py-2.5 rounded-xl transition-colors"
-          >
-            <MapPin size={14} weight="duotone" /> Ver en Maps
-          </button>
         </div>
 
         {/* Otra parte */}
