@@ -1,47 +1,23 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { MagnifyingGlass, Plus, BookOpen, Bell, User, Car, SignOut, GearSix, ChatCircle } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext';
-import api from '../api';
+import { useUnread } from '../context/UnreadContext';
 
 export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [unreadNotifs, setUnreadNotifs] = useState(0);
-  const [unreadMsgs, setUnreadMsgs] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { unreadNotifs, unreadMsgs, clearNotifs, clearMsgs } = useUnread();
 
   const isActive = (path: string) => location.pathname === path;
   const isDriver = user?.role !== 'passenger';
 
-  const fetchUnread = useCallback(async () => {
-    if (!isAuthenticated) return;
-    try {
-      const [notifsRes, msgsRes] = await Promise.all([
-        api.get('/notifications/unread-count'),
-        api.get('/messages/unread-count'),
-      ]);
-      setUnreadNotifs(notifsRes.data.count);
-      setUnreadMsgs(msgsRes.data.count);
-    } catch {}
-  }, [isAuthenticated]);
-
   useEffect(() => {
-    fetchUnread();
-    const interval = setInterval(fetchUnread, 6000);
-    const onVisible = () => { if (document.visibilityState === 'visible') fetchUnread(); };
-    document.addEventListener('visibilitychange', onVisible);
-    return () => {
-      clearInterval(interval);
-      document.removeEventListener('visibilitychange', onVisible);
-    };
-  }, [fetchUnread]);
-
-  useEffect(() => {
-    if (location.pathname === '/notifications') setUnreadNotifs(0);
-    if (location.pathname === '/messages') setUnreadMsgs(0);
+    if (location.pathname === '/notifications') clearNotifs();
+    if (location.pathname === '/messages') clearMsgs();
   }, [location.pathname]);
 
   // Total visible en el avatar — engloba notifs + msgs sin leer
@@ -76,32 +52,33 @@ export default function Navbar() {
 
         {isAuthenticated ? (
           <div className="flex items-center gap-1">
+            {/* Links de navegación — solo visibles en desktop (en móvil están en BottomNav) */}
             {!isDriver && (
               <Link
                 to="/search"
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium transition-colors ${isActive('/search') ? 'bg-white text-black' : 'text-zinc-400 hover:text-white'}`}
+                className={`hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium transition-colors ${isActive('/search') ? 'bg-white text-black' : 'text-zinc-400 hover:text-white'}`}
               >
                 <MagnifyingGlass size={14} weight="duotone" />
-                <span className="hidden sm:inline">Buscar</span>
+                Buscar
               </Link>
             )}
 
             {isDriver && (
               <Link
                 to="/create-ride"
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium transition-colors ${isActive('/create-ride') ? 'bg-white text-black' : 'text-zinc-400 hover:text-white'}`}
+                className={`hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium transition-colors ${isActive('/create-ride') ? 'bg-white text-black' : 'text-zinc-400 hover:text-white'}`}
               >
                 <Plus size={14} weight="duotone" />
-                <span className="hidden sm:inline">Publicar</span>
+                Publicar
               </Link>
             )}
 
             <Link
               to="/my-rides"
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium transition-colors ${isActive('/my-rides') ? 'bg-white text-black' : 'text-zinc-400 hover:text-white'}`}
+              className={`hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium transition-colors ${isActive('/my-rides') ? 'bg-white text-black' : 'text-zinc-400 hover:text-white'}`}
             >
               <BookOpen size={14} weight="duotone" />
-              <span className="hidden sm:inline">{isDriver ? 'Mis viajes' : 'Mis reservas'}</span>
+              {isDriver ? 'Mis viajes' : 'Mis reservas'}
             </Link>
 
             {/* Avatar + dropdown */}
@@ -172,6 +149,9 @@ export default function Navbar() {
                       </span>
                     )}
                   </Link>
+
+                  {/* Links de navegación en dropdown solo para móvil */}
+                  <div className="sm:hidden border-t border-zinc-800 my-1" />
 
                   <Link
                     to="/settings"

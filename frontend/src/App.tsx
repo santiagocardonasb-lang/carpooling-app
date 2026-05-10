@@ -5,6 +5,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider, useToast } from './context/ToastContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { UnreadProvider } from './context/UnreadContext';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -21,6 +22,7 @@ import TripInProgress from './pages/TripInProgress';
 import RateTrip from './pages/RateTrip';
 import ChatPage from './pages/ChatPage';
 import MessagesPage from './pages/MessagesPage';
+import BottomNav from './components/BottomNav';
 import api from './api';
 
 interface InProgressBooking {
@@ -184,11 +186,14 @@ function TripStartedWatcher() {
 function AppRoutes() {
   const location = useLocation();
   const { isAuthenticated } = useAuth();
-  // Pantallas focalizadas: sin Navbar
+  // Pantallas focalizadas: sin Navbar ni BottomNav
   const focusedRoute = /^\/(trip|rate|chat)\//.test(location.pathname);
+  // Rutas sin autenticación: sin BottomNav
+  const authRoute = /^\/(login|register)/.test(location.pathname);
+  const showBottomNav = isAuthenticated && !focusedRoute && !authRoute;
 
   return (
-    <div className="min-h-screen">
+    <div className={`min-h-screen ${showBottomNav ? 'pb-16 sm:pb-0' : ''}`}>
       {!focusedRoute && <Navbar />}
       <Routes>
         <Route path="/" element={<RootRoute />} />
@@ -211,6 +216,9 @@ function AppRoutes() {
 
       {/* Overlay global de viaje iniciado (solo pasajeros autenticados) */}
       {isAuthenticated && <TripStartedWatcher />}
+
+      {/* Barra de navegación inferior — solo móvil, solo autenticado */}
+      {showBottomNav && <BottomNav />}
     </div>
   );
 }
@@ -227,9 +235,11 @@ export default function App() {
       <BrowserRouter>
         <ThemeProvider>
           <AuthProvider>
-            <ToastProvider>
-              <AppRoutes />
-            </ToastProvider>
+            <UnreadProvider>
+              <ToastProvider>
+                <AppRoutes />
+              </ToastProvider>
+            </UnreadProvider>
           </AuthProvider>
         </ThemeProvider>
       </BrowserRouter>
