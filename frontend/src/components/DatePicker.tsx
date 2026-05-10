@@ -24,6 +24,9 @@ export default function DatePicker({ value, onChange, min, error, placeholder = 
   const [viewMonth, setViewMonth] = useState(initMonth);
   const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, width: 0 });
 
+  const CALENDAR_H  = 310; // altura aproximada del calendario
+  const BOTTOM_SAFE = 72;  // BottomNav (~64px) + margen
+
   const triggerRef  = useRef<HTMLButtonElement>(null);
   const wrapperRef  = useRef<HTMLDivElement>(null);
   const calendarRef = useRef<HTMLDivElement>(null);   // ← calendar div inside portal
@@ -31,7 +34,13 @@ export default function DatePicker({ value, onChange, min, error, placeholder = 
   const updatePos = useCallback(() => {
     if (!triggerRef.current) return;
     const r = triggerRef.current.getBoundingClientRect();
-    setDropdownPos({ top: r.bottom + 8, left: r.left, width: r.width });
+    const spaceBelow = window.innerHeight - r.bottom - BOTTOM_SAFE;
+    const openUp     = spaceBelow < CALENDAR_H && r.top > CALENDAR_H;
+    setDropdownPos({
+      top:  openUp ? r.top - CALENDAR_H - 8 : r.bottom + 8,
+      left: r.left,
+      width: r.width,
+    });
   }, []);
 
   const openCalendar = () => {

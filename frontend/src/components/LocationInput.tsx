@@ -10,12 +10,16 @@ interface Props {
   error?: boolean;
 }
 
-export default function LocationInput({ value, onChange, placeholder, dot = 'origin', error }: Props) {
-  const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState(value);
-  const ref = useRef<HTMLDivElement>(null);
+const DROPDOWN_H  = 220; // altura estimada del dropdown (6 items × ~36px)
+const BOTTOM_SAFE = 72;  // BottomNav + margen
 
-  // Solo sugerir cuando el usuario ha escrito algo
+export default function LocationInput({ value, onChange, placeholder, dot = 'origin', error }: Props) {
+  const [open, setOpen]   = useState(false);
+  const [query, setQuery] = useState(value);
+  const [openUp, setOpenUp] = useState(false);
+  const ref        = useRef<HTMLDivElement>(null);
+  const inputRef   = useRef<HTMLInputElement>(null);
+
   const suggestions = query.trim().length >= 1
     ? MUNICIPALITIES.filter(m => m.toLowerCase().includes(query.toLowerCase())).slice(0, 6)
     : [];
@@ -30,6 +34,13 @@ export default function LocationInput({ value, onChange, placeholder, dot = 'ori
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  const checkDirection = () => {
+    if (!inputRef.current) return;
+    const r = inputRef.current.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - r.bottom - BOTTOM_SAFE;
+    setOpenUp(spaceBelow < DROPDOWN_H && r.top > DROPDOWN_H);
+  };
+
   const select = (municipality: string) => {
     setQuery(municipality);
     onChange(municipality);
@@ -43,10 +54,11 @@ export default function LocationInput({ value, onChange, placeholder, dot = 'ori
           dot === 'origin' ? 'rounded-full bg-zinc-500' : 'rounded-sm bg-white'
         } ${error ? 'bg-red-500' : ''}`} />
         <input
+          ref={inputRef}
           type="text"
           value={query}
           onChange={(e) => { setQuery(e.target.value); onChange(e.target.value); setOpen(true); }}
-          onFocus={() => { if (query.trim().length > 0) setOpen(true); }}
+          onFocus={() => { checkDirection(); if (query.trim().length > 0) setOpen(true); }}
           placeholder={placeholder}
           className={`flex-1 bg-transparent placeholder-zinc-500 text-sm focus:outline-none ${error ? 'text-red-300 placeholder-red-800' : 'text-white'}`}
           autoComplete="off"
@@ -59,7 +71,7 @@ export default function LocationInput({ value, onChange, placeholder, dot = 'ori
       </div>
 
       {open && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-zinc-800 border border-zinc-700 rounded-xl overflow-hidden z-[100] shadow-2xl">
+        <div className={`absolute ${openUp ? 'bottom-full mb-2' : 'top-full mt-2'} left-0 right-0 bg-zinc-800 border border-zinc-700 rounded-xl overflow-hidden z-[100] shadow-2xl`}>
           {suggestions.length === 0 ? (
             <div className="px-4 py-3 flex items-center gap-2 text-zinc-500 text-sm">
               <MapPin size={14} weight="duotone" />
