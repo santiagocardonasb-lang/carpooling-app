@@ -28,7 +28,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-6 pt-16">
+    <div className="min-h-screen bg-black flex justify-center px-6 pt-24 pb-10">
       <div className="w-full max-w-sm">
         <h1 className="text-3xl font-black text-white mb-1">Bienvenido</h1>
         <p className="text-zinc-500 text-sm mb-8">Ingresa a tu cuenta para continuar</p>

@@ -46,7 +46,7 @@ export default function Register() {
 
   if (step === 'role') {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center px-6 pt-16">
+      <div className="min-h-screen bg-black flex justify-center px-6 pt-24 pb-10">
         <div className="w-full max-w-sm">
           <h1 className="text-3xl font-black text-white mb-2">¿Cómo usarás la app?</h1>
           <p className="text-zinc-500 text-sm mb-8">Elige tu rol principal. Podrás cambiarlo después.</p>
@@ -113,7 +113,7 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-6 pt-16">
+    <div className="min-h-screen bg-black flex justify-center px-6 pt-24 pb-10">
       <div className="w-full max-w-sm">
         <button onClick={() => setStep('role')} className="text-zinc-500 text-sm mb-4 hover:text-white transition-colors flex items-center gap-1">
           ← Volver

@@ -24,7 +24,7 @@ export default function Home() {
   if (isAuthenticated && isDriver) {
     return (
       <div className="min-h-screen bg-black flex flex-col">
-        <div className="flex-1 flex flex-col justify-center px-6 pt-24 pb-12 max-w-2xl mx-auto w-full">
+        <div className="flex-1 flex flex-col px-6 pt-24 pb-12 max-w-2xl mx-auto w-full">
           <h1 className="text-5xl md:text-6xl font-black text-white leading-tight mb-3">
             Hola, {user?.name?.split(' ')[0]}.
           </h1>
@@ -70,7 +70,7 @@ export default function Home() {
   if (isAuthenticated && !isDriver) {
     return (
       <div className="min-h-screen bg-black flex flex-col">
-        <div className="flex-1 flex flex-col justify-center px-6 pt-24 pb-12 max-w-2xl mx-auto w-full">
+        <div className="flex-1 flex flex-col px-6 pt-24 pb-12 max-w-2xl mx-auto w-full">
           <h1 className="text-5xl md:text-6xl font-black text-white leading-tight mb-3">
             Hola, {user?.name?.split(' ')[0]}.
           </h1>
@@ -115,7 +115,7 @@ export default function Home() {
   // ── Unauthenticated fallback (shouldn't normally reach here) ─────────────
   return (
     <div className="min-h-screen bg-black flex flex-col">
-      <div className="flex-1 flex flex-col justify-center px-6 pt-24 pb-12 max-w-2xl mx-auto w-full">
+      <div className="flex-1 flex flex-col px-6 pt-24 pb-12 max-w-2xl mx-auto w-full">
         <h1 className="text-5xl md:text-6xl font-black text-white leading-tight mb-3">
           Ve a donde<br />quieras ir.
         </h1>
