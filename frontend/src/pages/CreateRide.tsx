@@ -1,6 +1,6 @@
-import { useState, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Car, Bike, RefreshCw, AlertCircle } from 'lucide-react';
+import { useState, useEffect, FormEvent } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Car, Motorcycle, ArrowsClockwise, WarningCircle } from '@phosphor-icons/react';
 import api from '../api';
 import LocationInput from '../components/LocationInput';
 import Toggle from '../components/Toggle';
@@ -26,9 +26,18 @@ export default function CreateRide() {
   const [isRecurring, setIsRecurring] = useState(false);
   const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5]);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [sameRouteError, setSameRouteError] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [vehicleOk, setVehicleOk] = useState<boolean | null>(null);
   const navigate = useNavigate();
   const { showToast } = useToast();
+
+  // Verificar que el conductor tenga datos de vehículo antes de publicar
+  useEffect(() => {
+    api.get('/profile')
+      .then(({ data }) => setVehicleOk(!!(data.car_brand && data.car_plate)))
+      .catch(() => setVehicleOk(false));
+  }, []);
 
   const toggleDay = (id: number) =>
     setSelectedDays(prev => prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id]);
@@ -37,6 +46,15 @@ export default function CreateRide() {
     const errs: FieldErrors = {};
     if (!form.origin.trim()) errs.origin = true;
     if (!form.destination.trim()) errs.destination = true;
+    // Origen y destino no pueden ser iguales
+    if (form.origin.trim() && form.destination.trim() &&
+        form.origin.trim().toLowerCase() === form.destination.trim().toLowerCase()) {
+      errs.origin = true;
+      errs.destination = true;
+      setSameRouteError(true);
+    } else {
+      setSameRouteError(false);
+    }
     if (!form.time) errs.time = true;
     if (!form.seats || Number(form.seats) < 1) errs.seats = true;
     if (form.price === '' || isNaN(Number(form.price))) errs.price = true;
@@ -72,13 +90,39 @@ export default function CreateRide() {
     }
   };
 
-  const today = new Date().toISOString().split('T')[0];
+  // Fecha local (toISOString usa UTC → puede dar "mañana" en UTC-5 de noche)
+  const _now = new Date();
+  const today = `${_now.getFullYear()}-${String(_now.getMonth()+1).padStart(2,'0')}-${String(_now.getDate()).padStart(2,'0')}`;
   const hasErrors = Object.values(fieldErrors).some(Boolean);
 
   const inputCls = (field: keyof FieldErrors) =>
     `w-full bg-zinc-900 text-white placeholder-zinc-600 px-4 py-3.5 rounded-xl text-sm transition [color-scheme:dark] ${
       fieldErrors[field] ? 'ring-2 ring-red-500 placeholder-red-900' : 'focus:ring-2 focus:ring-white'
     }`;
+
+  // Pantalla de bloqueo si no hay datos de vehículo
+  if (vehicleOk === false) {
+    return (
+      <div className="min-h-screen bg-black pt-20 px-6 pb-10 flex items-center justify-center">
+        <div className="max-w-sm w-full text-center">
+          <div className="w-16 h-16 bg-zinc-900 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Car size={28} weight="duotone" className="text-zinc-500" />
+          </div>
+          <h2 className="text-white text-xl font-bold mb-2">Completa tu vehículo</h2>
+          <p className="text-zinc-500 text-sm mb-6 leading-relaxed">
+            Antes de publicar un viaje, los pasajeros necesitan conocer tu vehículo.
+            Agrega la marca y placa para continuar.
+          </p>
+          <Link
+            to="/vehicle"
+            className="inline-block bg-white text-black font-semibold px-6 py-3 rounded-xl hover:bg-zinc-200 transition-colors text-sm"
+          >
+            Agregar información del vehículo →
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black pt-20 px-6 pb-10">
@@ -101,7 +145,7 @@ export default function CreateRide() {
                     vehicleType === type ? 'bg-white text-black border-white' : 'bg-transparent text-zinc-500 border-zinc-800 hover:border-zinc-600'
                   }`}
                 >
-                  {type === 'car' ? <Car size={16} /> : <Bike size={16} />}
+                  {type === 'car' ? <Car size={16} weight="duotone" /> : <Motorcycle size={16} weight="duotone" />}
                   {type === 'car' ? 'Carro' : 'Moto'}
                 </button>
               ))}
@@ -130,7 +174,7 @@ export default function CreateRide() {
           <div className="bg-zinc-900 rounded-xl px-4 py-3.5">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 min-w-0 flex-1">
-                <RefreshCw size={15} className="text-zinc-500 flex-shrink-0" />
+                <ArrowsClockwise size={15} weight="duotone" className="text-zinc-500 flex-shrink-0" />
                 <div className="min-w-0">
                   <p className="text-white text-sm font-medium">Viaje recurrente</p>
                   <p className="text-zinc-600 text-xs">Sale varios días a la semana</p>
@@ -241,9 +285,15 @@ export default function CreateRide() {
             />
           </div>
 
-          {hasErrors && (
+          {sameRouteError && (
             <div className="flex items-center gap-2 bg-red-900/20 border border-red-900/50 px-3 py-2.5 rounded-xl">
-              <AlertCircle size={14} className="text-red-400 flex-shrink-0" />
+              <WarningCircle size={14} weight="duotone" className="text-red-400 flex-shrink-0" />
+              <p className="text-red-400 text-xs">El origen y el destino no pueden ser el mismo lugar.</p>
+            </div>
+          )}
+          {hasErrors && !sameRouteError && (
+            <div className="flex items-center gap-2 bg-red-900/20 border border-red-900/50 px-3 py-2.5 rounded-xl">
+              <WarningCircle size={14} weight="duotone" className="text-red-400 flex-shrink-0" />
               <p className="text-red-400 text-xs">Completa los campos marcados en rojo antes de continuar.</p>
             </div>
           )}

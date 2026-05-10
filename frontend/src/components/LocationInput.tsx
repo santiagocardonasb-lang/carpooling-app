@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { MapPin, X } from 'lucide-react';
+import { MapPin, X } from '@phosphor-icons/react';
 import { MUNICIPALITIES } from '../data/municipalities';
 
 interface Props {
@@ -15,9 +15,10 @@ export default function LocationInput({ value, onChange, placeholder, dot = 'ori
   const [query, setQuery] = useState(value);
   const ref = useRef<HTMLDivElement>(null);
 
-  const suggestions = query.length >= 1
+  // Solo sugerir cuando el usuario ha escrito algo
+  const suggestions = query.trim().length >= 1
     ? MUNICIPALITIES.filter(m => m.toLowerCase().includes(query.toLowerCase())).slice(0, 6)
-    : MUNICIPALITIES.slice(0, 6);
+    : [];
 
   useEffect(() => { setQuery(value); }, [value]);
 
@@ -45,14 +46,14 @@ export default function LocationInput({ value, onChange, placeholder, dot = 'ori
           type="text"
           value={query}
           onChange={(e) => { setQuery(e.target.value); onChange(e.target.value); setOpen(true); }}
-          onFocus={() => setOpen(true)}
+          onFocus={() => { if (query.trim().length > 0) setOpen(true); }}
           placeholder={placeholder}
           className={`flex-1 bg-transparent placeholder-zinc-500 text-sm focus:outline-none ${error ? 'text-red-300 placeholder-red-800' : 'text-white'}`}
           autoComplete="off"
         />
         {query && (
           <button type="button" onClick={() => { setQuery(''); onChange(''); }} className="text-zinc-600 hover:text-zinc-400">
-            <X size={13} />
+            <X size={13} weight="bold" />
           </button>
         )}
       </div>
@@ -61,7 +62,7 @@ export default function LocationInput({ value, onChange, placeholder, dot = 'ori
         <div className="absolute top-full left-0 right-0 mt-2 bg-zinc-800 border border-zinc-700 rounded-xl overflow-hidden z-[100] shadow-2xl">
           {suggestions.length === 0 ? (
             <div className="px-4 py-3 flex items-center gap-2 text-zinc-500 text-sm">
-              <MapPin size={14} />
+              <MapPin size={14} weight="duotone" />
               Sin resultados
             </div>
           ) : (

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Car, Palette, CreditCard, Check, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Car, Palette, CreditCard, Check, WarningCircle } from '@phosphor-icons/react';
 import api from '../api';
 import AutocompleteInput from '../components/AutocompleteInput';
 
@@ -79,7 +79,7 @@ export default function VehicleProfile() {
     <div className="min-h-screen bg-black pt-20 px-6 pb-12">
       <div className="max-w-sm mx-auto mt-4">
         <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors text-sm mb-6">
-          <ArrowLeft size={16} /> Volver
+          <ArrowLeft size={16} weight="bold" /> Volver
         </button>
 
         <h1 className="text-2xl font-black text-white mb-2">Mi vehículo</h1>
@@ -93,7 +93,7 @@ export default function VehicleProfile() {
               onChange={setCarBrand}
               options={CAR_BRANDS}
               placeholder="Marca y modelo (ej. Chevrolet Spark)"
-              icon={<Car size={15} className="text-zinc-500 flex-shrink-0" />}
+              icon={<Car size={15} weight="duotone" className="text-zinc-500 flex-shrink-0" />}
             />
           </div>
           <div className="px-4 py-3.5 border-b border-zinc-800">
@@ -102,11 +102,11 @@ export default function VehicleProfile() {
               onChange={setCarColor}
               options={CAR_COLORS}
               placeholder="Color (ej. Blanco)"
-              icon={<Palette size={15} className="text-zinc-500 flex-shrink-0" />}
+              icon={<Palette size={15} weight="duotone" className="text-zinc-500 flex-shrink-0" />}
             />
           </div>
           <div className="flex items-center gap-3 px-4 py-3.5">
-            <CreditCard size={15} className="text-zinc-500 flex-shrink-0" />
+            <CreditCard size={15} weight="duotone" className="text-zinc-500 flex-shrink-0" />
             <input
               type="text"
               value={carPlate}
@@ -120,7 +120,7 @@ export default function VehicleProfile() {
 
         {plateError && (
           <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-xl text-xs bg-red-900/30 text-red-400">
-            <AlertCircle size={13} />
+            <WarningCircle size={13} weight="duotone" />
             {plateError}
           </div>
         )}
@@ -129,7 +129,7 @@ export default function VehicleProfile() {
           <div className={`flex items-center gap-2 mb-3 px-3 py-2 rounded-xl text-xs ${
             msg.type === 'ok' ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400'
           }`}>
-            {msg.type === 'ok' ? <Check size={13} /> : <AlertCircle size={13} />}
+            {msg.type === 'ok' ? <Check size={13} weight="bold" /> : <WarningCircle size={13} weight="duotone" />}
             {msg.text}
           </div>
         )}

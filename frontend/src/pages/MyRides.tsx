@@ -1,99 +1,55 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { Share2, Star, CheckCircle } from 'lucide-react';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { ShareNetwork, ChatCircle, MapPin, CaretRight } from '@phosphor-icons/react';
 import api from '../api';
 import RideCard from '../components/RideCard';
-import RatingModal from '../components/RatingModal';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { shareTrip } from '../utils/share';
+import { shareTrip, openMapDirections } from '../utils/share';
 
 const DAY_NAMES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
 interface Ride {
-  id: number;
-  origin: string;
-  destination: string;
-  date?: string;
-  time: string;
-  seats: number;
-  seats_available: number;
-  price: number;
-  driver_name: string;
-  description?: string;
-  driver_id: number;
-  status: string;
-  vehicle_type: string;
-  is_recurring: number;
-  days_of_week?: string;
-  pending_requests: number;
-  confirmed_passengers: number;
+  id: number; origin: string; destination: string; date?: string; time: string;
+  seats: number; seats_available: number; price: number; driver_name: string;
+  description?: string; driver_id: number; status: string; vehicle_type: string;
+  is_recurring: number; days_of_week?: string; pending_requests: number; confirmed_passengers: number;
 }
 
 interface Booking {
-  id: number;
-  origin: string;
-  destination: string;
-  date?: string;
-  time: string;
-  price: number;
-  driver_name: string;
-  driver_phone: string;
-  status: string;
-  seats: number;
-  proposed_time?: string;
-  is_recurring: number;
-  days_of_week?: string;
-  booking_date?: string;
-  booking_days?: string;
-  car_brand?: string;
-  car_color?: string;
-  car_plate?: string;
-  cancelled_dates?: string;
-  completed_at?: string;
-  driver_id?: number;
-  passenger_id?: number;
+  id: number; origin: string; destination: string; date?: string; time: string;
+  price: number; driver_name: string; driver_phone: string; status: string; seats: number;
+  proposed_time?: string; is_recurring: number; days_of_week?: string;
+  booking_date?: string; booking_days?: string; car_brand?: string; car_color?: string;
+  car_plate?: string; cancelled_dates?: string; completed_at?: string;
+  driver_id?: number; passenger_id?: number; passenger_ready?: number;
 }
 
 interface Request {
-  id: number;
-  ride_id: number;
-  passenger_name: string;
-  passenger_phone: string;
-  passenger_email: string;
-  seats: number;
-  proposed_time?: string;
-  booking_date?: string;
-  booking_days?: string;
-  status: string;
-  created_at: string;
-  // ride info (from my/requests endpoint)
-  origin?: string;
-  destination?: string;
-  time?: string;
-  date?: string;
-  is_recurring?: number;
-  days_of_week?: string;
+  id: number; ride_id: number; passenger_name: string; passenger_phone: string;
+  passenger_email: string; seats: number; proposed_time?: string;
+  booking_date?: string; booking_days?: string; status: string; created_at: string;
+  origin?: string; destination?: string; time?: string; date?: string;
+  is_recurring?: number; days_of_week?: string;
 }
 
 export default function MyRides() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const isDriver = user?.role !== 'passenger';
   const { showToast } = useToast();
 
-  // Tab derivado del URL: si una notificación navega a ?tab=requests, la pestaña
-  // cambia automáticamente sin lógica adicional de sincronización.
   const [searchParams, setSearchParams] = useSearchParams();
   const tab: 'rides' | 'requests' = searchParams.get('tab') === 'requests' ? 'requests' : 'rides';
   const setTab = (t: 'rides' | 'requests') => {
     if (t === 'requests') setSearchParams({ tab: 'requests' }, { replace: true });
     else setSearchParams({}, { replace: true });
   };
+
   const [myRides, setMyRides] = useState<Ride[]>([]);
   const [allRequests, setAllRequests] = useState<Request[]>([]);
   const [myBookings, setMyBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
-  const [ratingFor, setRatingFor] = useState<{ bookingId: number; name: string; role: 'driver' | 'passenger' } | null>(null);
   const [ratedSet, setRatedSet] = useState<Set<number>>(new Set());
 
   const fetchData = useCallback(async () => {
@@ -149,14 +105,13 @@ export default function MyRides() {
     }
   };
 
-  const completeBooking = async (id: number) => {
-    if (!confirm('¿Marcar este viaje como completado?')) return;
+  const notifyReady = async (bookingId: number) => {
     try {
-      await api.patch(`/bookings/${id}/complete`);
-      showToast('Viaje completado');
+      await api.patch(`/bookings/${bookingId}/passenger-ready`);
+      showToast('✅ Conductor notificado');
       fetchData();
     } catch (err: unknown) {
-      showToast((err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Error', 'error');
+      showToast((err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'No se pudo enviar la notificación', 'error');
     }
   };
 
@@ -171,14 +126,14 @@ export default function MyRides() {
     }
   };
 
-  // Cargar qué bookings ya califiqué (ambos roles)
   useEffect(() => {
     const completed = isDriver
       ? allRequests.filter(r => r.status === 'completed').map(r => r.id)
       : myBookings.filter(b => b.status === 'completed').map(b => b.id);
     if (completed.length === 0) { setRatedSet(new Set()); return; }
-    Promise.all(completed.map(id => api.get(`/ratings/booking/${id}/mine`).then(r => r.data.rated ? id : null).catch(() => null)))
-      .then(rated => setRatedSet(new Set(rated.filter((x): x is number => x !== null))));
+    Promise.all(completed.map(id =>
+      api.get(`/ratings/booking/${id}/mine`).then(r => r.data.rated ? id : null).catch(() => null)
+    )).then(rated => setRatedSet(new Set(rated.filter((x): x is number => x !== null))));
   }, [myBookings, allRequests, isDriver]);
 
   const formatDate = (d?: string) => {
@@ -192,15 +147,19 @@ export default function MyRides() {
   };
 
   const activeRides    = myRides.filter(r => r.status === 'active');
-  const activeBookings = myBookings.filter(b => b.status !== 'cancelled');
-  const pendingCount   = allRequests.filter(r => r.status === 'pending').length;
+  const activeBookings = myBookings.filter(b => {
+    if (b.status === 'cancelled' || b.status === 'rejected' || b.status === 'expired') return false;
+    if (b.status === 'completed' && !b.is_recurring && ratedSet.has(b.id)) return false;
+    return true;
+  });
+  const pendingCount = allRequests.filter(r => r.status === 'pending').length;
 
   const parseCancelled = (s?: string): string[] => {
     if (!s) return [];
     try { return JSON.parse(s); } catch { return []; }
   };
 
-  // ── Passenger view ────────────────────────────────────────────────────────
+  // ── Passenger view ──────────────────────────────────────────────────────────
   if (!isDriver) {
     return (
       <div className="min-h-screen bg-black pt-20 px-6 pb-10">
@@ -248,40 +207,55 @@ export default function MyRides() {
                       )}
                     </div>
                     <span className={`text-xs font-medium px-2.5 py-1 rounded-full flex-shrink-0 ${
-                      b.status === 'confirmed' ? 'bg-green-900/40 text-green-400' :
-                      b.status === 'pending'   ? 'bg-yellow-900/30 text-yellow-400' :
+                      b.status === 'in_progress' ? 'bg-yellow-900/40 text-yellow-400 animate-pulse' :
+                      b.status === 'confirmed'   ? 'bg-green-900/40 text-green-400' :
+                      b.status === 'completed'   ? 'bg-blue-900/40 text-blue-400' :
+                      b.status === 'pending'     ? 'bg-yellow-900/30 text-yellow-400' :
                       'bg-zinc-800 text-zinc-500'
                     }`}>
-                      {b.status === 'confirmed' ? 'Confirmado' : b.status === 'pending' ? 'Pendiente' : b.status === 'rejected' ? 'Rechazado' : 'Cancelado'}
+                      {b.status === 'in_progress' ? '🚗 En curso' :
+                       b.status === 'confirmed'   ? 'Confirmado' :
+                       b.status === 'completed'   ? 'Completado' :
+                       b.status === 'pending'     ? 'Pendiente'  :
+                       b.status === 'rejected'    ? 'Rechazado'  : 'Cancelado'}
                     </span>
                   </div>
-                  {/* Acciones según estado */}
+
+                  {/* Acciones */}
                   <div className="flex items-center justify-between mt-3 flex-wrap gap-2">
                     <p className="text-white font-bold text-sm">
                       ${b.price.toLocaleString()} · {b.seats} asiento{b.seats !== 1 ? 's' : ''}
                     </p>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <button
+                        onClick={() => openMapDirections(b.origin, b.destination)}
+                        className="flex items-center gap-1 text-xs text-zinc-400 hover:text-white transition-colors"
+                      >
+                        <MapPin size={13} weight="duotone" /> Mapa
+                      </button>
+                      {['confirmed', 'in_progress'].includes(b.status) && (
+                        <button
+                          onClick={() => navigate(`/chat/${b.id}`)}
+                          className="flex items-center gap-1 text-xs text-zinc-400 hover:text-white transition-colors"
+                        >
+                          <ChatCircle size={13} weight="duotone" /> Chat
+                        </button>
+                      )}
                       {b.status === 'confirmed' && (
                         <button
                           onClick={() => shareTrip(b)}
                           className="flex items-center gap-1 text-xs text-zinc-400 hover:text-white transition-colors"
-                          title="Compartir viaje"
                         >
-                          <Share2 size={13} /> Compartir
+                          <ShareNetwork size={13} weight="duotone" /> Compartir
                         </button>
                       )}
                       {b.status === 'completed' && !ratedSet.has(b.id) && (
                         <button
-                          onClick={() => setRatingFor({ bookingId: b.id, name: b.driver_name, role: 'driver' })}
+                          onClick={() => navigate(`/rate/${b.id}`)}
                           className="flex items-center gap-1 text-xs text-yellow-400 hover:text-yellow-300 font-semibold transition-colors"
                         >
-                          <Star size={13} /> Calificar
+                          ⭐ Calificar
                         </button>
-                      )}
-                      {b.status === 'completed' && ratedSet.has(b.id) && (
-                        <span className="text-xs text-zinc-600 flex items-center gap-1">
-                          <Star size={13} className="fill-yellow-400 text-yellow-400" /> Calificado
-                        </span>
                       )}
                       {['pending', 'confirmed'].includes(b.status) && (
                         <button onClick={() => cancelBooking(b.id)} className="text-xs text-red-500 hover:text-red-400 transition-colors">
@@ -291,15 +265,41 @@ export default function MyRides() {
                     </div>
                   </div>
 
-                  {/* Días recurrentes con opción de cancelar uno */}
-                  {b.is_recurring && b.booking_days && b.status === 'confirmed' && (() => {
+                  {/* Botón "Listo para salir" */}
+                  {b.status === 'confirmed' && (
+                    b.passenger_ready ? (
+                      <p className="mt-3 text-center text-xs text-green-500 py-2">
+                        ✅ Ya notificaste al conductor que estás listo
+                      </p>
+                    ) : (
+                      <button
+                        onClick={() => notifyReady(b.id)}
+                        className="mt-3 w-full flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 px-4 py-2.5 rounded-xl transition-colors"
+                      >
+                        <span className="text-white text-sm">✋ Listo para salir</span>
+                      </button>
+                    )
+                  )}
+
+                  {/* Banner viaje en curso */}
+                  {b.status === 'in_progress' && (
+                    <button
+                      onClick={() => navigate(`/trip/${b.id}`)}
+                      className="mt-3 w-full flex items-center justify-between gap-2 bg-yellow-900/30 hover:bg-yellow-900/50 border border-yellow-800 px-4 py-3 rounded-xl transition-colors"
+                    >
+                      <span className="text-yellow-400 text-sm font-semibold">🚗 Ver viaje en curso</span>
+                      <CaretRight size={16} weight="bold" className="text-yellow-400" />
+                    </button>
+                  )}
+
+                  {/* Días recurrentes */}
+                  {!!b.is_recurring && b.booking_days && b.status === 'confirmed' && (() => {
                     const cancelled = parseCancelled(b.cancelled_dates);
                     return (
                       <div className="mt-3 pt-3 border-t border-zinc-800">
                         <p className="text-zinc-500 text-xs mb-2">Cancelar un día específico:</p>
                         <div className="flex flex-wrap gap-1.5">
                           {b.booking_days.split(',').map(d => {
-                            // Fecha = booking_date + offset al día d de esa semana
                             const base = b.booking_date ? new Date(b.booking_date + 'T12:00:00') : new Date();
                             const target = new Date(base);
                             const diff = (Number(d) - base.getDay() + 7) % 7;
@@ -330,25 +330,15 @@ export default function MyRides() {
             </div>
           )}
         </div>
-        {ratingFor && (
-          <RatingModal
-            bookingId={ratingFor.bookingId}
-            rateeName={ratingFor.name}
-            rateeRole={ratingFor.role}
-            onClose={() => setRatingFor(null)}
-            onDone={fetchData}
-          />
-        )}
       </div>
     );
   }
 
-  // ── Driver view ───────────────────────────────────────────────────────────
+  // ── Driver view ─────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-black pt-20 px-6 pb-10">
       <div className="max-w-xl mx-auto mt-4">
 
-        {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <h1 className="text-2xl font-black text-white">Mis viajes</h1>
           <Link to="/create-ride" className="bg-white text-black text-xs font-semibold px-4 py-2 rounded-full hover:bg-zinc-200 transition-colors">
@@ -356,7 +346,6 @@ export default function MyRides() {
           </Link>
         </div>
 
-        {/* Tabs */}
         <div className="flex gap-1 bg-zinc-900 p-1 rounded-xl mb-5">
           <button
             onClick={() => setTab('rides')}
@@ -386,7 +375,6 @@ export default function MyRides() {
         {loading ? (
           <div className="text-center py-16 text-zinc-700 text-sm">Cargando...</div>
         ) : tab === 'rides' ? (
-          /* ── Tab: Mis viajes ── */
           activeRides.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-zinc-600 font-semibold">No has publicado viajes</p>
@@ -410,7 +398,6 @@ export default function MyRides() {
             </div>
           )
         ) : (
-          /* ── Tab: Solicitudes ── */
           allRequests.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-zinc-600 font-semibold">No hay solicitudes</p>
@@ -420,7 +407,6 @@ export default function MyRides() {
             <div className="space-y-3">
               {allRequests.map((req) => (
                 <div key={req.id} className="bg-zinc-900 rounded-2xl border border-zinc-800 overflow-hidden">
-                  {/* Ride info header */}
                   <div className="px-4 py-3 border-b border-zinc-800 bg-zinc-800/50">
                     <div className="flex items-center gap-2 text-sm font-semibold text-white">
                       <span>{req.origin}</span>
@@ -433,18 +419,13 @@ export default function MyRides() {
                     </p>
                   </div>
 
-                  {/* Passenger info */}
                   <div className="px-4 py-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <p className="text-white text-sm font-semibold">{req.passenger_name}</p>
                         <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 text-xs text-zinc-500">
                           <span>{req.seats} asiento{req.seats !== 1 ? 's' : ''}</span>
-                          {req.booking_date && (
-                            <span className="text-zinc-300">
-                              Desde {formatDate(req.booking_date)}
-                            </span>
-                          )}
+                          {req.booking_date && <span className="text-zinc-300">Desde {formatDate(req.booking_date)}</span>}
                           {req.booking_days && (
                             <span className="text-zinc-300">
                               Días: {req.booking_days.split(',').map(d => DAY_NAMES[Number(d)]).join(', ')}
@@ -454,6 +435,25 @@ export default function MyRides() {
                           {req.passenger_phone && <span>{req.passenger_phone}</span>}
                           {req.passenger_email && <span className="text-zinc-600">{req.passenger_email}</span>}
                         </div>
+                        {/* Chat + mapa para el conductor */}
+                        {['confirmed', 'in_progress'].includes(req.status) && (
+                          <div className="flex items-center gap-3 mt-2">
+                            {req.origin && req.destination && (
+                              <button
+                                onClick={() => openMapDirections(req.origin!, req.destination!)}
+                                className="flex items-center gap-1 text-[11px] text-zinc-400 hover:text-white transition-colors"
+                              >
+                                <MapPin size={12} weight="duotone" /> Mapa
+                              </button>
+                            )}
+                            <button
+                              onClick={() => navigate(`/chat/${req.id}`)}
+                              className="flex items-center gap-1 text-[11px] text-zinc-400 hover:text-white transition-colors"
+                            >
+                              <ChatCircle size={12} weight="duotone" /> Chat
+                            </button>
+                          </div>
+                        )}
                       </div>
 
                       {req.status === 'pending' ? (
@@ -472,49 +472,45 @@ export default function MyRides() {
                           </button>
                         </div>
                       ) : req.status === 'confirmed' ? (
-                        <div className="flex flex-col gap-1.5 flex-shrink-0">
-                          <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-green-900/40 text-green-400 text-center">
-                            Confirmado
-                          </span>
-                          <button
-                            onClick={() => completeBooking(req.id)}
-                            className="flex items-center gap-1 text-[10px] text-zinc-400 hover:text-white transition-colors"
-                            title="Marcar viaje como completado"
-                          >
-                            <CheckCircle size={11} /> Completar
-                          </button>
-                        </div>
-                      ) : req.status === 'completed' ? (
-                        !ratedSet.has(req.id) ? (
-                          <button
-                            onClick={() => setRatingFor({ bookingId: req.id, name: req.passenger_name, role: 'passenger' })}
-                            className="flex items-center gap-1 text-xs text-yellow-400 hover:text-yellow-300 font-semibold flex-shrink-0"
-                          >
-                            <Star size={13} /> Calificar
-                          </button>
-                        ) : (
-                          <span className="text-xs text-zinc-600 flex items-center gap-1 flex-shrink-0">
-                            <Star size={13} className="fill-yellow-400 text-yellow-400" /> Calificado
-                          </span>
-                        )
+                        <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-green-900/40 text-green-400 flex-shrink-0">
+                          Confirmado
+                        </span>
+                      ) : req.status === 'in_progress' ? (
+                        <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-yellow-900/40 text-yellow-400 flex-shrink-0 animate-pulse">
+                          En curso
+                        </span>
+                      ) : req.status === 'completed' && !ratedSet.has(req.id) ? (
+                        <button
+                          onClick={() => navigate(`/rate/${req.id}`)}
+                          className="flex items-center gap-1 text-xs text-yellow-400 hover:text-yellow-300 font-semibold flex-shrink-0"
+                        >
+                          ⭐ Calificar
+                        </button>
                       ) : null}
                     </div>
                   </div>
+
+                  {['confirmed', 'in_progress'].includes(req.status) && (
+                    <button
+                      onClick={() => navigate(`/trip/${req.id}`)}
+                      className={`w-full flex items-center justify-between gap-2 px-4 py-3 border-t transition-colors ${
+                        req.status === 'in_progress'
+                          ? 'bg-yellow-900/30 hover:bg-yellow-900/50 border-yellow-800'
+                          : 'bg-zinc-800/50 hover:bg-zinc-800 border-zinc-700'
+                      }`}
+                    >
+                      <span className={`text-sm font-semibold ${req.status === 'in_progress' ? 'text-yellow-400' : 'text-white'}`}>
+                        {req.status === 'in_progress' ? '🚗 Continuar viaje' : '▶ Iniciar viaje'}
+                      </span>
+                      <CaretRight size={16} weight="bold" className={req.status === 'in_progress' ? 'text-yellow-400' : 'text-zinc-400'} />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
           )
         )}
       </div>
-      {ratingFor && (
-        <RatingModal
-          bookingId={ratingFor.bookingId}
-          rateeName={ratingFor.name}
-          rateeRole={ratingFor.role}
-          onClose={() => setRatingFor(null)}
-          onDone={fetchData}
-        />
-      )}
     </div>
   );
 }

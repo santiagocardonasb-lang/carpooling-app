@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Star, X } from 'lucide-react';
+import { Star, X } from '@phosphor-icons/react';
 import api from '../api';
 import { useToast } from '../context/ToastContext';
 
@@ -41,7 +41,7 @@ export default function RatingModal({ bookingId, rateeName, rateeRole, onClose, 
             <h2 className="text-white font-bold text-lg">Califica al {rateeRole === 'driver' ? 'conductor' : 'pasajero'}</h2>
             <p className="text-zinc-500 text-sm mt-0.5">{rateeName}</p>
           </div>
-          <button onClick={onClose} className="text-zinc-500 hover:text-white"><X size={18} /></button>
+          <button onClick={onClose} className="text-zinc-500 hover:text-white"><X size={18} weight="bold" /></button>
         </div>
 
         <div className="flex justify-center gap-2 mb-5">
@@ -56,8 +56,8 @@ export default function RatingModal({ bookingId, rateeName, rateeRole, onClose, 
             >
               <Star
                 size={36}
-                className={n <= (hover || rating) ? 'text-yellow-400 fill-yellow-400' : 'text-zinc-700'}
-                strokeWidth={1.5}
+                weight={n <= (hover || rating) ? 'fill' : 'regular'}
+                className={n <= (hover || rating) ? 'text-yellow-400' : 'text-zinc-700'}
               />
             </button>
           ))}

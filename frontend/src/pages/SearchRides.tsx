@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Car, Bike, Search, LayoutGrid } from 'lucide-react';
+import { Car, Motorcycle, MagnifyingGlass, SquaresFour } from '@phosphor-icons/react';
 import api from '../api';
 import RideCard from '../components/RideCard';
 import LocationInput from '../components/LocationInput';
@@ -45,7 +45,10 @@ export default function SearchRides() {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
+  const canSearch = filters.origin.trim().length > 0 && filters.destination.trim().length > 0;
+
   const fetchRides = async () => {
+    if (!canSearch) return;
     setLoading(true);
     setSearched(true);
     try {
@@ -61,7 +64,8 @@ export default function SearchRides() {
   };
 
   useEffect(() => {
-    if (filters.origin || filters.destination) fetchRides();
+    if (canSearch) fetchRides();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const formatDays = (daysStr?: string) => {
@@ -92,10 +96,10 @@ export default function SearchRides() {
             <div className="px-4 pb-4">
               <button
                 onClick={fetchRides}
-                disabled={loading}
-                className="w-full bg-white text-black font-semibold py-3 rounded-xl hover:bg-zinc-200 disabled:opacity-50 transition-colors text-sm flex items-center justify-center gap-2"
+                disabled={loading || !canSearch}
+                className="w-full bg-white text-black font-semibold py-3 rounded-xl hover:bg-zinc-200 disabled:opacity-40 transition-colors text-sm flex items-center justify-center gap-2"
               >
-                <Search size={15} />
+                <MagnifyingGlass size={15} weight="duotone" />
                 {loading ? 'Buscando...' : 'Buscar'}
               </button>
             </div>
@@ -104,9 +108,9 @@ export default function SearchRides() {
           {/* Vehicle filter */}
           <div className="flex gap-2">
             {([
-              { key: 'all', label: 'Todos', icon: <LayoutGrid size={13} /> },
-              { key: 'car', label: 'Carro', icon: <Car size={13} /> },
-              { key: 'moto', label: 'Moto', icon: <Bike size={13} /> },
+              { key: 'all', label: 'Todos', icon: <SquaresFour size={13} weight="duotone" /> },
+              { key: 'car', label: 'Carro', icon: <Car size={13} weight="duotone" /> },
+              { key: 'moto', label: 'Moto', icon: <Motorcycle size={13} weight="duotone" /> },
             ] as const).map(({ key, label, icon }) => (
               <button
                 key={key}
@@ -121,12 +125,22 @@ export default function SearchRides() {
           </div>
         </div>
 
+        {/* Placeholder cuando no hay origen+destino */}
+        {!searched && !canSearch && (
+          <div className="text-center py-14 px-4">
+            <div className="w-14 h-14 bg-zinc-900 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <MagnifyingGlass size={24} weight="duotone" className="text-zinc-700" />
+            </div>
+            <p className="text-zinc-500 text-sm">Ingresa origen y destino para ver los viajes disponibles</p>
+          </div>
+        )}
+
         {/* Results */}
         {searched && (
           rides.length === 0 ? (
             <div className="text-center py-14 px-4">
               <div className="w-14 h-14 bg-zinc-900 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Search size={24} className="text-zinc-600" />
+                <MagnifyingGlass size={24} weight="duotone" className="text-zinc-600" />
               </div>
               <p className="text-white text-lg font-semibold mb-2">Sin viajes disponibles</p>
               <p className="text-zinc-600 text-sm mb-6 leading-relaxed">

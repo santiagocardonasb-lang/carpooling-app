@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Clock, ChevronUp, ChevronDown } from 'lucide-react';
+import { Clock, CaretUp, CaretDown } from '@phosphor-icons/react';
 
 interface Props {
   value: string;          // 'HH:MM' or ''
@@ -55,7 +55,7 @@ export default function TimePicker({ value, onChange, error, placeholder = 'Sele
           error ? 'ring-2 ring-red-500' : open ? 'ring-2 ring-white' : ''
         }`}
       >
-        <Clock size={15} className="text-zinc-500 flex-shrink-0" />
+        <Clock size={15} weight="duotone" className="text-zinc-500 flex-shrink-0" />
         <span className={value ? 'text-white' : 'text-zinc-600'}>
           {value || placeholder}
         </span>
@@ -69,14 +69,14 @@ export default function TimePicker({ value, onChange, error, placeholder = 'Sele
             <div className="flex flex-col items-center gap-1">
               <button type="button" onClick={() => changeHour(1)}
                 className="p-1 text-zinc-500 hover:text-white transition-colors">
-                <ChevronUp size={18} />
+                <CaretUp size={18} weight="bold" />
               </button>
               <div className="w-16 h-14 bg-zinc-800 rounded-xl flex items-center justify-center ring-1 ring-zinc-700">
                 <span className="text-white text-3xl font-black tabular-nums">{fmt2(hour)}</span>
               </div>
               <button type="button" onClick={() => changeHour(-1)}
                 className="p-1 text-zinc-500 hover:text-white transition-colors">
-                <ChevronDown size={18} />
+                <CaretDown size={18} weight="bold" />
               </button>
               <span className="text-zinc-600 text-[10px] uppercase tracking-wider mt-0.5">horas</span>
             </div>
@@ -87,14 +87,14 @@ export default function TimePicker({ value, onChange, error, placeholder = 'Sele
             <div className="flex flex-col items-center gap-1">
               <button type="button" onClick={() => changeMinute(5)}
                 className="p-1 text-zinc-500 hover:text-white transition-colors">
-                <ChevronUp size={18} />
+                <CaretUp size={18} weight="bold" />
               </button>
               <div className="w-16 h-14 bg-zinc-800 rounded-xl flex items-center justify-center ring-1 ring-zinc-700">
                 <span className="text-white text-3xl font-black tabular-nums">{fmt2(minute)}</span>
               </div>
               <button type="button" onClick={() => changeMinute(-5)}
                 className="p-1 text-zinc-500 hover:text-white transition-colors">
-                <ChevronDown size={18} />
+                <CaretDown size={18} weight="bold" />
               </button>
               <span className="text-zinc-600 text-[10px] uppercase tracking-wider mt-0.5">minutos</span>
             </div>

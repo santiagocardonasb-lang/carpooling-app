@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Bell, Trash2, Users, ChevronRight, Star } from 'lucide-react';
+import {
+  ArrowLeft, CheckCircle, XCircle, WarningCircle, Bell,
+  Trash, Users, CaretRight, Star, Play, Clock, ChatCircle,
+} from '@phosphor-icons/react';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
 
 type NotifType =
-  | 'ride_cancelled'
-  | 'booking_accepted'
-  | 'booking_rejected'
-  | 'booking_request'
-  | 'booking_completed';
+  | 'ride_cancelled' | 'booking_accepted' | 'booking_rejected'
+  | 'booking_request' | 'booking_started' | 'booking_completed'
+  | 'departure_reminder' | 'new_message' | 'passenger_ready'
+  | 'new_rating' | 'passenger_delay' | 'passenger_declined';
 
 interface Notif {
   id: number;
@@ -18,6 +20,7 @@ interface Notif {
   message: string;
   read: number;
   created_at: string;
+  related_id?: number | null;
 }
 
 export default function NotificationsPage() {
@@ -47,25 +50,43 @@ export default function NotificationsPage() {
   const deleteAll = async () => {
     if (!confirm('¿Borrar todas las notificaciones?')) return;
     try {
-      await api.delete('/notifications');
+      // /all evita ambigüedad con la ruta /:id en Express
+      await api.delete('/notifications/all');
       setNotifs([]);
-    } catch {}
+    } catch (e: unknown) {
+      const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error
+        || 'No se pudieron borrar las notificaciones. Intenta de nuevo.';
+      alert(msg);
+      console.error('Delete all notifications failed:', e);
+    }
   };
 
-  // Mapa de tipo → ruta destino. Depende del rol porque el conductor y pasajero
-  // van a vistas distintas dentro de /my-rides.
-  const getDestination = (type: NotifType): string | null => {
-    switch (type) {
+  const getDestination = (n: Notif): string | null => {
+    const id = n.related_id;
+    switch (n.type) {
       case 'booking_request':
-        // Sólo el conductor recibe esto → tab "Solicitudes"
+        return '/my-rides?tab=requests';
+      case 'booking_started':
+        return id ? `/trip/${id}` : '/my-rides';
+      case 'booking_completed':
+        return id ? `/rate/${id}` : '/my-rides';
+      case 'passenger_ready':
+        return id ? `/trip/${id}` : '/my-rides?tab=requests';
+      case 'new_message':
+        // related_id es el booking_id → ir directo al chat
+        return id ? `/chat/${id}` : (isDriver ? '/my-rides?tab=requests' : '/my-rides');
+      case 'new_rating':
+        // Notificación de calificación recibida → ir al perfil para ver
+        return '/profile';
+      case 'passenger_delay':
+        // Conductor: ir a la pantalla del viaje para esperar
+        return id ? `/trip/${id}` : '/my-rides?tab=requests';
+      case 'passenger_declined':
         return '/my-rides?tab=requests';
       case 'booking_accepted':
       case 'booking_rejected':
       case 'ride_cancelled':
-        // El pasajero recibe estas → su lista de reservas
-        return '/my-rides';
-      case 'booking_completed':
-        // Pasajero: puede calificar al conductor desde ahí
+      case 'departure_reminder':
         return '/my-rides';
       default:
         return null;
@@ -73,9 +94,8 @@ export default function NotificationsPage() {
   };
 
   const handleClick = (n: Notif) => {
-    const dest = getDestination(n.type);
+    const dest = getDestination(n);
     if (!dest) return;
-    // Si por alguna razón llegan tipos cruzados con el rol, llevamos a my-rides genérico
     if (n.type === 'booking_request' && !isDriver) {
       navigate('/my-rides');
     } else {
@@ -84,11 +104,18 @@ export default function NotificationsPage() {
   };
 
   const icon = (type: NotifType) => {
-    if (type === 'booking_accepted')  return <CheckCircle size={22} className="text-green-400"  strokeWidth={1.5} />;
-    if (type === 'booking_rejected')  return <XCircle     size={22} className="text-red-400"    strokeWidth={1.5} />;
-    if (type === 'booking_request')   return <Users       size={22} className="text-blue-400"   strokeWidth={1.5} />;
-    if (type === 'booking_completed') return <Star        size={22} className="text-yellow-400" strokeWidth={1.5} />;
-    return <AlertCircle size={22} className="text-yellow-400" strokeWidth={1.5} />;
+    if (type === 'booking_accepted')   return <CheckCircle   size={22} weight="duotone" className="text-green-400"  />;
+    if (type === 'booking_rejected')   return <XCircle       size={22} weight="duotone" className="text-red-400"    />;
+    if (type === 'booking_request')    return <Users         size={22} weight="duotone" className="text-blue-400"   />;
+    if (type === 'booking_started')    return <Play          size={22} weight="duotone" className="text-yellow-400" />;
+    if (type === 'booking_completed')  return <Star          size={22} weight="duotone" className="text-blue-400"   />;
+    if (type === 'departure_reminder') return <Clock         size={22} weight="duotone" className="text-orange-400" />;
+    if (type === 'new_message')        return <ChatCircle    size={22} weight="duotone" className="text-blue-400"   />;
+    if (type === 'passenger_ready')    return <CheckCircle   size={22} weight="duotone" className="text-green-400"  />;
+    if (type === 'new_rating')         return <Star          size={22} weight="fill"    className="text-yellow-400" />;
+    if (type === 'passenger_delay')    return <Clock         size={22} weight="duotone" className="text-orange-400" />;
+    if (type === 'passenger_declined') return <XCircle       size={22} weight="duotone" className="text-red-400"    />;
+    return <WarningCircle size={22} weight="duotone" className="text-yellow-400" />;
   };
 
   const timeAgo = (dateStr: string) => {
@@ -104,7 +131,7 @@ export default function NotificationsPage() {
       <div className="max-w-sm mx-auto mt-4">
         <div className="flex items-center justify-between mb-4">
           <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors text-sm">
-            <ArrowLeft size={16} /> Volver
+            <ArrowLeft size={16} weight="bold" /> Volver
           </button>
           {notifs.length > 0 && (
             <button onClick={deleteAll} className="text-zinc-600 hover:text-red-400 text-xs transition-colors">
@@ -119,14 +146,14 @@ export default function NotificationsPage() {
           <div className="text-center py-16 text-zinc-700 text-sm">Cargando...</div>
         ) : notifs.length === 0 ? (
           <div className="text-center py-16">
-            <Bell size={36} className="text-zinc-800 mx-auto mb-3" strokeWidth={1.5} />
+            <Bell size={36} weight="duotone" className="text-zinc-800 mx-auto mb-3" />
             <p className="text-zinc-600 font-semibold">Sin notificaciones</p>
             <p className="text-zinc-700 text-sm mt-1">Aquí verás actualizaciones de tus viajes</p>
           </div>
         ) : (
           <div className="space-y-2">
             {notifs.map(n => {
-              const clickable = !!getDestination(n.type);
+              const clickable = !!getDestination(n);
               return (
                 <div
                   key={n.id}
@@ -153,11 +180,9 @@ export default function NotificationsPage() {
                       className="p-1 text-zinc-700 hover:text-red-400 transition-colors rounded"
                       title="Eliminar"
                     >
-                      <Trash2 size={14} />
+                      <Trash size={14} weight="duotone" />
                     </button>
-                    {clickable && (
-                      <ChevronRight size={14} className="text-zinc-700" />
-                    )}
+                    {clickable && <CaretRight size={14} weight="bold" className="text-zinc-700" />}
                   </div>
                 </div>
               );

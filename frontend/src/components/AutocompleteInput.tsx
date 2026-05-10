@@ -16,7 +16,8 @@ export default function AutocompleteInput({ value, onChange, options, placeholde
     .filter(o => o.toLowerCase().includes(value.toLowerCase()))
     .slice(0, 8);
 
-  const showDropdown = open && filtered.length > 0 &&
+  // Solo mostrar si el usuario ha escrito algo (no abrir en blanco)
+  const showDropdown = open && value.trim().length > 0 && filtered.length > 0 &&
     !(filtered.length === 1 && filtered[0].toLowerCase() === value.toLowerCase());
 
   useEffect(() => {
