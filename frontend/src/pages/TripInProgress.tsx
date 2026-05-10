@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   MapPin, ChatCircle, Phone, Star, Flag, Play, Car,
-  Clock, User, Bell, GearSix, SignOut, CreditCard,
+  Clock, User, Bell, GearSix, SignOut, CreditCard, CheckCircle,
 } from '@phosphor-icons/react';
 import api from '../api';
 import { openMapDirections } from '../utils/share';
@@ -225,8 +225,18 @@ export default function TripInProgress() {
         <div className={`rounded-2xl p-4 text-center border ${
           inProgress ? 'bg-yellow-900/20 border-yellow-800' : 'bg-green-900/20 border-green-800'
         }`}>
-          <p className={`text-xs font-bold uppercase tracking-wider ${inProgress ? 'text-yellow-400' : 'text-green-400'}`}>
-            {inProgress ? '🚗 Viaje en curso' : '✓ Confirmado · Listo para iniciar'}
+          <p className={`text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 ${inProgress ? 'text-yellow-400' : 'text-green-400'}`}>
+            {inProgress ? (
+              <>
+                <Car size={13} weight="duotone" />
+                Viaje en curso
+              </>
+            ) : (
+              <>
+                <CheckCircle size={13} weight="duotone" />
+                Confirmado · Listo para iniciar
+              </>
+            )}
           </p>
           {data.booking.started_at && (
             <p className="text-zinc-500 text-[11px] mt-1 flex items-center justify-center gap-1">

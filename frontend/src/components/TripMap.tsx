@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { Clock } from '@phosphor-icons/react';
 
 interface Props {
   driverLat: number | null;
@@ -217,7 +218,7 @@ export default function TripMap({ driverLat, driverLng, destination, isDriver }:
       {/* ETA badge */}
       {eta && (
         <div className="absolute top-3 left-3 bg-black/80 backdrop-blur-sm border border-zinc-700 px-3 py-1.5 rounded-xl flex items-center gap-1.5 pointer-events-none">
-          <span className="text-base leading-none">🕐</span>
+          <Clock size={13} weight="duotone" className="text-zinc-400" />
           <span className="text-white text-sm font-bold">{eta}</span>
           <span className="text-zinc-400 text-xs">al destino</span>
         </div>
