@@ -9,9 +9,13 @@ import { openMapDirections } from '../utils/share';
 import { parseDate } from '../utils/date';
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
+import TripMap from '../components/TripMap';
 
 interface TripData {
-  booking: { id: number; status: string; seats: number; started_at?: string; };
+  booking: {
+    id: number; status: string; seats: number; started_at?: string;
+    driver_lat: number | null; driver_lng: number | null;
+  };
   ride: { origin: string; destination: string; date?: string; time: string; price: number; description?: string; };
   driver: { id: number; name: string; phone?: string; avatar?: string; car_brand?: string; car_color?: string; car_plate?: string; rating: number; rating_count: number; };
   passenger: { id: number; name: string; phone?: string; avatar?: string; rating: number; rating_count: number; };
@@ -85,6 +89,29 @@ export default function TripInProgress() {
     const j = setInterval(checkUnread, 5000);
     return () => { clearInterval(i); clearInterval(j); };
   }, [load, checkUnread]);
+
+  // ── GPS tracking (solo conductor, solo cuando el viaje está en_progress) ──
+  useEffect(() => {
+    if (!data || data.my_role !== 'driver' || data.booking.status !== 'in_progress') return;
+    if (!navigator.geolocation) return;
+
+    let lastSent = 0;
+    const watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        const now = Date.now();
+        if (now - lastSent < 4500) return; // throttle: enviar cada ~5s máximo
+        lastSent = now;
+        api.patch(`/bookings/${bookingId}/location`, {
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        }).catch(() => {});
+      },
+      (err) => console.warn('[GPS]', err.message),
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 3000 }
+    );
+
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, [data?.booking.status, data?.my_role, bookingId]);
 
   const openChat = () => {
     // Marcar como vistos al abrir el chat
@@ -208,6 +235,16 @@ export default function TripInProgress() {
             </p>
           )}
         </div>
+
+        {/* Mapa en tiempo real — solo cuando el viaje está en curso */}
+        {inProgress && (
+          <TripMap
+            driverLat={data.booking.driver_lat}
+            driverLng={data.booking.driver_lng}
+            destination={data.ride.destination}
+            isDriver={isDriver}
+          />
+        )}
 
         {/* Ruta */}
         <div className="bg-zinc-900 rounded-2xl p-5">

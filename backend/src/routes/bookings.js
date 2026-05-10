@@ -332,6 +332,35 @@ router.delete('/:id', auth, async (req, res) => {
   }
 });
 
+// Conductor actualiza su ubicación GPS en tiempo real
+router.patch('/:id/location', auth, async (req, res) => {
+  const { lat, lng } = req.body;
+  if (typeof lat !== 'number' || typeof lng !== 'number')
+    return res.status(400).json({ error: 'Coordenadas inválidas' });
+  if (lat < -90 || lat > 90 || lng < -180 || lng > 180)
+    return res.status(400).json({ error: 'Coordenadas fuera de rango' });
+
+  try {
+    const bRes = await query(`
+      SELECT b.*, r.driver_id FROM bookings b
+      JOIN rides r ON b.ride_id = r.id WHERE b.id = $1
+    `, [req.params.id]);
+    const booking = bRes.rows[0];
+    if (!booking) return res.status(404).json({ error: 'Reserva no encontrada' });
+    if (booking.driver_id !== req.user.id) return res.status(403).json({ error: 'No autorizado' });
+    if (booking.status !== 'in_progress') return res.status(400).json({ error: 'El viaje no está en curso' });
+
+    await query(
+      'UPDATE bookings SET driver_lat=$1, driver_lng=$2 WHERE id=$3',
+      [lat, lng, req.params.id]
+    );
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('location patch:', err);
+    res.status(500).json({ error: 'Error interno' });
+  }
+});
+
 // Vista consolidada para pantalla de viaje en curso / calificación
 router.get('/:id/trip-view', auth, async (req, res) => {
   const id = parseInt(req.params.id, 10);
@@ -341,6 +370,7 @@ router.get('/:id/trip-view', auth, async (req, res) => {
     const dataRes = await query(`
       SELECT b.id, b.status, b.seats, b.proposed_time, b.booking_date, b.booking_days,
              b.started_at, b.completed_at, b.passenger_id,
+             b.driver_lat, b.driver_lng,
              r.id as ride_id, r.origin, r.destination, r.date, r.time, r.price,
              r.is_recurring, r.days_of_week, r.driver_id, r.vehicle_type, r.description,
              ud.name as driver_name, ud.phone as driver_phone, ud.avatar as driver_avatar,
@@ -373,6 +403,8 @@ router.get('/:id/trip-view', auth, async (req, res) => {
         proposed_time: data.proposed_time, booking_date: data.booking_date,
         booking_days: data.booking_days, started_at: data.started_at,
         completed_at: data.completed_at,
+        driver_lat: data.driver_lat ?? null,
+        driver_lng: data.driver_lng ?? null,
       },
       ride: {
         id: data.ride_id, origin: data.origin, destination: data.destination,
