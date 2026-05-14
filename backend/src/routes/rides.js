@@ -24,9 +24,26 @@ router.get('/', async (req, res) => {
   const params = [];
   let idx = 1;
 
-  if (origin)       { sql += ` AND LOWER(r.origin) LIKE $${idx++}`;      params.push(`%${origin.toLowerCase()}%`); }
-  if (destination)  { sql += ` AND LOWER(r.destination) LIKE $${idx++}`; params.push(`%${destination.toLowerCase()}%`); }
-  if (vehicle_type) { sql += ` AND r.vehicle_type = $${idx++}`;           params.push(vehicle_type); }
+  // Normaliza removiendo acentos y minúsculas — "Chía" === "chia"
+  const stripAccents = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  // translate() en SQL hace lo mismo: mapea cada carácter acentuado a su versión normal
+  const ACCENTS_FROM = 'áéíóúüñÁÉÍÓÚÜÑ';
+  const ACCENTS_TO   = 'aeiouunAEIOUUN';
+
+  if (origin) {
+    sql += ` AND LOWER(translate(r.origin, $${idx}, $${idx+1})) LIKE $${idx+2}`;
+    params.push(ACCENTS_FROM, ACCENTS_TO, `%${stripAccents(origin)}%`);
+    idx += 3;
+  }
+  if (destination) {
+    sql += ` AND LOWER(translate(r.destination, $${idx}, $${idx+1})) LIKE $${idx+2}`;
+    params.push(ACCENTS_FROM, ACCENTS_TO, `%${stripAccents(destination)}%`);
+    idx += 3;
+  }
+  if (vehicle_type) {
+    sql += ` AND r.vehicle_type = $${idx++}`;
+    params.push(vehicle_type);
+  }
 
   try {
     if (date) {
