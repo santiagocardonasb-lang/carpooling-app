@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, LockSimple, User, Phone, Envelope, ArrowLeft, Check, WarningCircle, Car, Users } from '@phosphor-icons/react';
+import { Camera, LockSimple, User, Phone, Envelope, ArrowLeft, Check, WarningCircle, Car, Users, Star } from '@phosphor-icons/react';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
+import { parseDate } from '../utils/date';
 
 interface ProfileData {
   id: number;
@@ -11,6 +12,19 @@ interface ProfileData {
   phone?: string;
   avatar?: string;
   created_at: string;
+}
+
+interface Rating {
+  rating: number;
+  comment: string | null;
+  created_at: string;
+  rater_name: string;
+  type: 'passenger_to_driver' | 'driver_to_passenger';
+}
+
+interface RatingStats {
+  avg: number;
+  count: number;
 }
 
 export default function Profile() {
@@ -32,6 +46,10 @@ export default function Profile() {
   const [avatarLoading, setAvatarLoading] = useState(false);
   const [fetchError, setFetchError] = useState('');
 
+  const [ratingStats, setRatingStats] = useState<RatingStats | null>(null);
+  const [ratings, setRatings] = useState<Rating[]>([]);
+  const [showAllRatings, setShowAllRatings] = useState(false);
+
   useEffect(() => {
     api.get('/profile')
       .then(({ data }) => {
@@ -39,6 +57,16 @@ export default function Profile() {
         setEditName(data.name);
         setEditPhone(data.phone || '');
         updateUser({ role: data.role });
+        // Cargar calificaciones recibidas (en paralelo, no bloquea el perfil)
+        Promise.all([
+          api.get(`/ratings/user/${data.id}`),
+          api.get(`/ratings/user/${data.id}/list`),
+        ]).then(([statsRes, listRes]) => {
+          setRatingStats(statsRes.data);
+          setRatings(listRes.data);
+        }).catch(() => {
+          // No bloquear el perfil si fallan las calificaciones
+        });
       })
       .catch((err) => {
         const status = err?.response?.status;
@@ -243,6 +271,96 @@ export default function Profile() {
           >
             {saving ? 'Guardando...' : 'Guardar cambios'}
           </button>
+        </section>
+
+        {/* Calificaciones recibidas */}
+        <section className="mb-6">
+          <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-3">Calificaciones</h3>
+
+          {ratingStats === null ? (
+            <div className="bg-zinc-900 rounded-2xl p-5 text-center">
+              <div className="w-5 h-5 border-2 border-zinc-700 border-t-white rounded-full animate-spin mx-auto" />
+            </div>
+          ) : ratingStats.count === 0 ? (
+            <div className="bg-zinc-900 rounded-2xl p-5 text-center">
+              <Star size={28} weight="duotone" className="text-zinc-700 mx-auto mb-2" />
+              <p className="text-zinc-500 text-sm font-medium">Sin calificaciones aún</p>
+              <p className="text-zinc-700 text-xs mt-1">Completa viajes para recibir calificaciones</p>
+            </div>
+          ) : (
+            <>
+              {/* Resumen: promedio + total */}
+              <div className="bg-zinc-900 rounded-2xl p-5 mb-3 flex items-center justify-between">
+                <div>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-3xl font-black text-white tabular-nums">
+                      {Number(ratingStats.avg ?? 0).toFixed(1)}
+                    </span>
+                    <span className="text-zinc-500 text-sm">/ 5</span>
+                  </div>
+                  <p className="text-zinc-500 text-xs mt-1">
+                    {ratingStats.count} calificación{ratingStats.count !== 1 ? 'es' : ''}
+                  </p>
+                </div>
+                <div className="flex items-center gap-0.5">
+                  {[1,2,3,4,5].map(n => (
+                    <Star
+                      key={n}
+                      size={18}
+                      weight={n <= Math.round(ratingStats.avg) ? 'fill' : 'duotone'}
+                      className={n <= Math.round(ratingStats.avg) ? 'text-yellow-400' : 'text-zinc-700'}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Lista de calificaciones */}
+              <div className="space-y-2">
+                {(showAllRatings ? ratings : ratings.slice(0, 3)).map((r, i) => (
+                  <div key={i} className="bg-zinc-900 rounded-2xl p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                          <span className="text-white text-xs font-bold">
+                            {r.rater_name?.[0]?.toUpperCase() || '?'}
+                          </span>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-white text-sm font-medium truncate">{r.rater_name}</p>
+                          <p className="text-zinc-700 text-[10px]">
+                            {r.type === 'passenger_to_driver' ? 'Pasajero' : 'Conductor'} ·{' '}
+                            {parseDate(r.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-0.5 flex-shrink-0">
+                        {[1,2,3,4,5].map(n => (
+                          <Star
+                            key={n}
+                            size={11}
+                            weight={n <= r.rating ? 'fill' : 'duotone'}
+                            className={n <= r.rating ? 'text-yellow-400' : 'text-zinc-700'}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    {r.comment && (
+                      <p className="text-zinc-400 text-xs leading-relaxed">"{r.comment}"</p>
+                    )}
+                  </div>
+                ))}
+
+                {ratings.length > 3 && (
+                  <button
+                    onClick={() => setShowAllRatings(v => !v)}
+                    className="w-full text-zinc-500 hover:text-white text-xs py-2 transition-colors"
+                  >
+                    {showAllRatings ? 'Ver menos' : `Ver todas (${ratings.length})`}
+                  </button>
+                )}
+              </div>
+            </>
+          )}
         </section>
 
         {/* Password section */}

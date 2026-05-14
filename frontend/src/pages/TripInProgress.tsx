@@ -194,7 +194,7 @@ export default function TripInProgress() {
               <div className="absolute right-0 top-10 w-52 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden py-1 z-50">
                 <Link to="/profile" onClick={() => setDropdownOpen(false)}
                   className="flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-zinc-800 transition-colors">
-                  <User size={15} weight="duotone" className="text-zinc-400" /> Ajustar perfil
+                  <User size={15} weight="duotone" className="text-zinc-400" /> Perfil
                 </Link>
                 <Link to="/notifications" onClick={() => setDropdownOpen(false)}
                   className="flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-zinc-800 transition-colors">

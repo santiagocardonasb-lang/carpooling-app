@@ -111,7 +111,7 @@ export default function Navbar() {
                     className="flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-zinc-800 transition-colors"
                   >
                     <User size={15} weight="duotone" className="text-zinc-400 flex-shrink-0" />
-                    Ajustar perfil
+                    Perfil
                   </Link>
 
                   {isDriver && (
