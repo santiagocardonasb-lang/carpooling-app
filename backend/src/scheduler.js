@@ -26,21 +26,18 @@ async function autoCompleteStaleTrips() {
   if (stale.rows.length) console.log(`[scheduler] auto-completados ${stale.rows.length} viajes en curso >6h`);
 }
 
-// 2) Recordatorio 15 min antes de la hora prevista (solo viajes one-time de hoy)
+// 2) Recordatorio 15 min antes de la hora prevista (solo viajes one-time)
+//    Comparación timezone-aware en SQL para evitar offsets entre UTC y Bogotá.
 async function sendDepartureReminders() {
-  const now   = new Date();
-  const today = now.toISOString().split('T')[0];
-
   const ridesRes = await query(`
     SELECT * FROM rides
-    WHERE status='active' AND is_recurring=0 AND date=$1 AND reminder_sent=0
-  `, [today]);
+    WHERE status='active' AND is_recurring=0 AND reminder_sent=0
+      AND ((date::text || ' ' || time)::timestamp AT TIME ZONE 'America/Bogota')
+          BETWEEN NOW() + INTERVAL '13 minutes' AND NOW() + INTERVAL '17 minutes'
+  `);
 
   for (const ride of ridesRes.rows) {
     if (!ride.time) continue;
-    const depart      = new Date(`${today}T${ride.time}:00`);
-    const minutesUntil = (depart.getTime() - now.getTime()) / 60_000;
-    if (minutesUntil < 13 || minutesUntil > 17) continue;
 
     const pbRes = await query(
       "SELECT id, passenger_id FROM bookings WHERE ride_id=$1 AND status='confirmed'",
@@ -63,19 +60,16 @@ async function sendDepartureReminders() {
 }
 
 // 3) Expirar viajes one-time cuya fecha+hora pasó hace más de 1 hora
+//    Usamos comparación timezone-aware: las fechas/horas se guardan en hora
+//    local de Colombia (America/Bogota, UTC-5) pero NOW() es UTC en Render.
 async function expirePastRides() {
-  // Construir cutoff como strings de fecha y hora local
-  const now      = new Date();
-  const oneHAgo  = new Date(now.getTime() - 60 * 60_000);
-  const cutDate  = `${oneHAgo.getFullYear()}-${String(oneHAgo.getMonth()+1).padStart(2,'0')}-${String(oneHAgo.getDate()).padStart(2,'0')}`;
-  const cutTime  = `${String(oneHAgo.getHours()).padStart(2,'0')}:${String(oneHAgo.getMinutes()).padStart(2,'0')}`;
-
   const expiredRes = await query(`
     SELECT id, origin, destination, driver_id
     FROM rides
     WHERE status='active' AND is_recurring=0
-      AND (date < $1 OR (date = $1 AND time < $2))
-  `, [cutDate, cutTime]);
+      AND ((date::text || ' ' || time)::timestamp AT TIME ZONE 'America/Bogota')
+          < NOW() - INTERVAL '1 hour'
+  `);
 
   for (const ride of expiredRes.rows) {
     const activeRes = await query(
