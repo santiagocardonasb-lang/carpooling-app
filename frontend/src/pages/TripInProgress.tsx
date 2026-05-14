@@ -160,10 +160,10 @@ export default function TripInProgress() {
   const confirmed = data.booking.status === 'confirmed';
 
   const RatingDisplay = ({ rating, count }: { rating: number; count: number }) => (
-    count > 0 ? (
+    Number(count) > 0 ? (
       <div className="flex items-center gap-1">
         <Star size={12} weight="fill" className="text-yellow-400" />
-        <span className="text-yellow-400 text-xs font-semibold">{rating.toFixed(1)}</span>
+        <span className="text-yellow-400 text-xs font-semibold">{Number(rating ?? 0).toFixed(1)}</span>
         <span className="text-zinc-600 text-xs">({count})</span>
       </div>
     ) : (

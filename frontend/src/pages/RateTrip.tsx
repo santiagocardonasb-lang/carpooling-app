@@ -91,10 +91,10 @@ export default function RateTrip() {
             )}
           </div>
           <h1 className="text-white text-xl font-bold">{otherParty.name}</h1>
-          {otherParty.rating_count > 0 ? (
+          {Number(otherParty.rating_count) > 0 ? (
             <div className="flex items-center gap-1 mt-1">
               <Star size={14} weight="fill" className="text-yellow-400" />
-              <span className="text-yellow-400 text-sm font-semibold">{otherParty.rating.toFixed(1)}</span>
+              <span className="text-yellow-400 text-sm font-semibold">{Number(otherParty.rating ?? 0).toFixed(1)}</span>
               <span className="text-zinc-600 text-sm">({otherParty.rating_count})</span>
             </div>
           ) : (

@@ -154,10 +154,10 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
             {ride.driver_name && (
               <p className="text-zinc-500 text-xs mt-0.5 flex items-center gap-1.5">
                 <span>{ride.driver_name}</span>
-                {(ride.driver_rating_count ?? 0) > 0 && (
+                {Number(ride.driver_rating_count ?? 0) > 0 && (
                   <span className="flex items-center gap-0.5 text-yellow-400">
                     <Star size={10} weight="fill" className="text-yellow-400" />
-                    <span>{ride.driver_rating?.toFixed(1)}</span>
+                    <span>{Number(ride.driver_rating ?? 0).toFixed(1)}</span>
                     <span className="text-zinc-700">({ride.driver_rating_count})</span>
                   </span>
                 )}

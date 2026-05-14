@@ -13,10 +13,10 @@ router.get('/', async (req, res) => {
            u.name as driver_name, u.phone as driver_phone,
            u.car_brand, u.car_color, u.car_plate,
            COALESCE(
-             (SELECT ROUND(AVG(rt.rating)::numeric, 1)
+             (SELECT ROUND(AVG(rt.rating)::numeric, 1)::float
               FROM ratings rt WHERE rt.ratee_id = u.id), 0
            ) as driver_rating,
-           (SELECT COUNT(*) FROM ratings rt WHERE rt.ratee_id = u.id) as driver_rating_count
+           (SELECT COUNT(*)::int FROM ratings rt WHERE rt.ratee_id = u.id) as driver_rating_count
     FROM rides r
     JOIN users u ON r.driver_id = u.id
     WHERE r.status = 'active' AND r.seats_available > 0
