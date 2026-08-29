@@ -16,3 +16,9 @@ services:
         sync: false   # Se configura manualmente en el panel de Render
       - key: CORS_ORIGIN
         sync: false   # Se pone la URL de Vercel una vez desplegado el frontend
+      - key: BREVO_API_KEY
+        sync: false   # Clave de API de Brevo, para el correo de recuperación
+      - key: MAIL_FROM
+        sync: false   # Remitente verificado en Brevo
+      - key: MAIL_FROM_NAME
+        value: Carpool

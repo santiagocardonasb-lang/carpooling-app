@@ -10,6 +10,7 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
 import SearchRides from './pages/SearchRides';
 import CreateRide from './pages/CreateRide';
 import MyRides from './pages/MyRides';
@@ -189,7 +190,7 @@ function AppRoutes() {
   // Pantallas focalizadas: sin Navbar ni BottomNav
   const focusedRoute = /^\/(trip|rate|chat)\//.test(location.pathname);
   // Rutas sin autenticación: sin BottomNav
-  const authRoute = /^\/(login|register)/.test(location.pathname);
+  const authRoute = /^\/(login|register|forgot-password)/.test(location.pathname);
   const showBottomNav = isAuthenticated && !focusedRoute && !authRoute;
 
   return (
@@ -199,6 +200,7 @@ function AppRoutes() {
         <Route path="/" element={<RootRoute />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/search" element={<SearchRides />} />
         <Route path="/create-ride" element={<DriverRoute><CreateRide /></DriverRoute>} />
         <Route path="/edit-ride/:id" element={<DriverRoute><EditRide /></DriverRoute>} />

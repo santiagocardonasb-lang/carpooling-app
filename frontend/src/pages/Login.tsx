@@ -51,15 +51,20 @@ export default function Login() {
             autoComplete="current-password"
           />
 
-          <label className="flex items-center gap-2 px-1 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={remember}
-              onChange={(e) => setRemember(e.target.checked)}
-              className="w-4 h-4 rounded accent-white"
-            />
-            <span className="text-zinc-500 text-xs">Mantener sesión iniciada en este dispositivo</span>
-          </label>
+          <div className="flex items-center justify-between gap-3 px-1">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+                className="w-4 h-4 rounded accent-white flex-shrink-0"
+              />
+              <span className="text-zinc-500 text-xs">Mantener sesión iniciada</span>
+            </label>
+            <Link to="/forgot-password" className="text-zinc-400 hover:text-white text-xs transition-colors flex-shrink-0">
+              ¿Olvidaste tu contraseña?
+            </Link>
+          </div>
 
           {error && (
             <p className="text-red-400 text-xs text-center bg-red-900/20 py-2 rounded-lg">{error}</p>
