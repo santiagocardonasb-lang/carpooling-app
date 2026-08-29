@@ -4,16 +4,13 @@ import { ArrowLeft, WarningCircle, EnvelopeSimple, CheckCircle, Check, X } from 
 import api from '../api';
 import PasswordInput from '../components/PasswordInput';
 import { checkPassword, passwordError, PASSWORD_MIN } from '../utils/password';
+import { apiError } from '../utils/apiError';
 
 const DOMAIN = 'ucundinamarca.edu.co';
 const CODE_LEN = 4;
 const RESEND_SECONDS = 45;
 
 type Step = 'email' | 'code' | 'password' | 'done';
-
-function errMsg(e: unknown, fallback: string) {
-  return (e as { response?: { data?: { error?: string } } })?.response?.data?.error || fallback;
-}
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
@@ -54,7 +51,7 @@ export default function ForgotPassword() {
       setStep('code');
       setCooldown(RESEND_SECONDS);
     } catch (err) {
-      setError(errMsg(err, 'No pudimos enviar el código. Intenta de nuevo.'));
+      setError(apiError(err, 'No pudimos enviar el código. Intenta de nuevo.'));
     } finally {
       setLoading(false);
     }
@@ -69,7 +66,7 @@ export default function ForgotPassword() {
       setToken(data.token);
       setStep('password');
     } catch (err) {
-      setError(errMsg(err, 'Código incorrecto'));
+      setError(apiError(err, 'Código incorrecto'));
       setDigits(Array(CODE_LEN).fill(''));
       boxRefs.current[0]?.focus();
     } finally {
@@ -115,7 +112,7 @@ export default function ForgotPassword() {
       await api.post('/auth/reset-password', { token, new_password: password });
       setStep('done');
     } catch (err) {
-      setError(errMsg(err, 'No pudimos cambiar la contraseña'));
+      setError(apiError(err, 'No pudimos cambiar la contraseña'));
     } finally {
       setLoading(false);
     }

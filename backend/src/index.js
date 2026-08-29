@@ -13,15 +13,27 @@ const allowedOrigins = (process.env.CORS_ORIGIN || '')
 
 const LOCAL_IP_RE = /^https?:\/\/(localhost|127\.0\.0\.1|192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})(:\d+)?$/;
 
+// Vercel da una URL distinta a cada despliegue además de la de producción:
+//   carpooling-app-blond.vercel.app                                  (producción)
+//   carpooling-app-git-<rama>-<cuenta>-projects.vercel.app           (preview de rama)
+//   carpooling-app-<hash>-<cuenta>-projects.vercel.app               (preview de commit)
+// Sin esto, probar desde una URL de preview falla con un error de CORS que en
+// el frontend se ve como un "Error al registrarse" genérico.
+const VERCEL_PREVIEW_RE = /^https:\/\/carpooling-app(-[a-z0-9-]+)?\.vercel\.app$/;
+
 app.use(cors({
   origin: (origin, cb) => {
     // Sin origen (apps móviles nativas, curl, Postman) → permitir
     if (!origin) return cb(null, true);
     // Lista explícita (producción)
     if (allowedOrigins.includes(origin)) return cb(null, true);
+    // Cualquier despliegue de este proyecto en Vercel
+    if (VERCEL_PREVIEW_RE.test(origin)) return cb(null, true);
     // Red local (desarrollo desde celular / otra PC de la misma red)
     if (LOCAL_IP_RE.test(origin)) return cb(null, true);
-    cb(new Error('Origen no permitido'));
+    // Denegar sin lanzar: lanzar aquí devuelve un 500 que confunde el
+    // diagnóstico. Sin cabecera CORS, el navegador bloquea igual.
+    cb(null, false);
   },
   credentials: true,
 }));

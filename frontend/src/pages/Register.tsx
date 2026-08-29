@@ -5,6 +5,7 @@ import api from '../api';
 import { useAuth } from '../context/AuthContext';
 import PasswordInput from '../components/PasswordInput';
 import { checkPassword, passwordError, PASSWORD_MIN } from '../utils/password';
+import { apiError } from '../utils/apiError';
 
 const DOMAIN = 'ucundinamarca.edu.co';
 
@@ -58,7 +59,7 @@ export default function Register() {
       // Driver → home (publish CTA); Passenger → search
       navigate('/');
     } catch (err: unknown) {
-      setError((err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Error al registrarse');
+      setError(apiError(err, 'Error al registrarse'));
     } finally {
       setLoading(false);
     }
