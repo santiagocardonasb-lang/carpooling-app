@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, LockSimple, User, Phone, Envelope, ArrowLeft, Check, WarningCircle, Car, Users, Star } from '@phosphor-icons/react';
+import { Camera, LockSimple, User, Phone, Envelope, ArrowLeft, Check, WarningCircle, Car, Users, Star, Eye, EyeSlash, X } from '@phosphor-icons/react';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
 import { parseDate } from '../utils/date';
+import { checkPassword, passwordError, PASSWORD_MIN } from '../utils/password';
 
 interface ProfileData {
   id: number;
@@ -42,6 +43,7 @@ export default function Profile() {
   const [pwForm, setPwForm] = useState({ current: '', next: '', confirm: '' });
   const [pwMsg, setPwMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
   const [pwLoading, setPwLoading] = useState(false);
+  const [pwVisible, setPwVisible] = useState({ current: false, next: false, confirm: false });
 
   const [avatarLoading, setAvatarLoading] = useState(false);
   const [fetchError, setFetchError] = useState('');
@@ -95,8 +97,9 @@ export default function Profile() {
   };
 
   const changePassword = async () => {
-    if (pwForm.next !== pwForm.confirm) {
-      setPwMsg({ type: 'err', text: 'Las contraseñas nuevas no coinciden' });
+    const pwErr = passwordError(pwForm.next, pwForm.confirm);
+    if (pwErr) {
+      setPwMsg({ type: 'err', text: pwErr });
       return;
     }
     setPwLoading(true);
@@ -185,6 +188,9 @@ export default function Profile() {
   }
 
   const initials = profile.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+
+  const newPwCheck  = checkPassword(pwForm.next);
+  const canChangePw = !!pwForm.current && newPwCheck.valid && pwForm.next === pwForm.confirm;
 
   return (
     <div className="min-h-screen bg-black pt-20 px-6 pb-12">
@@ -367,23 +373,58 @@ export default function Profile() {
         <section className="mb-8">
           <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-3">Cambiar contraseña</h3>
           <div className="bg-zinc-900 rounded-2xl overflow-hidden space-y-0">
-            {[
-              { key: 'current', placeholder: 'Contraseña actual' },
-              { key: 'next', placeholder: 'Nueva contraseña' },
-              { key: 'confirm', placeholder: 'Confirmar nueva contraseña' },
-            ].map(({ key, placeholder }, i) => (
+            {([
+              { key: 'current', placeholder: 'Contraseña actual',           autoComplete: 'current-password' },
+              { key: 'next',    placeholder: 'Nueva contraseña',            autoComplete: 'new-password' },
+              { key: 'confirm', placeholder: 'Confirmar nueva contraseña',  autoComplete: 'new-password' },
+            ] as const).map(({ key, placeholder, autoComplete }, i) => (
               <div key={key} className={`flex items-center gap-3 px-4 py-3.5 ${i < 2 ? 'border-b border-zinc-800' : ''}`}>
                 <LockSimple size={15} weight="duotone" className="text-zinc-500 flex-shrink-0" />
                 <input
-                  type="password"
-                  value={pwForm[key as keyof typeof pwForm]}
+                  type={pwVisible[key] ? 'text' : 'password'}
+                  value={pwForm[key]}
                   onChange={(e) => setPwForm({ ...pwForm, [key]: e.target.value })}
                   placeholder={placeholder}
-                  className="flex-1 bg-transparent text-white text-sm focus:outline-none placeholder-zinc-600"
+                  autoComplete={autoComplete}
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  className="flex-1 bg-transparent text-white text-sm focus:outline-none placeholder-zinc-600 min-w-0"
                 />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  onClick={() => setPwVisible(v => ({ ...v, [key]: !v[key] }))}
+                  aria-label={pwVisible[key] ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  className="text-zinc-500 hover:text-white transition-colors flex-shrink-0"
+                >
+                  {pwVisible[key]
+                    ? <EyeSlash size={16} weight="duotone" />
+                    : <Eye size={16} weight="duotone" />}
+                </button>
               </div>
             ))}
           </div>
+
+          {/* Requisitos en vivo de la nueva contraseña */}
+          {pwForm.next.length > 0 && (
+            <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 px-1">
+              <span className={`text-xs flex items-center gap-1.5 ${newPwCheck.minLength ? 'text-green-400' : 'text-zinc-600'}`}>
+                {newPwCheck.minLength ? <Check size={11} weight="bold" /> : <X size={11} weight="bold" />}
+                Mínimo {PASSWORD_MIN} caracteres
+              </span>
+              <span className={`text-xs flex items-center gap-1.5 ${newPwCheck.hasNumber ? 'text-green-400' : 'text-zinc-600'}`}>
+                {newPwCheck.hasNumber ? <Check size={11} weight="bold" /> : <X size={11} weight="bold" />}
+                Al menos un número
+              </span>
+              {pwForm.confirm.length > 0 && (
+                <span className={`text-xs flex items-center gap-1.5 ${pwForm.next === pwForm.confirm ? 'text-green-400' : 'text-red-400'}`}>
+                  {pwForm.next === pwForm.confirm ? <Check size={11} weight="bold" /> : <X size={11} weight="bold" />}
+                  Coinciden
+                </span>
+              )}
+            </div>
+          )}
 
           {pwMsg && (
             <div className={`flex items-center gap-2 mt-3 px-3 py-2 rounded-xl text-xs ${
@@ -396,7 +437,7 @@ export default function Profile() {
 
           <button
             onClick={changePassword}
-            disabled={pwLoading}
+            disabled={pwLoading || !canChangePw}
             className="w-full mt-3 bg-zinc-800 hover:bg-zinc-700 text-white font-semibold py-3 rounded-xl disabled:opacity-50 transition-colors text-sm"
           >
             {pwLoading ? 'Cambiando...' : 'Cambiar contraseña'}

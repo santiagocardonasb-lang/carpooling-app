@@ -1,4 +1,11 @@
-const { Pool } = require('pg');
+const { Pool, types } = require('pg');
+
+// pg devuelve NUMERIC y BIGINT como strings para no perder precisión.
+// En esta app los valores son montos y conteos pequeños, así que los
+// convertimos a number: evita "$30000" en vez de "$30.000" y errores
+// tipo "x.toFixed is not a function" en el frontend.
+types.setTypeParser(1700, (v) => (v === null ? null : parseFloat(v))); // NUMERIC / DECIMAL
+types.setTypeParser(20,   (v) => (v === null ? null : parseInt(v, 10))); // INT8 / BIGINT (COUNT)
 
 if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL no está definida. Agrégala al archivo .env');

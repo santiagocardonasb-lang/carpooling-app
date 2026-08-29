@@ -224,7 +224,7 @@ export default function MyRides() {
                   {/* Acciones */}
                   <div className="flex items-center justify-between mt-3 flex-wrap gap-2">
                     <p className="text-white font-bold text-sm">
-                      ${b.price.toLocaleString()} · {b.seats} asiento{b.seats !== 1 ? 's' : ''}
+                      ${Number(b.price).toLocaleString()} · {b.seats} asiento{b.seats !== 1 ? 's' : ''}
                     </p>
                     <div className="flex items-center gap-3 flex-wrap">
                       {['confirmed', 'in_progress'].includes(b.status) && (

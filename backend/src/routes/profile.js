@@ -70,8 +70,10 @@ router.put('/password', auth, async (req, res) => {
   const { current_password, new_password } = req.body;
   if (!current_password || !new_password)
     return res.status(400).json({ error: 'Contraseña actual y nueva son requeridas' });
-  if (new_password.length < 6)
-    return res.status(400).json({ error: 'La nueva contraseña debe tener al menos 6 caracteres' });
+  if (typeof new_password !== 'string' || new_password.length < 6 || new_password.length > 200)
+    return res.status(400).json({ error: 'La nueva contraseña debe tener entre 6 y 200 caracteres' });
+  if (!/\d/.test(new_password))
+    return res.status(400).json({ error: 'La nueva contraseña debe incluir al menos un número' });
 
   try {
     const result = await query('SELECT * FROM users WHERE id=$1', [req.user.id]);

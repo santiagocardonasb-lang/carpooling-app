@@ -2,6 +2,7 @@ import { useState, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
+import PasswordInput from '../components/PasswordInput';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -42,13 +43,12 @@ export default function Login() {
             placeholder="Email"
             className="w-full bg-zinc-900 text-white placeholder-zinc-500 px-4 py-4 rounded-xl text-sm focus:ring-2 focus:ring-white focus:ring-offset-0 transition"
           />
-          <input
-            type="password"
+          <PasswordInput
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={setPassword}
             required
             placeholder="Contraseña"
-            className="w-full bg-zinc-900 text-white placeholder-zinc-500 px-4 py-4 rounded-xl text-sm focus:ring-2 focus:ring-white transition"
+            autoComplete="current-password"
           />
 
           <label className="flex items-center gap-2 px-1 cursor-pointer select-none">

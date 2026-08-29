@@ -17,6 +17,8 @@ router.post('/register', async (req, res) => {
     return res.status(400).json({ error: 'Email inválido' });
   if (typeof password !== 'string' || password.length < 6 || password.length > 200)
     return res.status(400).json({ error: 'La contraseña debe tener entre 6 y 200 caracteres' });
+  if (!/\d/.test(password))
+    return res.status(400).json({ error: 'La contraseña debe incluir al menos un número' });
   if (phone && (typeof phone !== 'string' || !/^[+\d\s-]{7,20}$/.test(phone)))
     return res.status(400).json({ error: 'Teléfono inválido' });
   if (!email.toLowerCase().endsWith(ALLOWED_DOMAIN))

@@ -1,15 +1,26 @@
 import { useState, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { WarningCircle, Car, Users } from '@phosphor-icons/react';
+import { WarningCircle, Car, Users, Check, X } from '@phosphor-icons/react';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
+import PasswordInput from '../components/PasswordInput';
+import { checkPassword, passwordError, PASSWORD_MIN } from '../utils/password';
 
 const DOMAIN = 'ucundinamarca.edu.co';
+
+function Requirement({ ok, label }: { ok: boolean; label: string }) {
+  return (
+    <span className={`text-xs flex items-center gap-1.5 ${ok ? 'text-green-400' : 'text-zinc-600'}`}>
+      {ok ? <Check size={11} weight="bold" /> : <X size={11} weight="bold" />}
+      {label}
+    </span>
+  );
+}
 
 export default function Register() {
   const [step, setStep] = useState<'role' | 'info'>('role');
   const [role, setRole] = useState<'driver' | 'passenger' | null>(null);
-  const [form, setForm] = useState({ name: '', emailUser: '', password: '', phone: '' });
+  const [form, setForm] = useState({ name: '', emailUser: '', password: '', confirm: '', phone: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
@@ -18,12 +29,21 @@ export default function Register() {
   // El correo completo se arma uniendo la parte local + dominio
   const fullEmail = form.emailUser.trim() ? `${form.emailUser.trim()}@${DOMAIN}` : '';
 
+  const pwCheck         = checkPassword(form.password);
+  const pwTouched       = form.password.length > 0;
+  const confirmMismatch = form.confirm.length > 0 && form.password !== form.confirm;
+  const canSubmit       = !!form.emailUser.trim() && !!form.name.trim()
+                          && pwCheck.valid && form.password === form.confirm;
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!form.emailUser.trim()) {
       setError('Ingresa tu correo institucional');
       return;
     }
+    const pwErr = passwordError(form.password, form.confirm);
+    if (pwErr) { setError(pwErr); return; }
+
     setError('');
     setLoading(true);
     try {
@@ -157,14 +177,38 @@ export default function Register() {
               @{DOMAIN}
             </div>
           </div>
-          <input
-            type="password"
+
+          <PasswordInput
             value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            onChange={(v) => setForm({ ...form, password: v })}
             required
             placeholder="Contraseña"
-            className="w-full bg-zinc-900 text-white placeholder-zinc-500 px-4 py-4 rounded-xl text-sm focus:ring-2 focus:ring-white transition"
+            autoComplete="new-password"
+            error={pwTouched && !pwCheck.valid}
           />
+
+          {/* Requisitos en vivo */}
+          {pwTouched && (
+            <div className="flex flex-wrap gap-x-4 gap-y-1 px-1">
+              <Requirement ok={pwCheck.minLength} label={`Mínimo ${PASSWORD_MIN} caracteres`} />
+              <Requirement ok={pwCheck.hasNumber} label="Al menos un número" />
+            </div>
+          )}
+
+          <PasswordInput
+            value={form.confirm}
+            onChange={(v) => setForm({ ...form, confirm: v })}
+            required
+            placeholder="Repetir contraseña"
+            autoComplete="new-password"
+            error={confirmMismatch}
+          />
+          {confirmMismatch && (
+            <p className="text-red-400 text-xs px-1 flex items-center gap-1.5">
+              <X size={11} weight="bold" /> Las contraseñas no coinciden
+            </p>
+          )}
+
           <input
             type="tel"
             value={form.phone}
@@ -181,7 +225,7 @@ export default function Register() {
 
           <button
             type="submit"
-            disabled={loading || !form.emailUser.trim()}
+            disabled={loading || !canSubmit}
             className="w-full bg-white text-black font-semibold py-4 rounded-xl hover:bg-zinc-200 disabled:opacity-50 transition-colors text-sm mt-2"
           >
             {loading ? 'Creando cuenta...' : 'Crear cuenta'}

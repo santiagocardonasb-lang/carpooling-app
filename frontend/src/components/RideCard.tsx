@@ -171,7 +171,7 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
           </div>
         </div>
         <div className="text-right flex-shrink-0 ml-3">
-          <p className="text-white font-bold text-lg">${ride.price.toLocaleString()}</p>
+          <p className="text-white font-bold text-lg">${Number(ride.price).toLocaleString()}</p>
           <p className="text-zinc-600 text-xs">por persona</p>
         </div>
       </div>
@@ -274,7 +274,7 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
                   {/* Summary */}
                   {bookingDays.length > 0 && (
                     <p className="text-zinc-400 text-xs bg-zinc-800 rounded-xl px-3 py-2">
-                      Reservando {bookingDays.length} día{bookingDays.length !== 1 ? 's' : ''} · ${(ride.price * bookingDays.length).toLocaleString()} total estimado
+                      Reservando {bookingDays.length} día{bookingDays.length !== 1 ? 's' : ''} · ${(Number(ride.price) * bookingDays.length).toLocaleString()} total estimado
                     </p>
                   )}
 

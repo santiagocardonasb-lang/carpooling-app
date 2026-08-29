@@ -326,7 +326,7 @@ export default function TripInProgress() {
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-zinc-500">Precio total</span>
-            <span className="text-white font-bold">${(data.ride.price * data.booking.seats).toLocaleString()}</span>
+            <span className="text-white font-bold">${(Number(data.ride.price) * data.booking.seats).toLocaleString()}</span>
           </div>
         </div>
 
