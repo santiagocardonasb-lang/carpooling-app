@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Car, Palette, CreditCard, Check, WarningCircle } from '@phosphor-icons/react';
 import api from '../api';
 import AutocompleteInput from '../components/AutocompleteInput';
+import { useToast } from '../context/ToastContext';
+import { apiError } from '../utils/apiError';
 
 const PLATE_REGEX = /^[A-Z]{3}[0-9]{3}$|^[A-Z]{3}[0-9]{2}[A-Z]$/;
 
@@ -22,6 +24,11 @@ const CAR_COLORS = [
 
 export default function VehicleProfile() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { showToast } = useToast();
+  // Quien nos mandó acá lo deja en el state del router (ver CreateRide).
+  // Al guardar volvemos ahí para no dejar al conductor a mitad de camino.
+  const returnTo = (location.state as { from?: string } | null)?.from || null;
   const [carBrand, setCarBrand] = useState('');
   const [carColor, setCarColor] = useState('');
   const [carPlate, setCarPlate] = useState('');
@@ -59,9 +66,15 @@ export default function VehicleProfile() {
         car_color: carColor,
         car_plate: carPlate,
       });
+      // El toast sobrevive al cambio de pantalla; el mensaje en línea no.
+      showToast('Información del vehículo actualizada');
+      if (returnTo) {
+        navigate(returnTo, { replace: true });
+        return;
+      }
       setMsg({ type: 'ok', text: 'Información del vehículo actualizada' });
     } catch (err: unknown) {
-      setMsg({ type: 'err', text: (err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Error al guardar' });
+      setMsg({ type: 'err', text: apiError(err, 'Error al guardar') });
     } finally {
       setSaving(false);
     }

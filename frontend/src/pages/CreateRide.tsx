@@ -115,6 +115,7 @@ export default function CreateRide() {
           </p>
           <Link
             to="/vehicle"
+            state={{ from: '/create-ride' }}
             className="inline-block bg-white text-black font-semibold px-6 py-3 rounded-xl hover:bg-zinc-200 transition-colors text-sm"
           >
             Agregar información del vehículo →

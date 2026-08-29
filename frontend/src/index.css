@@ -91,5 +91,43 @@ html.light .placeholder-zinc-600::placeholder { color: #a1a1aa; }
 /* Inputs con [color-scheme:dark] — quitar para que se vean nativos en claro */
 html.light .\[color-scheme\:dark\] { color-scheme: light; }
 
-/* Mantener el color de los semáforos (rojo/verde/amarillo/azul) tal cual,
-   y el rojo de notificaciones tal cual. No tocar text-red-*, bg-red-500, etc. */
+/* ─────────────────────────────────────────────────────────────
+   SEMÁFOROS EN MODO CLARO
+   Los tonos -400 están pensados para fondo negro. Sobre blanco
+   quedan casi ilegibles: el verde de "guardado" era invisible.
+   Aquí se oscurece el texto y se aclara el fondo, conservando el
+   significado del color.
+   ───────────────────────────────────────────────────────────── */
+
+/* Texto */
+html.light .text-green-400,
+html.light .text-green-500   { color: #15803d; }
+html.light .text-red-300,
+html.light .text-red-400,
+html.light .text-red-500     { color: #b91c1c; }
+html.light .text-yellow-300,
+html.light .text-yellow-400,
+html.light .text-yellow-500  { color: #a16207; }
+
+/* Fondos de aviso: de translúcido oscuro a tinte claro */
+html.light .bg-green-900\/20,
+html.light .bg-green-900\/30,
+html.light .bg-green-900\/40  { background-color: #dcfce7; }
+html.light .bg-red-900\/20,
+html.light .bg-red-900\/30    { background-color: #fee2e2; }
+html.light .bg-yellow-900\/20,
+html.light .bg-yellow-900\/30,
+html.light .bg-yellow-900\/40,
+html.light .bg-yellow-900\/50 { background-color: #fef3c7; }
+
+/* Bordes de esos mismos avisos */
+html.light .border-green-800      { border-color: #86efac; }
+html.light .border-red-800,
+html.light .border-red-900,
+html.light .border-red-800\/50,
+html.light .border-red-900\/50    { border-color: #fca5a5; }
+html.light .border-yellow-800,
+html.light .border-yellow-800\/60 { border-color: #fde047; }
+
+/* La burbuja roja de notificaciones ya contrasta sobre blanco: se deja igual
+   (bg-red-500 con texto blanco), lo mismo que bg-green-50 y bg-red-50. */

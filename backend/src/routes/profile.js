@@ -52,15 +52,41 @@ router.put('/', auth, async (req, res) => {
   }
 });
 
+// Placa colombiana: LLLNNN (carro) o LLLNNL (moto)
+const PLATE_RE = /^[A-Z]{3}[0-9]{3}$|^[A-Z]{3}[0-9]{2}[A-Z]$/;
+
 router.put('/vehicle', auth, async (req, res) => {
   const { car_brand, car_color, car_plate } = req.body;
+
+  // Normalizar igual que el frontend, para que "abc 123" y "ABC123" sean
+  // la misma placa y la comparación de duplicados no se escape por formato.
+  const plate = typeof car_plate === 'string'
+    ? car_plate.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6)
+    : '';
+
+  if (plate && !PLATE_RE.test(plate))
+    return res.status(400).json({ error: 'Formato de placa inválido. Usa LLLNNN (ej. ABC123) o LLLNNL (ej. ABC12D)' });
+
   try {
+    // Una placa pertenece a un solo conductor.
+    if (plate) {
+      const dup = await query(
+        'SELECT id FROM users WHERE car_plate = $1 AND id <> $2',
+        [plate, req.user.id]
+      );
+      if (dup.rows[0])
+        return res.status(409).json({ error: 'Esa placa ya está registrada por otro conductor' });
+    }
+
     const result = await query(
       'UPDATE users SET car_brand=$1, car_color=$2, car_plate=$3 WHERE id=$4 RETURNING id, name, email, phone, avatar, car_brand, car_color, car_plate',
-      [car_brand || null, car_color || null, car_plate || null, req.user.id]
+      [car_brand || null, car_color || null, plate || null, req.user.id]
     );
     res.json(result.rows[0]);
   } catch (err) {
+    // Respaldo del índice único, por si dos conductores guardan a la vez.
+    if (err.code === '23505')
+      return res.status(409).json({ error: 'Esa placa ya está registrada por otro conductor' });
     console.error('vehicle PUT:', err);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
