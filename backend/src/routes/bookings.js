@@ -1,11 +1,13 @@
 const express = require('express');
 const { query, withTransaction } = require('../db');
 const auth = require('../middleware/auth');
+const { paging } = require('../utils/paging');
 
 const router = express.Router();
 
 // Reservas del pasajero autenticado
 router.get('/my', auth, async (req, res) => {
+  const { limit, offset } = paging(req, { def: 100, max: 200 });
   try {
     const result = await query(`
       SELECT b.*, r.origin, r.destination, r.date, r.time, r.price, r.is_recurring, r.days_of_week,
@@ -16,7 +18,8 @@ router.get('/my', auth, async (req, res) => {
       JOIN users u ON r.driver_id = u.id
       WHERE b.passenger_id = $1
       ORDER BY b.created_at DESC
-    `, [req.user.id]);
+      LIMIT $2 OFFSET $3
+    `, [req.user.id, limit, offset]);
     res.json(result.rows);
   } catch (err) {
     console.error('bookings my:', err);

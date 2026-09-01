@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const { query } = require('../db');
 const auth = require('../middleware/auth');
+const { validatePassword, normalizePlate, isValidPlate } = require('../utils/validation');
 
 const router = express.Router();
 
@@ -52,19 +53,14 @@ router.put('/', auth, async (req, res) => {
   }
 });
 
-// Placa colombiana: LLLNNN (carro) o LLLNNL (moto)
-const PLATE_RE = /^[A-Z]{3}[0-9]{3}$|^[A-Z]{3}[0-9]{2}[A-Z]$/;
-
 router.put('/vehicle', auth, async (req, res) => {
   const { car_brand, car_color, car_plate } = req.body;
 
   // Normalizar igual que el frontend, para que "abc 123" y "ABC123" sean
   // la misma placa y la comparación de duplicados no se escape por formato.
-  const plate = typeof car_plate === 'string'
-    ? car_plate.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6)
-    : '';
+  const plate = normalizePlate(car_plate);
 
-  if (plate && !PLATE_RE.test(plate))
+  if (plate && !isValidPlate(plate))
     return res.status(400).json({ error: 'Formato de placa inválido. Usa LLLNNN (ej. ABC123) o LLLNNL (ej. ABC12D)' });
 
   try {
@@ -96,10 +92,8 @@ router.put('/password', auth, async (req, res) => {
   const { current_password, new_password } = req.body;
   if (!current_password || !new_password)
     return res.status(400).json({ error: 'Contraseña actual y nueva son requeridas' });
-  if (typeof new_password !== 'string' || new_password.length < 6 || new_password.length > 200)
-    return res.status(400).json({ error: 'La nueva contraseña debe tener entre 6 y 200 caracteres' });
-  if (!/\d/.test(new_password))
-    return res.status(400).json({ error: 'La nueva contraseña debe incluir al menos un número' });
+  const pwError = validatePassword(new_password);
+  if (pwError) return res.status(400).json({ error: pwError });
 
   try {
     const result = await query('SELECT * FROM users WHERE id=$1', [req.user.id]);

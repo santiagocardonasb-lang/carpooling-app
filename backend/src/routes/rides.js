@@ -1,12 +1,15 @@
 const express = require('express');
 const { query } = require('../db');
 const auth = require('../middleware/auth');
+const { paging } = require('../utils/paging');
+const { stripAccents } = require('../utils/validation');
 
 const router = express.Router();
 
 // Búsqueda pública de viajes
 router.get('/', async (req, res) => {
   const { origin, destination, date, vehicle_type } = req.query;
+  const { limit, offset } = paging(req, { def: 50, max: 100 });
 
   let sql = `
     SELECT r.*,
@@ -24,9 +27,8 @@ router.get('/', async (req, res) => {
   const params = [];
   let idx = 1;
 
-  // Normaliza removiendo acentos y minúsculas — "Chía" === "chia"
-  const stripAccents = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-  // translate() en SQL hace lo mismo: mapea cada carácter acentuado a su versión normal
+  // translate() en SQL hace lo mismo del lado de la base: mapea cada carácter
+  // acentuado a su versión sin tilde antes de comparar.
   const ACCENTS_FROM = 'áéíóúüñÁÉÍÓÚÜÑ';
   const ACCENTS_TO   = 'aeiouunAEIOUUN';
 
@@ -49,19 +51,25 @@ router.get('/', async (req, res) => {
     if (date) {
       const d = new Date(date + 'T12:00:00Z');
       const dayOfWeek = d.getUTCDay();
-      sql += ` AND ((r.is_recurring = 0 AND r.date = $${idx++}) OR r.is_recurring = 1)`;
-      params.push(date);
-      const result = await query(sql + ' ORDER BY r.time ASC', params);
-      const filtered = result.rows.filter(r => {
-        if (!r.is_recurring) return true;
-        if (!r.days_of_week) return false;
-        return r.days_of_week.split(',').map(Number).includes(dayOfWeek);
-      });
-      return res.json(filtered);
+      // El día de un viaje recurrente se filtra en SQL y no en JS: filtrarlo
+      // después del LIMIT devolvería páginas incompletas. days_of_week es
+      // "1,2,3", así que se envuelve en comas para que ",3," no case con
+      // ",13," ni con ",30,".
+      sql += ` AND (
+        (r.is_recurring = 0 AND r.date = $${idx++})
+        OR (r.is_recurring = 1 AND r.days_of_week IS NOT NULL
+            AND ',' || r.days_of_week || ',' LIKE '%,' || $${idx++} || ',%')
+      )`;
+      params.push(date, String(dayOfWeek));
+      const result = await query(
+        sql + ` ORDER BY r.time ASC LIMIT $${idx++} OFFSET $${idx++}`,
+        [...params, limit, offset]
+      );
+      return res.json(result.rows);
     }
 
-    sql += ' ORDER BY r.date ASC, r.time ASC';
-    const result = await query(sql, params);
+    sql += ` ORDER BY r.date ASC, r.time ASC LIMIT $${idx++} OFFSET $${idx++}`;
+    const result = await query(sql, [...params, limit, offset]);
     res.json(result.rows);
   } catch (err) {
     console.error('rides GET:', err);
@@ -71,6 +79,7 @@ router.get('/', async (req, res) => {
 
 // Viajes del conductor autenticado
 router.get('/my', auth, async (req, res) => {
+  const { limit, offset } = paging(req, { def: 100, max: 200 });
   try {
     const result = await query(`
       SELECT r.*,
@@ -79,7 +88,8 @@ router.get('/my', auth, async (req, res) => {
       FROM rides r
       WHERE r.driver_id = $1
       ORDER BY r.created_at DESC
-    `, [req.user.id]);
+      LIMIT $2 OFFSET $3
+    `, [req.user.id, limit, offset]);
     res.json(result.rows);
   } catch (err) {
     console.error('rides my:', err);
@@ -127,6 +137,7 @@ router.get('/:id/requests', auth, async (req, res) => {
       JOIN users u ON b.passenger_id = u.id
       WHERE b.ride_id = $1
       ORDER BY b.created_at ASC
+      LIMIT 200
     `, [req.params.id]);
     res.json(result.rows);
   } catch (err) {

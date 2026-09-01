@@ -4,18 +4,10 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { query } = require('../db');
 const { sendResetCode } = require('../services/email');
+const { validatePassword } = require('../utils/validation');
 
 const router = express.Router();
 const ALLOWED_DOMAIN = '@ucundinamarca.edu.co';
-
-// ── Reglas de contraseña (deben coincidir con frontend/src/utils/password.ts) ──
-function validatePassword(pw) {
-  if (typeof pw !== 'string' || pw.length < 6 || pw.length > 200)
-    return 'La contraseña debe tener entre 6 y 200 caracteres';
-  if (!/\d/.test(pw))
-    return 'La contraseña debe incluir al menos un número';
-  return null;
-}
 
 // ── Parámetros de la recuperación por código ──
 const CODE_TTL_MIN     = 10; // minutos que vive el código
@@ -92,8 +84,6 @@ router.post('/login', async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Paso 1: pedir el código.
-// Siempre responde ok, exista o no el correo, para que nadie pueda usar este
-// endpoint como directorio de quién está registrado.
 router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
   const ok = { ok: true, message: 'Te enviamos un código a tu correo.' };

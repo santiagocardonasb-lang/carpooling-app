@@ -1,6 +1,7 @@
 const express = require('express');
 const { query } = require('../db');
 const auth = require('../middleware/auth');
+const { paging } = require('../utils/paging');
 
 const router = express.Router();
 
@@ -101,6 +102,7 @@ router.get('/conversations', auth, async (req, res) => {
       WHERE (b.passenger_id = $1 OR r.driver_id = $1)
         AND b.status IN ('confirmed', 'in_progress')
       ORDER BY b.created_at DESC
+      LIMIT 100
     `, [userId]);
 
     const conversations = await Promise.all(rowsRes.rows.map(async (r) => {
