@@ -15,6 +15,10 @@ interface ProfileData {
   phone?: string;
   avatar?: string;
   created_at: string;
+  trips_as_driver: number;
+  trips_as_passenger: number;
+  cancellations: number;
+  late_cancellations: number;
 }
 
 interface Rating {
@@ -235,6 +239,38 @@ export default function Profile() {
           <p className="text-zinc-700 text-xs mt-1">
             Miembro desde {new Date(profile.created_at).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
           </p>
+
+          {/* Resumen de actividad. Las cancelaciones tardías se muestran solo
+              a quien es dueño de la cuenta: sirven para corregirse. */}
+          <div className="flex items-center gap-4 mt-4">
+            <div className="text-center">
+              <p className="text-white font-bold tabular-nums">
+                {(profile.trips_as_driver ?? 0) + (profile.trips_as_passenger ?? 0)}
+              </p>
+              <p className="text-zinc-600 text-[10px] uppercase tracking-wider">Viajes</p>
+            </div>
+            <div className="w-px h-8 bg-zinc-800" />
+            <div className="text-center">
+              <p className="text-white font-bold tabular-nums">{ratingStats?.count ?? 0}</p>
+              <p className="text-zinc-600 text-[10px] uppercase tracking-wider">Reseñas</p>
+            </div>
+            <div className="w-px h-8 bg-zinc-800" />
+            <div className="text-center">
+              <p className={`font-bold tabular-nums ${
+                (profile.late_cancellations ?? 0) > 0 ? 'text-yellow-400' : 'text-white'
+              }`}>
+                {profile.cancellations ?? 0}
+              </p>
+              <p className="text-zinc-600 text-[10px] uppercase tracking-wider">Cancelaciones</p>
+            </div>
+          </div>
+
+          {(profile.late_cancellations ?? 0) > 0 && (
+            <p className="text-yellow-400 text-[11px] mt-3 text-center leading-relaxed max-w-[15rem]">
+              {profile.late_cancellations} {profile.late_cancellations === 1 ? 'fue' : 'fueron'} con menos
+              de 2 horas de aviso. Cancelar temprano le da tiempo al otro de buscar alternativa.
+            </p>
+          )}
         </div>
 
         {/* Info section */}

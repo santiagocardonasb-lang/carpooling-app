@@ -29,6 +29,7 @@ const RateTrip = lazy(() => import('./pages/RateTrip'));
 const ChatPage = lazy(() => import('./pages/ChatPage'));
 const MessagesPage = lazy(() => import('./pages/MessagesPage'));
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const History = lazy(() => import('./pages/History'));
 
 interface InProgressBooking {
   id: number;
@@ -237,6 +238,7 @@ function AppRoutes() {
         <Route path="/rate/:bookingId" element={<PrivateRoute><RateTrip /></PrivateRoute>} />
         <Route path="/chat/:bookingId" element={<PrivateRoute><ChatPage /></PrivateRoute>} />
         <Route path="/messages" element={<PrivateRoute><MessagesPage /></PrivateRoute>} />
+        <Route path="/history" element={<PrivateRoute><History /></PrivateRoute>} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
       </Suspense>

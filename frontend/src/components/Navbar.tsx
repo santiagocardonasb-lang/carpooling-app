@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { MagnifyingGlass, Plus, BookOpen, Bell, User, Car, SignOut, GearSix, ChatCircle } from '@phosphor-icons/react';
+import { MagnifyingGlass, Plus, BookOpen, Bell, User, Car, SignOut, GearSix, ChatCircle, ClockCounterClockwise } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext';
 import { useUnread } from '../context/UnreadContext';
 
@@ -152,6 +152,14 @@ export default function Navbar() {
 
                   {/* Links de navegación en dropdown solo para móvil */}
                   <div className="sm:hidden border-t border-zinc-800 my-1" />
+
+                  <Link
+                    to="/history"
+                    className="flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-zinc-800 transition-colors"
+                  >
+                    <ClockCounterClockwise size={15} weight="duotone" className="text-zinc-400 flex-shrink-0" />
+                    Historial
+                  </Link>
 
                   <Link
                     to="/settings"

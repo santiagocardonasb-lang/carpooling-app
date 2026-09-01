@@ -15,7 +15,7 @@ router.get('/', auth, async (req, res) => {
     const user = result.rows[0];
     if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
 
-    const [drRes, paRes] = await Promise.all([
+    const [drRes, paRes, cancelRes] = await Promise.all([
       query(
         "SELECT COUNT(*) as n FROM bookings WHERE ride_id IN (SELECT id FROM rides WHERE driver_id=$1) AND status='completed'",
         [req.user.id]
@@ -24,6 +24,18 @@ router.get('/', auth, async (req, res) => {
         "SELECT COUNT(*) as n FROM bookings WHERE passenger_id=$1 AND status='completed'",
         [req.user.id]
       ),
+      // Cancelaciones propias, separando las de última hora. Se le muestran
+      // solo al dueño de la cuenta: sirven para corregirse, no para señalar.
+      query(`
+        SELECT
+          COUNT(*)::int AS total,
+          COUNT(*) FILTER (WHERE cancel_notice_hours IS NOT NULL AND cancel_notice_hours < 2)::int AS late
+        FROM bookings b
+        LEFT JOIN rides r ON b.ride_id = r.id
+        WHERE b.cancelled_by IS NOT NULL AND b.cancelled_by <> 'system'
+          AND ((b.cancelled_by = 'driver'    AND r.driver_id = $1)
+            OR (b.cancelled_by = 'passenger' AND b.passenger_id = $1))
+      `, [req.user.id]),
     ]);
 
     res.json({
@@ -31,6 +43,8 @@ router.get('/', auth, async (req, res) => {
       role: user.role || 'passenger',
       trips_as_driver:    parseInt(drRes.rows[0].n, 10),
       trips_as_passenger: parseInt(paRes.rows[0].n, 10),
+      cancellations:      cancelRes.rows[0].total,
+      late_cancellations: cancelRes.rows[0].late,
     });
   } catch (err) {
     console.error('profile GET:', err);

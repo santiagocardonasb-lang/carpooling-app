@@ -32,6 +32,14 @@ interface Ride {
 
 const DAY_NAMES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
+type SortKey = 'time' | 'price' | 'rating' | 'seats';
+const SORTS: { key: SortKey; label: string }[] = [
+  { key: 'time',   label: 'Más próximo' },
+  { key: 'price',  label: 'Más barato' },
+  { key: 'rating', label: 'Mejor calificado' },
+  { key: 'seats',  label: 'Más cupos' },
+];
+
 export default function SearchRides() {
   const [searchParams] = useSearchParams();
   const [filters, setFilters] = useState({
@@ -40,6 +48,7 @@ export default function SearchRides() {
     date: '',
   });
   const [vehicleType, setVehicleType] = useState<'all' | 'car' | 'moto'>('all');
+  const [sort, setSort] = useState<SortKey>('time');
   const [rides, setRides] = useState<Ride[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
@@ -59,6 +68,7 @@ export default function SearchRides() {
       if (filters.destination) params.append('destination', filters.destination);
       if (filters.date) params.append('date', filters.date);
       if (vehicleType !== 'all') params.append('vehicle_type', vehicleType);
+      params.append('sort', sort);
       const { data } = await api.get(`/rides?${params}`);
       setRides(data);
     } catch { showToast('Error al buscar viajes', 'error'); }
@@ -69,6 +79,13 @@ export default function SearchRides() {
     if (canSearch) fetchRides();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Cambiar el orden o el tipo de vehículo vuelve a consultar en el acto:
+  // obligar a pulsar "Buscar" otra vez haría que los filtros se sientan rotos.
+  useEffect(() => {
+    if (searched && canSearch) fetchRides();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sort, vehicleType]);
 
   const formatDays = (daysStr?: string) => {
     if (!daysStr) return '';
@@ -125,6 +142,25 @@ export default function SearchRides() {
               </button>
             ))}
           </div>
+
+          {/* Orden — solo tiene sentido cuando ya hay resultados */}
+          {searched && rides.length > 1 && (
+            <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+              {SORTS.map(({ key, label }) => (
+                <button
+                  key={key}
+                  onClick={() => setSort(key)}
+                  className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all border ${
+                    sort === key
+                      ? 'bg-white text-black border-white'
+                      : 'bg-transparent text-zinc-500 border-zinc-800 hover:border-zinc-600'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Placeholder cuando no hay origen+destino */}

@@ -1,15 +1,27 @@
 const express = require('express');
 const { query } = require('../db');
 const auth = require('../middleware/auth');
+const { noticeHours, isLate } = require('../utils/cancellation');
 const { paging } = require('../utils/paging');
 const { stripAccents } = require('../utils/validation');
 
 const router = express.Router();
 
 // Búsqueda pública de viajes
+// Órdenes permitidos. Lista blanca a propósito: el criterio entra en el SQL
+// como texto, así que no puede venir del cliente sin filtrar.
+const SORTS = {
+  time:   'r.date ASC NULLS LAST, r.time ASC',
+  price:  'r.price ASC, r.time ASC',
+  rating: 'driver_rating DESC, r.time ASC',
+  seats:  'r.seats_available DESC, r.time ASC',
+  recent: 'r.created_at DESC',
+};
+
 router.get('/', async (req, res) => {
-  const { origin, destination, date, vehicle_type } = req.query;
+  const { origin, destination, date, vehicle_type, max_price } = req.query;
   const { limit, offset } = paging(req, { def: 50, max: 100 });
+  const sort = SORTS[req.query.sort] || SORTS.time;
 
   let sql = `
     SELECT r.*,
@@ -46,6 +58,10 @@ router.get('/', async (req, res) => {
     sql += ` AND r.vehicle_type = $${idx++}`;
     params.push(vehicle_type);
   }
+  if (max_price !== undefined && max_price !== '' && !isNaN(Number(max_price))) {
+    sql += ` AND r.price <= $${idx++}`;
+    params.push(Number(max_price));
+  }
 
   try {
     if (date) {
@@ -62,13 +78,13 @@ router.get('/', async (req, res) => {
       )`;
       params.push(date, String(dayOfWeek));
       const result = await query(
-        sql + ` ORDER BY r.time ASC LIMIT $${idx++} OFFSET $${idx++}`,
+        sql + ` ORDER BY ${sort} LIMIT $${idx++} OFFSET $${idx++}`,
         [...params, limit, offset]
       );
       return res.json(result.rows);
     }
 
-    sql += ` ORDER BY r.date ASC, r.time ASC LIMIT $${idx++} OFFSET $${idx++}`;
+    sql += ` ORDER BY ${sort} LIMIT $${idx++} OFFSET $${idx++}`;
     const result = await query(sql, [...params, limit, offset]);
     res.json(result.rows);
   } catch (err) {
@@ -248,10 +264,16 @@ router.delete('/:id', auth, async (req, res) => {
       [req.params.id]
     );
 
+    // Registrar quién canceló y con cuánta antelación: sin esto, un
+    // conductor que cancela sobre la hora se ve igual que uno que avisó ayer.
+    const notice = noticeHours(ride.date, ride.time);
+
     await query("UPDATE rides SET status='cancelled' WHERE id=$1", [req.params.id]);
     await query(
-      "UPDATE bookings SET status='cancelled' WHERE ride_id=$1 AND status IN ('pending','confirmed')",
-      [req.params.id]
+      `UPDATE bookings
+       SET status='cancelled', cancelled_by='driver', cancelled_at=NOW(), cancel_notice_hours=$2
+       WHERE ride_id=$1 AND status IN ('pending','confirmed')`,
+      [req.params.id, notice]
     );
 
     for (const b of activeRes.rows) {
@@ -260,7 +282,9 @@ router.delete('/:id', auth, async (req, res) => {
         [
           b.passenger_id, 'ride_cancelled',
           'Viaje cancelado',
-          `El conductor canceló el viaje ${ride.origin} → ${ride.destination}. Tu reserva fue cancelada automáticamente.`,
+          isLate(notice)
+            ? `El conductor canceló el viaje ${ride.origin} → ${ride.destination} a última hora. Busca otra opción cuanto antes.`
+            : `El conductor canceló el viaje ${ride.origin} → ${ride.destination}. Tu reserva fue cancelada automáticamente.`,
           b.id,
         ]
       );

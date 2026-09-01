@@ -1,6 +1,7 @@
 const express = require('express');
 const { query, withTransaction } = require('../db');
 const auth = require('../middleware/auth');
+const { noticeHours, isLate } = require('../utils/cancellation');
 const { paging } = require('../utils/paging');
 
 const router = express.Router();
@@ -267,7 +268,13 @@ router.patch('/:id/passenger-decline', auth, async (req, res) => {
     const passenger = passengerRes.rows[0];
 
     await withTransaction(async (client) => {
-      await client.query("UPDATE bookings SET status='cancelled' WHERE id=$1", [booking.id]);
+      await client.query(
+        `UPDATE bookings
+         SET status='cancelled', cancelled_by='passenger', cancelled_at=NOW(),
+             cancel_notice_hours=$2
+         WHERE id=$1`,
+        [booking.id, noticeHours(ride.date, ride.time)]
+      );
       await client.query('UPDATE rides SET seats_available=seats_available+$1 WHERE id=$2', [booking.seats, booking.ride_id]);
     });
 
@@ -323,12 +330,20 @@ router.delete('/:id', auth, async (req, res) => {
     if (!['pending', 'confirmed'].includes(booking.status))
       return res.status(400).json({ error: 'No se puede cancelar esta reserva' });
 
+    const rideRes = await query('SELECT date, time FROM rides WHERE id=$1', [booking.ride_id]);
+    const notice = noticeHours(rideRes.rows[0]?.date, rideRes.rows[0]?.time);
+
     await withTransaction(async (client) => {
-      await client.query("UPDATE bookings SET status='cancelled' WHERE id=$1", [req.params.id]);
+      await client.query(
+        `UPDATE bookings
+         SET status='cancelled', cancelled_by='passenger', cancelled_at=NOW(), cancel_notice_hours=$2
+         WHERE id=$1`,
+        [req.params.id, notice]
+      );
       await client.query('UPDATE rides SET seats_available=seats_available+$1 WHERE id=$2', [booking.seats, booking.ride_id]);
     });
 
-    res.json({ message: 'Reserva cancelada' });
+    res.json({ message: 'Reserva cancelada', late: isLate(notice) });
   } catch (err) {
     console.error('booking DELETE:', err);
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -361,6 +376,56 @@ router.patch('/:id/location', auth, async (req, res) => {
   } catch (err) {
     console.error('location patch:', err);
     res.status(500).json({ error: 'Error interno' });
+  }
+});
+
+// Historial: viajes cerrados, como conductor y como pasajero, con totales.
+// Antes los viajes completados simplemente desaparecían de la vista.
+router.get('/history', auth, async (req, res) => {
+  const { limit, offset } = paging(req, { def: 30, max: 100 });
+  const userId = req.user.id;
+
+  try {
+    const rowsRes = await query(`
+      SELECT
+        b.id, b.seats, b.status, b.completed_at, b.created_at,
+        r.origin, r.destination, r.date, r.time, r.price, r.vehicle_type,
+        r.driver_id,
+        CASE WHEN r.driver_id = $1 THEN 'driver' ELSE 'passenger' END AS role,
+        CASE WHEN r.driver_id = $1 THEN up.name ELSE ud.name END AS other_name,
+        (r.price * b.seats) AS amount,
+        EXISTS (
+          SELECT 1 FROM ratings rt
+          WHERE rt.booking_id = b.id AND rt.rater_id = $1
+        ) AS rated
+      FROM bookings b
+      JOIN rides r  ON b.ride_id = r.id
+      JOIN users ud ON r.driver_id = ud.id
+      JOIN users up ON b.passenger_id = up.id
+      WHERE (b.passenger_id = $1 OR r.driver_id = $1)
+        AND b.status IN ('completed', 'cancelled', 'rejected', 'expired')
+      ORDER BY COALESCE(b.completed_at, b.created_at) DESC
+      LIMIT $2 OFFSET $3
+    `, [userId, limit, offset]);
+
+    // Los totales se calculan sobre todo el historial, no sobre la página
+    // que se está mostrando, o cambiarían al pasar de página.
+    const totalsRes = await query(`
+      SELECT
+        COUNT(*) FILTER (WHERE b.status = 'completed' AND r.driver_id = $1)::int  AS trips_as_driver,
+        COUNT(*) FILTER (WHERE b.status = 'completed' AND r.driver_id <> $1)::int AS trips_as_passenger,
+        COALESCE(SUM(r.price * b.seats) FILTER (WHERE b.status = 'completed' AND r.driver_id = $1), 0)::float  AS earned,
+        COALESCE(SUM(r.price * b.seats) FILTER (WHERE b.status = 'completed' AND r.driver_id <> $1), 0)::float AS spent,
+        COUNT(*) FILTER (WHERE b.status IN ('cancelled','rejected','expired'))::int AS cancelled
+      FROM bookings b
+      JOIN rides r ON b.ride_id = r.id
+      WHERE b.passenger_id = $1 OR r.driver_id = $1
+    `, [userId]);
+
+    res.json({ items: rowsRes.rows, totals: totalsRes.rows[0] });
+  } catch (err) {
+    console.error('bookings history:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
 
