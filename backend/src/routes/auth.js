@@ -197,8 +197,10 @@ router.post('/forgot-password', async (req, res) => {
   } catch (err) {
     // 42P01 = falta la tabla password_resets (no se corrió la migración).
     // Sin esto el error salía como un 500 genérico imposible de diagnosticar.
-    if (err.code === '42P01') {
-      console.error('forgot-password: falta la tabla password_resets. Corre supabase/password_resets.sql');
+    // 42P01 = no existe la tabla; 42703 = falta la columna purpose.
+    // Ambos significan lo mismo: la migración no se ha ejecutado.
+    if (err.code === '42P01' || err.code === '42703') {
+      console.error('forgot-password: falta la migración. Corre supabase/email_verification.sql');
       return res.status(503).json({ error: 'La recuperación de contraseña aún no está habilitada. Avisa al administrador.' });
     }
     console.error('forgot-password:', err);

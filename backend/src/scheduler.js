@@ -1,4 +1,5 @@
 const { query, withTransaction } = require('./db');
+const { caps } = require('./utils/schema');
 
 // 1) Auto-completar viajes en curso por más de 6 horas
 async function autoCompleteStaleTrips() {
@@ -80,9 +81,11 @@ async function expirePastRides() {
       await withTransaction(async (client) => {
         await client.query("UPDATE rides SET status='expired' WHERE id=$1", [ride.id]);
         await client.query(
-          `UPDATE bookings
-           SET status='expired', cancelled_by='system', cancelled_at=NOW()
-           WHERE ride_id=$1 AND status IN ('pending','confirmed')`,
+          caps.cancelMetadata
+            ? `UPDATE bookings
+               SET status='expired', cancelled_by='system', cancelled_at=NOW()
+               WHERE ride_id=$1 AND status IN ('pending','confirmed')`
+            : "UPDATE bookings SET status='expired' WHERE ride_id=$1 AND status IN ('pending','confirmed')",
           [ride.id]
         );
       });

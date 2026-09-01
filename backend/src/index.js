@@ -65,5 +65,6 @@ app.use((err, _req, res, _next) => {
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor corriendo en http://0.0.0.0:${PORT}`);
-  require('./scheduler').start();
+  // Saber qué migraciones opcionales ya corrieron antes de atender tráfico.
+  require('./utils/schema').detect().finally(() => require('./scheduler').start());
 });

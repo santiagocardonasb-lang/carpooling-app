@@ -1,6 +1,7 @@
 const express = require('express');
 const { query } = require('../db');
 const auth = require('../middleware/auth');
+const { caps } = require('../utils/schema');
 const { noticeHours, isLate } = require('../utils/cancellation');
 const { paging } = require('../utils/paging');
 const { stripAccents } = require('../utils/validation');
@@ -269,12 +270,19 @@ router.delete('/:id', auth, async (req, res) => {
     const notice = noticeHours(ride.date, ride.time);
 
     await query("UPDATE rides SET status='cancelled' WHERE id=$1", [req.params.id]);
-    await query(
-      `UPDATE bookings
-       SET status='cancelled', cancelled_by='driver', cancelled_at=NOW(), cancel_notice_hours=$2
-       WHERE ride_id=$1 AND status IN ('pending','confirmed')`,
-      [req.params.id, notice]
-    );
+    if (caps.cancelMetadata) {
+      await query(
+        `UPDATE bookings
+         SET status='cancelled', cancelled_by='driver', cancelled_at=NOW(), cancel_notice_hours=$2
+         WHERE ride_id=$1 AND status IN ('pending','confirmed')`,
+        [req.params.id, notice]
+      );
+    } else {
+      await query(
+        "UPDATE bookings SET status='cancelled' WHERE ride_id=$1 AND status IN ('pending','confirmed')",
+        [req.params.id]
+      );
+    }
 
     for (const b of activeRes.rows) {
       await query(

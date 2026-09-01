@@ -1,6 +1,7 @@
 const express = require('express');
 const { query, withTransaction } = require('../db');
 const auth = require('../middleware/auth');
+const { caps } = require('../utils/schema');
 const { noticeHours, isLate } = require('../utils/cancellation');
 const { paging } = require('../utils/paging');
 
@@ -269,11 +270,13 @@ router.patch('/:id/passenger-decline', auth, async (req, res) => {
 
     await withTransaction(async (client) => {
       await client.query(
-        `UPDATE bookings
-         SET status='cancelled', cancelled_by='passenger', cancelled_at=NOW(),
-             cancel_notice_hours=$2
-         WHERE id=$1`,
-        [booking.id, noticeHours(ride.date, ride.time)]
+        caps.cancelMetadata
+          ? `UPDATE bookings
+             SET status='cancelled', cancelled_by='passenger', cancelled_at=NOW(),
+                 cancel_notice_hours=$2
+             WHERE id=$1`
+          : "UPDATE bookings SET status='cancelled' WHERE id=$1",
+        caps.cancelMetadata ? [booking.id, noticeHours(ride.date, ride.time)] : [booking.id]
       );
       await client.query('UPDATE rides SET seats_available=seats_available+$1 WHERE id=$2', [booking.seats, booking.ride_id]);
     });
@@ -335,10 +338,12 @@ router.delete('/:id', auth, async (req, res) => {
 
     await withTransaction(async (client) => {
       await client.query(
-        `UPDATE bookings
-         SET status='cancelled', cancelled_by='passenger', cancelled_at=NOW(), cancel_notice_hours=$2
-         WHERE id=$1`,
-        [req.params.id, notice]
+        caps.cancelMetadata
+          ? `UPDATE bookings
+             SET status='cancelled', cancelled_by='passenger', cancelled_at=NOW(), cancel_notice_hours=$2
+             WHERE id=$1`
+          : "UPDATE bookings SET status='cancelled' WHERE id=$1",
+        caps.cancelMetadata ? [req.params.id, notice] : [req.params.id]
       );
       await client.query('UPDATE rides SET seats_available=seats_available+$1 WHERE id=$2', [booking.seats, booking.ride_id]);
     });

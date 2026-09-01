@@ -27,6 +27,11 @@ router.get('/', auth, async (req, res) => {
       ),
       // Cancelaciones propias, separando las de última hora. Se le muestran
       // solo al dueño de la cuenta: sirven para corregirse, no para señalar.
+      //
+      // Depende de columnas que agrega supabase/cancelled_by.sql. Si esa
+      // migración todavía no corrió, se devuelven ceros en vez de dejar que
+      // el error tumbe el perfil entero, que es justo lo que pasó al
+      // desplegarlo antes de ejecutarla.
       query(`
         SELECT
           COUNT(*)::int AS total,
@@ -36,7 +41,12 @@ router.get('/', auth, async (req, res) => {
         WHERE b.cancelled_by IS NOT NULL AND b.cancelled_by <> 'system'
           AND ((b.cancelled_by = 'driver'    AND r.driver_id = $1)
             OR (b.cancelled_by = 'passenger' AND b.passenger_id = $1))
-      `, [req.user.id]),
+      `, [req.user.id]).catch((e) => {
+        if (e.code === '42703' || e.code === '42P01') {
+          return { rows: [{ total: 0, late: 0 }] };
+        }
+        throw e;
+      }),
     ]);
 
     res.json({
