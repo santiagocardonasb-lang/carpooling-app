@@ -151,7 +151,7 @@ export default function NotificationsPage() {
             <p className="text-zinc-700 text-sm mt-1">Aquí verás actualizaciones de tus viajes</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-2 stagger">
             {notifs.map(n => {
               const clickable = !!getDestination(n);
               return (

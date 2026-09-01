@@ -25,8 +25,9 @@ export default function Home() {
     return (
       <div className="min-h-screen bg-black flex flex-col">
         <div className="flex-1 flex flex-col px-6 pt-24 pb-12 max-w-2xl mx-auto w-full">
-          <h1 className="text-5xl md:text-6xl font-black text-white leading-tight mb-3">
-            Hola, {user?.name?.split(' ')[0]}.
+          <p className="display-serif text-3xl text-zinc-500 mb-1 animate-fade">Hola,</p>
+          <h1 className="text-5xl md:text-6xl font-extrabold text-white leading-[0.95] mb-3 animate-rise">
+            {user?.name?.split(' ')[0]}.
           </h1>
           <p className="text-zinc-500 text-lg mb-10">
             Publica tu ruta y gana dinero en cada viaje.
@@ -71,8 +72,9 @@ export default function Home() {
     return (
       <div className="min-h-screen bg-black flex flex-col">
         <div className="flex-1 flex flex-col px-6 pt-24 pb-12 max-w-2xl mx-auto w-full">
-          <h1 className="text-5xl md:text-6xl font-black text-white leading-tight mb-3">
-            Hola, {user?.name?.split(' ')[0]}.
+          <p className="display-serif text-3xl text-zinc-500 mb-1 animate-fade">Hola,</p>
+          <h1 className="text-5xl md:text-6xl font-extrabold text-white leading-[0.95] mb-3 animate-rise">
+            {user?.name?.split(' ')[0]}.
           </h1>
           <p className="text-zinc-500 text-lg mb-10">
             Encuentra tu próximo viaje compartido.
@@ -116,10 +118,10 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-black flex flex-col">
       <div className="flex-1 flex flex-col px-6 pt-24 pb-12 max-w-2xl mx-auto w-full">
-        <h1 className="text-5xl md:text-6xl font-black text-white leading-tight mb-3">
-          Ve a donde<br />quieras ir.
+        <h1 className="text-5xl md:text-6xl font-extrabold text-white leading-[0.95] mb-3 animate-rise">
+          Ve a donde<br /><span className="display-serif font-normal">quieras ir.</span>
         </h1>
-        <p className="text-zinc-500 text-lg mb-10">
+        <p className="text-zinc-500 text-lg mb-10 animate-fade">
           Comparte el viaje, divide el costo.
         </p>
 

@@ -41,7 +41,7 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-black/95 backdrop-blur-sm border-t border-zinc-900"
+      className="glass-bar sm:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-zinc-900"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
       <div className="flex">

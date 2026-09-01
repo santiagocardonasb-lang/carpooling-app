@@ -1,12 +1,41 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-* {
-  font-family: 'Inter', sans-serif;
-  box-sizing: border-box;
+/* ═══════════════════════════════════════════════════════════════
+   SISTEMA DE DISEÑO
+   Superficies translúcidas sobre un fondo con luz ambiental, tipografía
+   con carácter y movimiento con curvas de resorte. La idea es que la app
+   se sienta construida, no ensamblada con piezas por defecto.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Curvas de animación. La de resorte se pasa un poco del destino y
+     vuelve: es lo que hace que un movimiento se sienta físico. */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* Cristal */
+  --glass-bg:     rgba(24, 24, 27, 0.62);
+  --glass-brd:    rgba(255, 255, 255, 0.08);
+  --glass-blur:   20px;
+  --glass-hi:     rgba(255, 255, 255, 0.06);
+
+  /* Profundidad: sombras en capas, nunca una sola sombra dura */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.28), 0 1px 1px rgba(0,0,0,.16);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.34), 0 1px 3px rgba(0,0,0,.2);
+  --shadow-lg: 0 16px 40px rgba(0,0,0,.46), 0 4px 12px rgba(0,0,0,.26);
+
+  /* Luz ambiental del fondo */
+  --aurora-1: rgba(64, 92, 156, 0.55);
+  --aurora-2: rgba(34, 118, 110, 0.42);
+  --aurora-3: rgba(110, 68, 140, 0.38);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
 }
 
 html, body {
@@ -16,20 +45,210 @@ html, body {
 
 body {
   @apply bg-black text-white;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont,
+               'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-feature-settings: 'ss01' 1, 'cv11' 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.011em;
 }
 
-input, textarea, select {
-  @apply outline-none;
+*, *::before, *::after { box-sizing: border-box; }
+
+input, textarea, select, button { font-family: inherit; }
+input, textarea, select { @apply outline-none; }
+
+/* Los números en columnas y contadores no deben bailar al cambiar */
+.tabular-nums, time, [class*='tabular'] { font-variant-numeric: tabular-nums; }
+
+/* ── Titulares ────────────────────────────────────────────────
+   Los pesos altos con tracking negativo son lo que da esa sensación
+   compacta y editorial de las apps nativas. */
+h1, h2, h3 { letter-spacing: -0.035em; }
+h1 { letter-spacing: -0.045em; }
+
+/* Acento serif para los titulares de portada. Se aplica con .display */
+.display-serif {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  font-style: italic;
 }
 
-/* ─────────────────────────────────────────────────────────────
-   MODO CLARO — overrides cuando html.light está activo.
-   Mantenemos toda la app en clases dark por defecto y aquí
-   invertimos las superficies y textos a una paleta clara.
-   ───────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════
+   LUZ AMBIENTAL
+   Manchas de color muy suaves y en movimiento lento detrás de todo.
+   Le dan a las superficies translúcidas algo que revelar; sin esto el
+   efecto de cristal no se nota.
+   ═══════════════════════════════════════════════════════════════ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: -20%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(42rem 42rem at 12% 8%,  var(--aurora-1), transparent 62%),
+    radial-gradient(38rem 38rem at 88% 22%, var(--aurora-2), transparent 60%),
+    radial-gradient(34rem 34rem at 50% 96%, var(--aurora-3), transparent 58%);
+  filter: blur(30px);
+  animation: aurora-drift 26s var(--ease-in-out) infinite alternate;
+}
+
+@keyframes aurora-drift {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  50%  { transform: translate3d(-2%, 2%, 0) scale(1.06); }
+  100% { transform: translate3d(2%, -1.5%, 0) scale(1.02); }
+}
+
+/* Cada pantalla se envuelve en .min-h-screen.bg-black, que pintaba negro
+   sólido y tapaba la luz del body. Se dejan transparentes para que el
+   fondo se vea a través y las superficies de cristal tengan qué revelar. */
+.min-h-screen.bg-black { background-color: transparent; }
+
+/* ═══════════════════════════════════════════════════════════════
+   SUPERFICIES DE CRISTAL
+   Las tarjetas de la app usan bg-zinc-900 con esquinas redondeadas.
+   En vez de tocar cientos de componentes, se reinterpreta esa
+   combinación como una superficie translúcida.
+   ═══════════════════════════════════════════════════════════════ */
+.bg-zinc-900.rounded-2xl,
+.bg-zinc-900.rounded-3xl,
+.bg-zinc-900.rounded-xl,
+.glass {
+  background-color: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  border: 1px solid var(--glass-brd);
+  box-shadow: var(--shadow-md), inset 0 1px 0 var(--glass-hi);
+}
+
+/* Barras fijas: más desenfoque y menos color, como en iOS */
+.glass-bar {
+  background-color: rgba(11, 11, 15, 0.72);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MOVIMIENTO
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes rise {
+  from { opacity: 0; transform: translate3d(0, 14px, 0) scale(.985); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes pop {
+  0%   { opacity: 0; transform: scale(.92); }
+  60%  { opacity: 1; transform: scale(1.02); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes sheet-up {
+  from { transform: translate3d(0, 100%, 0); }
+  to   { transform: none; }
+}
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to   { background-position: 200% 0; }
+}
+
+.animate-rise  { animation: rise .5s var(--ease-out) both; }
+.animate-fade  { animation: fade .35s var(--ease-out) both; }
+.animate-pop   { animation: pop .38s var(--ease-spring) both; }
+.animate-sheet { animation: sheet-up .42s var(--ease-out) both; }
+
+/* Escalonado: cada hijo entra un poco después que el anterior.
+   Es el detalle que hace que una lista se sienta viva y no de golpe. */
+.stagger > *          { animation: rise .5s var(--ease-out) both; }
+.stagger > *:nth-child(1) { animation-delay: .02s }
+.stagger > *:nth-child(2) { animation-delay: .06s }
+.stagger > *:nth-child(3) { animation-delay: .10s }
+.stagger > *:nth-child(4) { animation-delay: .14s }
+.stagger > *:nth-child(5) { animation-delay: .18s }
+.stagger > *:nth-child(6) { animation-delay: .22s }
+.stagger > *:nth-child(7) { animation-delay: .26s }
+.stagger > *:nth-child(8) { animation-delay: .30s }
+.stagger > *:nth-child(n+9) { animation-delay: .34s }
+
+/* Respuesta al tacto: hundir levemente en vez de solo cambiar color */
+button:not(:disabled), a, [role='button'] {
+  transition: transform .18s var(--ease-spring),
+              background-color .2s var(--ease-out),
+              border-color .2s var(--ease-out),
+              color .2s var(--ease-out),
+              opacity .2s var(--ease-out),
+              box-shadow .2s var(--ease-out);
+}
+button:not(:disabled):active,
+[role='button']:active { transform: scale(.97); }
+
+/* Foco visible solo con teclado, con el anillo del sistema */
+:focus-visible {
+  outline: 2px solid rgba(255,255,255,.75);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+html.light :focus-visible { outline-color: rgba(24,24,27,.75); }
+
+/* Carga: brillo que recorre el bloque */
+.skeleton {
+  background: linear-gradient(90deg,
+    rgba(255,255,255,.04) 25%,
+    rgba(255,255,255,.10) 50%,
+    rgba(255,255,255,.04) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+/* Barra de scroll discreta */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,.14);
+  border-radius: 99px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.24); background-clip: content-box; }
+html.light ::-webkit-scrollbar-thumb { background: rgba(0,0,0,.16); background-clip: content-box; }
+
+/* Quien pidió menos movimiento no debería recibir ninguno */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+  body::before { animation: none; }
+}
+
+/* ═════════════════════════════════════════════════════════════
+   MODO CLARO
+   La app está escrita en clases oscuras; aquí se invierten las
+   superficies y los textos a una paleta clara.
+   ═════════════════════════════════════════════════════════════ */
 
 html.light { color-scheme: light; }
 html.light body { background-color: #ffffff; color: #18181b; }
+
+html.light {
+  --glass-bg:  rgba(255, 255, 255, 0.66);
+  --glass-brd: rgba(9, 9, 11, 0.08);
+  --glass-hi:  rgba(255, 255, 255, 0.9);
+  --shadow-sm: 0 1px 2px rgba(9,9,11,.06);
+  --shadow-md: 0 4px 16px rgba(9,9,11,.08), 0 1px 3px rgba(9,9,11,.05);
+  --shadow-lg: 0 16px 44px rgba(9,9,11,.12), 0 4px 12px rgba(9,9,11,.06);
+  --aurora-1:  rgba(120, 156, 226, 0.20);
+  --aurora-2:  rgba(96, 196, 186, 0.16);
+  --aurora-3:  rgba(178, 142, 214, 0.14);
+}
+
+html.light .glass-bar { background-color: rgba(255,255,255,.75); }
 
 /* Backgrounds */
 html.light .bg-black           { background-color: #ffffff; }
@@ -37,13 +256,13 @@ html.light .bg-black\/95       { background-color: rgba(255,255,255,0.95); }
 html.light .bg-black\/85       { background-color: rgba(255,255,255,0.92); }
 html.light .bg-black\/80       { background-color: rgba(255,255,255,0.92); }
 html.light .bg-black\/70       { background-color: rgba(0,0,0,0.35); }
-html.light .bg-zinc-950\/70    { background-color: rgba(255,255,255,0.7); }
-html.light .bg-zinc-950\/60    { background-color: rgba(255,255,255,0.6); }
 html.light .bg-zinc-950        { background-color: #fafafa; }
 html.light .bg-zinc-900        { background-color: #f4f4f5; }
 html.light .bg-zinc-800        { background-color: #e4e4e7; }
 html.light .bg-zinc-700        { background-color: #d4d4d8; }
 html.light .bg-zinc-800\/50    { background-color: #e4e4e7cc; }
+html.light .bg-zinc-950\/70    { background-color: rgba(255,255,255,0.7); }
+html.light .bg-zinc-950\/60    { background-color: rgba(255,255,255,0.6); }
 
 /* Botones primarios — invertir: fondo oscuro con texto claro */
 html.light .bg-white           { background-color: #18181b; }
@@ -61,15 +280,13 @@ html.light .text-white         { color: #18181b; }
 html.light .text-zinc-300      { color: #3f3f46; }
 html.light .text-zinc-400      { color: #52525b; }
 html.light .text-zinc-500      { color: #71717a; }
-html.light .text-zinc-600      { color: #a1a1aa; }
-html.light .text-zinc-700      { color: #d4d4d8; }
-html.light .text-zinc-800      { color: #e4e4e7; }
-
-/* Hover text */
+html.light .text-zinc-600      { color: #8b8b93; }
+html.light .text-zinc-700      { color: #a8a8b0; }
+html.light .text-zinc-800      { color: #d4d4d8; }
 html.light .hover\:text-white:hover { color: #18181b; }
 
 /* Bordes */
-html.light .border-zinc-900    { border-color: #f4f4f5; }
+html.light .border-zinc-900    { border-color: #ececee; }
 html.light .border-zinc-800    { border-color: #e4e4e7; }
 html.light .border-zinc-700    { border-color: #d4d4d8; }
 html.light .border-zinc-600    { border-color: #a1a1aa; }
@@ -83,6 +300,7 @@ html.light .focus\:ring-white:focus { --tw-ring-color: #18181b; }
 html.light .ring-white { --tw-ring-color: #18181b; }
 html.light .hover\:ring-white:hover { --tw-ring-color: #18181b; }
 html.light .ring-zinc-700 { --tw-ring-color: #d4d4d8; }
+html.light .ring-zinc-800 { --tw-ring-color: #e4e4e7; }
 
 /* Placeholders */
 html.light .placeholder-zinc-500::placeholder,
@@ -91,15 +309,11 @@ html.light .placeholder-zinc-600::placeholder { color: #a1a1aa; }
 /* Inputs con [color-scheme:dark] — quitar para que se vean nativos en claro */
 html.light .\[color-scheme\:dark\] { color-scheme: light; }
 
-/* ─────────────────────────────────────────────────────────────
-   SEMÁFOROS EN MODO CLARO
-   Los tonos -400 están pensados para fondo negro. Sobre blanco
-   quedan casi ilegibles: el verde de "guardado" era invisible.
-   Aquí se oscurece el texto y se aclara el fondo, conservando el
-   significado del color.
-   ───────────────────────────────────────────────────────────── */
+/* ── Semáforos en modo claro ──────────────────────────────────
+   Los tonos -400 están pensados para fondo negro; sobre blanco quedan
+   casi ilegibles (el verde de "guardado" era invisible). Se oscurece el
+   texto y se aclara el fondo, conservando el significado del color. */
 
-/* Texto */
 html.light .text-green-400,
 html.light .text-green-500   { color: #15803d; }
 html.light .text-red-300,
@@ -109,7 +323,6 @@ html.light .text-yellow-300,
 html.light .text-yellow-400,
 html.light .text-yellow-500  { color: #a16207; }
 
-/* Fondos de aviso: de translúcido oscuro a tinte claro */
 html.light .bg-green-900\/20,
 html.light .bg-green-900\/30,
 html.light .bg-green-900\/40  { background-color: #dcfce7; }
@@ -120,7 +333,6 @@ html.light .bg-yellow-900\/30,
 html.light .bg-yellow-900\/40,
 html.light .bg-yellow-900\/50 { background-color: #fef3c7; }
 
-/* Bordes de esos mismos avisos */
 html.light .border-green-800      { border-color: #86efac; }
 html.light .border-red-800,
 html.light .border-red-900,

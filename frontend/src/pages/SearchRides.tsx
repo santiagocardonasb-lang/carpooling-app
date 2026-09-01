@@ -163,7 +163,7 @@ export default function SearchRides() {
               </div>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 stagger">
               <p className="text-zinc-600 text-xs">{rides.length} viaje{rides.length !== 1 ? 's' : ''} disponible{rides.length !== 1 ? 's' : ''}</p>
               {rides.map((ride) => (
                 <RideCard

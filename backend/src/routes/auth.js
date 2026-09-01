@@ -96,15 +96,21 @@ router.post('/login', async (req, res) => {
 // endpoint como directorio de quién está registrado.
 router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
-  const ok = { ok: true, message: 'Si el correo está registrado, te enviamos un código.' };
+  const ok = { ok: true, message: 'Te enviamos un código a tu correo.' };
 
-  if (typeof email !== 'string' || !email.trim()) return res.json(ok);
+  if (typeof email !== 'string' || !email.trim())
+    return res.status(400).json({ error: 'Escribe tu correo institucional' });
   const mail = email.trim().toLowerCase();
 
   try {
     const userRes = await query('SELECT id, name FROM users WHERE email = $1', [mail]);
     const user = userRes.rows[0];
-    if (!user) return res.json(ok); // correo desconocido: misma respuesta
+    // Decidimos avisar cuando el correo no existe. Lo estándar es callarlo para
+    // que nadie averigüe quién está registrado, pero aquí los correos son
+    // institucionales y predecibles, así que esconderlo no protege gran cosa y
+    // en cambio deja al usuario esperando un código que nunca va a llegar.
+    if (!user)
+      return res.status(404).json({ error: 'Ese correo no está registrado. Revisa que esté bien escrito.' });
 
     // Tope de códigos por hora, para que nadie use esto como bomba de correos.
     const recentRes = await query(
@@ -130,10 +136,16 @@ router.post('/forgot-password', async (req, res) => {
 
     const sent = await sendResetCode(mail, user.name, code);
     if (!sent) {
-      return res.status(500).json({ error: 'No pudimos enviar el correo. Intenta más tarde.' });
+      return res.status(502).json({ error: 'No pudimos enviar el correo. Intenta más tarde.' });
     }
     res.json(ok);
   } catch (err) {
+    // 42P01 = falta la tabla password_resets (no se corrió la migración).
+    // Sin esto el error salía como un 500 genérico imposible de diagnosticar.
+    if (err.code === '42P01') {
+      console.error('forgot-password: falta la tabla password_resets. Corre supabase/password_resets.sql');
+      return res.status(503).json({ error: 'La recuperación de contraseña aún no está habilitada. Avisa al administrador.' });
+    }
     console.error('forgot-password:', err);
     res.status(500).json({ error: 'Error al procesar la solicitud' });
   }
