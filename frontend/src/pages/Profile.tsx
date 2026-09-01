@@ -20,7 +20,8 @@ interface ProfileData {
   trips_as_passenger: number;
   cancellations: number;
   late_cancellations: number;
-  email_verified: boolean;
+  // null = todavía no se sabe (falta la migración). No se afirma nada.
+  email_verified: boolean | null;
 }
 
 interface Rating {
@@ -245,7 +246,7 @@ export default function Profile() {
           </div>
           <h2 className="text-white font-bold text-lg">{profile.name}</h2>
           <p className="text-zinc-500 text-sm">{profile.email}</p>
-          {profile.email_verified && <div className="mt-1"><VerifiedBadge /></div>}
+          {profile.email_verified === true && <div className="mt-1"><VerifiedBadge /></div>}
           <p className="text-zinc-700 text-xs mt-1">
             Miembro desde {new Date(profile.created_at).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
           </p>

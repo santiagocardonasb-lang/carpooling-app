@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const { query } = require('../db');
 const auth = require('../middleware/auth');
-const { validatePassword, normalizePlate, isValidPlate } = require('../utils/validation');
+const { validatePassword, normalizePlate, isValidPlate, verificationState } = require('../utils/validation');
 
 const router = express.Router();
 
@@ -52,8 +52,7 @@ router.get('/', auth, async (req, res) => {
     res.json({
       ...user,
       role: user.role || 'passenger',
-      // Sin la columna todavía, no se molesta a nadie con el aviso.
-      email_verified: user.email_verified ?? true,
+      email_verified: verificationState(user.email_verified),
       trips_as_driver:    parseInt(drRes.rows[0].n, 10),
       trips_as_passenger: parseInt(paRes.rows[0].n, 10),
       cancellations:      cancelRes.rows[0].total,

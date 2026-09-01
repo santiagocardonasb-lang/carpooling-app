@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 
 const {
   validatePassword, normalizePlate, isValidPlate, stripAccents, PASSWORD_MIN,
+  verificationState,
 } = require('../src/utils/validation');
 const { paging } = require('../src/utils/paging');
 
@@ -102,5 +103,28 @@ describe('paging', () => {
       assert.equal(limit, 50, `limit con ${JSON.stringify(bad)}`);
       assert.equal(offset, 0, `offset con ${JSON.stringify(bad)}`);
     }
+  });
+});
+
+describe('verificationState', () => {
+  test('conserva los dos valores conocidos', () => {
+    assert.equal(verificationState(true), true);
+    assert.equal(verificationState(false), false);
+  });
+
+  test('lo desconocido nunca se vuelve verificado', () => {
+    // Es la invariante: sin la migración la columna no llega, y devolver true
+    // ahí ponía una insignia de "correo verificado" sobre cuentas que nadie
+    // verificó. Cualquier cosa que no sea un booleano es "no se sabe".
+    for (const raw of [undefined, null, '', 'true', 1, 0, {}]) {
+      assert.notEqual(verificationState(raw), true,
+        `${JSON.stringify(raw)} no debe interpretarse como verificado`);
+    }
+  });
+
+  test('lo desconocido tampoco afirma lo contrario', () => {
+    // null significa "no se sabe": ni insignia ni aviso de sin verificar.
+    assert.equal(verificationState(undefined), null);
+    assert.equal(verificationState(null), null);
   });
 });

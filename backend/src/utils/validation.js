@@ -32,7 +32,22 @@ function stripAccents(s) {
   return String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 }
 
+/**
+ * Estado de verificación del correo, en tres valores.
+ *
+ * La regla que importa: lo desconocido nunca se convierte en verificado.
+ * Cuando falta la migración la columna no viene, y devolver true ahí ponía
+ * una insignia de "correo verificado" sobre cuentas que nadie verificó.
+ * Afirmar de menos es aceptable; afirmar de más, no.
+ */
+function verificationState(raw) {
+  if (raw === true)  return true;
+  if (raw === false) return false;
+  return null;
+}
+
 module.exports = {
+  verificationState,
   PASSWORD_MIN, PASSWORD_MAX,
   validatePassword,
   normalizePlate, isValidPlate,

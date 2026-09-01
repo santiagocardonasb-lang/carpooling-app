@@ -36,6 +36,8 @@ CREATE INDEX IF NOT EXISTS idx_password_resets_purpose
 ALTER TABLE users
   ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT FALSE;
 
--- 4) Las cuentas que ya existían se dan por verificadas: pedirles el paso
---    ahora sería castigarlas por haberse registrado antes de que existiera.
-UPDATE users SET email_verified = TRUE WHERE created_at < NOW();
+-- Las cuentas existentes quedan en FALSE, que es el valor por defecto de la
+-- columna. Se consideró darlas por verificadas para no molestarlas, pero eso
+-- les pondría una insignia de "correo verificado" sin que nadie hubiera
+-- verificado nada, y esa insignia solo sirve si dice la verdad. Van a ver el
+-- aviso en su perfil, que se puede cerrar y no bloquea nada.

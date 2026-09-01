@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { query } = require('../db');
 const { sendResetCode, sendVerifyCode, isEmailConfigured } = require('../services/email');
-const { validatePassword } = require('../utils/validation');
+const { validatePassword, verificationState } = require('../utils/validation');
 const auth = require('../middleware/auth');
 
 const router = express.Router();
@@ -160,7 +160,7 @@ router.post('/login', async (req, res) => {
       user: {
         id: user.id, name: user.name, email: user.email, phone: user.phone,
         avatar: user.avatar, role: user.role,
-        email_verified: user.email_verified ?? true,
+        email_verified: verificationState(user.email_verified),
       },
     });
   } catch (err) {
