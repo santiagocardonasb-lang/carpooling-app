@@ -366,6 +366,15 @@ router.get('/:id/trip-view', auth, async (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (!Number.isInteger(id)) return res.status(400).json({ error: 'ID inválido' });
 
+  // Las fotos son base64 dentro de la fila del usuario y pesan cientos de KB.
+  // Esta pantalla se refresca cada 5 s, así que mandarlas siempre gastaba
+  // decenas de MB de datos móviles por viaje. Solo van en la primera carga
+  // (?full=1); los refrescos posteriores traen el resto sin las fotos.
+  const withAvatars = req.query.full === '1';
+  const avatarCols = withAvatars
+    ? 'ud.avatar as driver_avatar, up.avatar as passenger_avatar,'
+    : 'NULL as driver_avatar, NULL as passenger_avatar,';
+
   try {
     const dataRes = await query(`
       SELECT b.id, b.status, b.seats, b.proposed_time, b.booking_date, b.booking_days,
@@ -373,9 +382,10 @@ router.get('/:id/trip-view', auth, async (req, res) => {
              b.driver_lat, b.driver_lng,
              r.id as ride_id, r.origin, r.destination, r.date, r.time, r.price,
              r.is_recurring, r.days_of_week, r.driver_id, r.vehicle_type, r.description,
-             ud.name as driver_name, ud.phone as driver_phone, ud.avatar as driver_avatar,
+             ${avatarCols}
+             ud.name as driver_name, ud.phone as driver_phone,
              ud.car_brand, ud.car_color, ud.car_plate,
-             up.name as passenger_name, up.phone as passenger_phone, up.avatar as passenger_avatar
+             up.name as passenger_name, up.phone as passenger_phone
       FROM bookings b
       JOIN rides r ON b.ride_id = r.id
       JOIN users ud ON r.driver_id = ud.id

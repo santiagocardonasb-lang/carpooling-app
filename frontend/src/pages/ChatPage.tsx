@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, PaperPlaneRight, HandWaving } from '@phosphor-icons/react';
 import api from '../api';
+import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
 import { parseDate } from '../utils/date';
 
@@ -17,6 +18,7 @@ export default function ChatPage() {
   const { bookingId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { showToast } = useToast();
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [otherName, setOtherName] = useState('');
@@ -89,7 +91,7 @@ export default function ChatPage() {
     } catch (e: unknown) {
       const errMsg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error
         || 'No se pudo enviar el mensaje';
-      alert(errMsg);
+      showToast(errMsg, 'error');
     } finally {
       setSending(false);
     }

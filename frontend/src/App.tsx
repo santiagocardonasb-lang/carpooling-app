@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import LoadingScreen from './components/LoadingScreen';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -6,25 +6,29 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider, useToast } from './context/ToastContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { UnreadProvider } from './context/UnreadContext';
+import { ConfirmProvider, useConfirm } from './context/ConfirmContext';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import ForgotPassword from './pages/ForgotPassword';
-import SearchRides from './pages/SearchRides';
-import CreateRide from './pages/CreateRide';
-import MyRides from './pages/MyRides';
-import Profile from './pages/Profile';
-import EditRide from './pages/EditRide';
-import NotificationsPage from './pages/NotificationsPage';
-import VehicleProfile from './pages/VehicleProfile';
-import Settings from './pages/Settings';
-import TripInProgress from './pages/TripInProgress';
-import RateTrip from './pages/RateTrip';
-import ChatPage from './pages/ChatPage';
-import MessagesPage from './pages/MessagesPage';
 import BottomNav from './components/BottomNav';
 import api from './api';
+
+// Pantallas que no hacen falta en la primera pintura: se descargan al entrar.
+// Esto saca del arranque el mapa, las animaciones y sus dependencias.
+const SearchRides = lazy(() => import('./pages/SearchRides'));
+const CreateRide = lazy(() => import('./pages/CreateRide'));
+const MyRides = lazy(() => import('./pages/MyRides'));
+const Profile = lazy(() => import('./pages/Profile'));
+const EditRide = lazy(() => import('./pages/EditRide'));
+const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
+const VehicleProfile = lazy(() => import('./pages/VehicleProfile'));
+const Settings = lazy(() => import('./pages/Settings'));
+const TripInProgress = lazy(() => import('./pages/TripInProgress'));
+const RateTrip = lazy(() => import('./pages/RateTrip'));
+const ChatPage = lazy(() => import('./pages/ChatPage'));
+const MessagesPage = lazy(() => import('./pages/MessagesPage'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
 
 interface InProgressBooking {
   id: number;
@@ -61,6 +65,7 @@ function TripStartedWatcher() {
   const navigate = useNavigate();
   const location = useLocation();
   const { showToast } = useToast();
+  const confirmDialog = useConfirm();
   const isPassenger = user?.role === 'passenger';
   const [alert, setAlert] = useState<InProgressBooking | null>(null);
   const pathRef = useRef(location.pathname);
@@ -114,7 +119,14 @@ function TripStartedWatcher() {
   };
 
   const decline = async () => {
-    if (!confirm('¿Cancelar tu reserva? El conductor será notificado.')) return;
+    const ok = await confirmDialog({
+      title: '¿Cancelar tu reserva?',
+      message: 'El conductor será notificado de inmediato.',
+      confirmText: 'Sí, cancelar',
+      cancelText: 'No',
+      danger: true,
+    });
+    if (!ok) return;
     try {
       await api.patch(`/bookings/${alert.id}/passenger-decline`);
       showToast('Reserva cancelada');
@@ -184,6 +196,17 @@ function TripStartedWatcher() {
 }
 
 
+// Mientras se descarga la pantalla. Discreto a propósito: en conexiones
+// normales aparece unos pocos cuadros y un spinner llamativo se sentiría
+// peor que un vacío breve.
+function RouteFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="w-6 h-6 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
+    </div>
+  );
+}
+
 function AppRoutes() {
   const location = useLocation();
   const { isAuthenticated } = useAuth();
@@ -196,6 +219,7 @@ function AppRoutes() {
   return (
     <div className={`min-h-screen ${showBottomNav ? 'pb-16 sm:pb-0' : ''}`}>
       {!focusedRoute && <Navbar />}
+      <Suspense fallback={<RouteFallback />}>
       <Routes>
         <Route path="/" element={<RootRoute />} />
         <Route path="/login" element={<Login />} />
@@ -215,6 +239,7 @@ function AppRoutes() {
         <Route path="/messages" element={<PrivateRoute><MessagesPage /></PrivateRoute>} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
+      </Suspense>
 
       {/* Overlay global de viaje iniciado (solo pasajeros autenticados) */}
       {isAuthenticated && <TripStartedWatcher />}
@@ -239,7 +264,9 @@ export default function App() {
           <AuthProvider>
             <UnreadProvider>
               <ToastProvider>
-                <AppRoutes />
+                <ConfirmProvider>
+                  <AppRoutes />
+                </ConfirmProvider>
               </ToastProvider>
             </UnreadProvider>
           </AuthProvider>

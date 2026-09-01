@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { Car, Motorcycle, Clock, CalendarBlank, Users, Phone, ArrowsClockwise, PencilSimple, Star } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
+import { useConfirm } from '../context/ConfirmContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import DatePicker from './DatePicker';
@@ -47,6 +48,7 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
   const { user } = useAuth();
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const confirmDialog = useConfirm();
   const [requesting, setRequesting] = useState(false);
   const [proposedTime, setProposedTime] = useState('');
   const [bookingDate, setBookingDate] = useState('');
@@ -124,7 +126,13 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
   };
 
   const handleCancel = async () => {
-    if (!confirm('¿Cancelar este viaje?')) return;
+    const ok = await confirmDialog({
+      title: '¿Cancelar este viaje?',
+      message: 'Se avisará a los pasajeros que ya reservaron.',
+      confirmText: 'Sí, cancelar',
+      danger: true,
+    });
+    if (!ok) return;
     try {
       await api.delete(`/rides/${ride.id}`);
       showToast('Viaje cancelado');

@@ -204,6 +204,51 @@ html.light :focus-visible { outline-color: rgba(24,24,27,.75); }
   animation: shimmer 1.4s linear infinite;
 }
 
+/* ── Pantalla de entrada ──────────────────────────────────────
+   La marca entra con resorte y respira; el nombre sube detrás y una
+   barrita marca el tiempo de espera para que no se sienta detenido. */
+.splash-mark {
+  animation: splash-in .72s var(--ease-spring) both,
+             splash-breathe 2.4s var(--ease-in-out) .72s infinite;
+  filter: drop-shadow(0 12px 32px rgba(90, 130, 220, .35));
+}
+.splash-badge { fill: #14141A; }
+.splash-car   { animation: splash-roll .8s var(--ease-out) .1s both; }
+
+.splash-word {
+  animation: rise .55s var(--ease-out) .22s both;
+}
+
+.splash-track {
+  width: 92px; height: 2px; border-radius: 99px;
+  background: rgba(255,255,255,.10);
+  overflow: hidden;
+  animation: fade .4s var(--ease-out) .4s both;
+}
+.splash-fill {
+  display: block; height: 100%; width: 100%;
+  background: linear-gradient(90deg, transparent, #fff, transparent);
+  transform: translateX(-100%);
+  animation: splash-sweep 1.15s var(--ease-in-out) .4s infinite;
+}
+
+@keyframes splash-in {
+  from { opacity: 0; transform: scale(.72) translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes splash-breathe {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.045); }
+}
+/* El coche entra desde la izquierda, como si llegara */
+@keyframes splash-roll {
+  from { transform: translateX(-7px); opacity: 0; }
+  to   { transform: none; opacity: 1; }
+}
+@keyframes splash-sweep {
+  to { transform: translateX(100%); }
+}
+
 /* Barra de scroll discreta */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }

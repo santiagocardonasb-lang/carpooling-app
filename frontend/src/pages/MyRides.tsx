@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { ShareNetwork, ChatCircle, CaretRight } from '@phosphor-icons/react';
 import api from '../api';
+import { useConfirm } from '../context/ConfirmContext';
 import RideCard from '../components/RideCard';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -38,6 +39,7 @@ export default function MyRides() {
   const navigate = useNavigate();
   const isDriver = user?.role !== 'passenger';
   const { showToast } = useToast();
+  const confirmDialog = useConfirm();
 
   const [searchParams, setSearchParams] = useSearchParams();
   const tab: 'rides' | 'requests' = searchParams.get('tab') === 'requests' ? 'requests' : 'rides';
@@ -84,7 +86,13 @@ export default function MyRides() {
   };
 
   const handleReject = async (bookingId: number) => {
-    if (!confirm('¿Rechazar esta solicitud?')) return;
+    const ok = await confirmDialog({
+      title: '¿Rechazar esta solicitud?',
+      message: 'El pasajero será notificado y su cupo quedará libre.',
+      confirmText: 'Rechazar',
+      danger: true,
+    });
+    if (!ok) return;
     try {
       await api.patch(`/bookings/${bookingId}/reject`);
       showToast('Solicitud rechazada');
@@ -95,7 +103,13 @@ export default function MyRides() {
   };
 
   const cancelBooking = async (id: number) => {
-    if (!confirm('¿Cancelar esta reserva?')) return;
+    const ok = await confirmDialog({
+      title: '¿Cancelar esta reserva?',
+      message: 'Perderás tu cupo en este viaje.',
+      confirmText: 'Sí, cancelar',
+      danger: true,
+    });
+    if (!ok) return;
     try {
       await api.delete(`/bookings/${id}`);
       showToast('Reserva cancelada');
@@ -116,7 +130,13 @@ export default function MyRides() {
   };
 
   const cancelRecurringDate = async (bookingId: number, date: string) => {
-    if (!confirm(`¿Cancelar el viaje del ${date}?`)) return;
+    const ok = await confirmDialog({
+      title: '¿Cancelar este día?',
+      message: `Solo se cancela el viaje del ${date}. El resto de días sigue igual.`,
+      confirmText: 'Cancelar ese día',
+      danger: true,
+    });
+    if (!ok) return;
     try {
       await api.patch(`/bookings/${bookingId}/cancel-date`, { date });
       showToast('Día cancelado');

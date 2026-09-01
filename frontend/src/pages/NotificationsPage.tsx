@@ -5,6 +5,8 @@ import {
   Trash, Users, CaretRight, Star, Play, Clock, ChatCircle,
 } from '@phosphor-icons/react';
 import api from '../api';
+import { useToast } from '../context/ToastContext';
+import { useConfirm } from '../context/ConfirmContext';
 import { useAuth } from '../context/AuthContext';
 
 type NotifType =
@@ -26,6 +28,8 @@ interface Notif {
 export default function NotificationsPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const confirmDialog = useConfirm();
+  const { showToast } = useToast();
   const isDriver = user?.role !== 'passenger';
   const [notifs, setNotifs] = useState<Notif[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,7 +52,13 @@ export default function NotificationsPage() {
   };
 
   const deleteAll = async () => {
-    if (!confirm('¿Borrar todas las notificaciones?')) return;
+    const ok = await confirmDialog({
+      title: '¿Borrar todas las notificaciones?',
+      message: 'Esta acción no se puede deshacer.',
+      confirmText: 'Borrar todas',
+      danger: true,
+    });
+    if (!ok) return;
     try {
       // /all evita ambigüedad con la ruta /:id en Express
       await api.delete('/notifications/all');
@@ -56,7 +66,7 @@ export default function NotificationsPage() {
     } catch (e: unknown) {
       const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error
         || 'No se pudieron borrar las notificaciones. Intenta de nuevo.';
-      alert(msg);
+      showToast(msg, 'error');
       console.error('Delete all notifications failed:', e);
     }
   };

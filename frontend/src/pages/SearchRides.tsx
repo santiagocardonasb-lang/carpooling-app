@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Car, Motorcycle, MagnifyingGlass, SquaresFour } from '@phosphor-icons/react';
 import api from '../api';
+import { useToast } from '../context/ToastContext';
 import RideCard from '../components/RideCard';
 import LocationInput from '../components/LocationInput';
 import DatePicker from '../components/DatePicker';
@@ -43,6 +44,7 @@ export default function SearchRides() {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const { isAuthenticated } = useAuth();
+  const { showToast } = useToast();
   const navigate = useNavigate();
 
   const canSearch = filters.origin.trim().length > 0 && filters.destination.trim().length > 0;
@@ -59,7 +61,7 @@ export default function SearchRides() {
       if (vehicleType !== 'all') params.append('vehicle_type', vehicleType);
       const { data } = await api.get(`/rides?${params}`);
       setRides(data);
-    } catch { alert('Error al buscar viajes'); }
+    } catch { showToast('Error al buscar viajes', 'error'); }
     finally { setLoading(false); }
   };
 

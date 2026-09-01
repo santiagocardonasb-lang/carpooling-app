@@ -79,13 +79,21 @@ router.post('/booking/:id', auth, async (req, res) => {
 // GET lista de conversaciones activas (para la pantalla de Mensajes)
 router.get('/conversations', auth, async (req, res) => {
   const userId = req.user.id;
+
+  // Igual que en trip-view: esta lista se refresca cada 5 s y traía una foto
+  // por conversación. Solo van en la primera carga (?full=1).
+  const avatarCols = req.query.full === '1'
+    ? 'ud.avatar as driver_avatar, up.avatar as passenger_avatar,'
+    : 'NULL as driver_avatar, NULL as passenger_avatar,';
+
   try {
     const rowsRes = await query(`
       SELECT b.id as booking_id, b.status, b.passenger_id,
              b.passenger_last_read_at, b.driver_last_read_at,
              r.id as ride_id, r.origin, r.destination, r.driver_id, r.date, r.time, r.is_recurring,
-             ud.name as driver_name, ud.avatar as driver_avatar,
-             up.name as passenger_name, up.avatar as passenger_avatar
+             ${avatarCols}
+             ud.name as driver_name,
+             up.name as passenger_name
       FROM bookings b
       JOIN rides r ON b.ride_id = r.id
       JOIN users ud ON r.driver_id = ud.id

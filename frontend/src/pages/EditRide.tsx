@@ -2,6 +2,7 @@ import { useState, useEffect, FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Car, Motorcycle, ArrowsClockwise, WarningCircle, ArrowLeft } from '@phosphor-icons/react';
 import api from '../api';
+import { useToast } from '../context/ToastContext';
 import LocationInput from '../components/LocationInput';
 import Toggle from '../components/Toggle';
 import DatePicker from '../components/DatePicker';
@@ -22,6 +23,7 @@ type FieldErrors = Partial<Record<'origin' | 'destination' | 'time' | 'seats' | 
 export default function EditRide() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const [form, setForm] = useState({ origin: '', destination: '', date: '', time: '', seats: '', price: '', description: '' });
   const [vehicleType, setVehicleType] = useState<'car' | 'moto'>('car');
@@ -85,7 +87,7 @@ export default function EditRide() {
     } catch (err: unknown) {
       const res = (err as { response?: { data?: { error?: string; fields?: FieldErrors } } })?.response?.data;
       if (res?.fields) setFieldErrors(res.fields);
-      else if (res?.error) alert(res.error);
+      else if (res?.error) showToast(res.error, 'error');
     } finally {
       setLoading(false);
     }

@@ -20,10 +20,22 @@ export default function MessagesPage() {
 
   useEffect(() => {
     let mounted = true;
+    let first = true;
     const fetchConvs = async () => {
       try {
-        const { data } = await api.get('/messages/conversations');
-        if (mounted) setConvs(data);
+        // Las fotos solo vienen en la primera carga; los refrescos las omiten
+        // para no gastar datos, así que se conservan las que ya teníamos.
+        const { data } = await api.get(`/messages/conversations${first ? '?full=1' : ''}`);
+        first = false;
+        if (!mounted) return;
+        setConvs(prev => data.map((c: Conversation) => ({
+          ...c,
+          other: {
+            ...c.other,
+            avatar: c.other.avatar
+              ?? prev.find(p => p.booking_id === c.booking_id)?.other.avatar,
+          },
+        })));
       } catch {
         // silencioso — el polling siguiente reintenta
       } finally {

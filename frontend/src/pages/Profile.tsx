@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Camera, LockSimple, User, Phone, Envelope, ArrowLeft, Check, WarningCircle, Car, Users, Star, Eye, EyeSlash, X } from '@phosphor-icons/react';
 import api from '../api';
+import { useToast } from '../context/ToastContext';
+import { useConfirm } from '../context/ConfirmContext';
 import { useAuth } from '../context/AuthContext';
 import { parseDate } from '../utils/date';
 import { checkPassword, passwordError, PASSWORD_MIN } from '../utils/password';
@@ -30,6 +32,8 @@ interface RatingStats {
 
 export default function Profile() {
   const { user, updateUser, logout } = useAuth();
+  const confirmDialog = useConfirm();
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -144,7 +148,7 @@ export default function Profile() {
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) { alert('Selecciona una imagen válida'); return; }
+    if (!file.type.startsWith('image/')) { showToast('Selecciona una imagen válida', 'error'); return; }
     setAvatarLoading(true);
     try {
       const base64 = await compressImage(file);
@@ -152,7 +156,7 @@ export default function Profile() {
       updateUser({ avatar: base64 });
       setProfile(prev => prev ? { ...prev, avatar: base64 } : prev);
     } catch {
-      alert('Error al subir la foto');
+      showToast('No pudimos subir la foto', 'error');
     } finally {
       setAvatarLoading(false);
     }
@@ -160,13 +164,16 @@ export default function Profile() {
 
   const changeRole = async (newRole: 'driver' | 'passenger') => {
     if (newRole === user?.role) return;
-    if (!confirm(newRole === 'driver' ? '¿Cambiar a cuenta de conductor? Podrás publicar viajes.' : '¿Cambiar a cuenta de pasajero? Solo podrás buscar y reservar viajes.')) return;
+    const ok = await confirmDialog(newRole === 'driver'
+      ? { title: '¿Cambiar a cuenta de conductor?', message: 'Vas a poder publicar y gestionar viajes.', confirmText: 'Sí, cambiar' }
+      : { title: '¿Cambiar a cuenta de pasajero?', message: 'Solo vas a poder buscar y reservar viajes.', confirmText: 'Sí, cambiar' });
+    if (!ok) return;
     setRoleLoading(true);
     try {
       await api.put('/profile/role', { role: newRole });
       updateUser({ role: newRole });
     } catch {
-      alert('Error al cambiar el tipo de cuenta');
+      showToast('No pudimos cambiar el tipo de cuenta', 'error');
     } finally {
       setRoleLoading(false);
     }

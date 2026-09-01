@@ -5,6 +5,7 @@ import {
   Clock, User, Bell, GearSix, SignOut, CreditCard, CheckCircle,
 } from '@phosphor-icons/react';
 import api from '../api';
+import { useConfirm } from '../context/ConfirmContext';
 import { parseDate } from '../utils/date';
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
@@ -27,6 +28,7 @@ export default function TripInProgress() {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const { user, logout } = useAuth();
+  const confirmDialog = useConfirm();
 
   const [data, setData] = useState<TripData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -34,6 +36,7 @@ export default function TripInProgress() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const firstLoadRef = useRef(true);
 
   // Cerrar dropdown al hacer click fuera
   useEffect(() => {
@@ -62,8 +65,18 @@ export default function TripInProgress() {
 
   const load = useCallback(async () => {
     try {
-      const { data } = await api.get(`/bookings/${bookingId}/trip-view`);
-      setData(data);
+      // Las fotos solo vienen en la primera carga. Los refrescos cada 5 s las
+      // omiten para no gastar datos móviles, así que hay que conservarlas.
+      const isFirst = firstLoadRef.current;
+      const { data } = await api.get(
+        `/bookings/${bookingId}/trip-view${isFirst ? '?full=1' : ''}`
+      );
+      firstLoadRef.current = false;
+      setData(prev => (prev ? {
+        ...data,
+        driver:    { ...data.driver,    avatar: data.driver.avatar    ?? prev.driver.avatar },
+        passenger: { ...data.passenger, avatar: data.passenger.avatar ?? prev.passenger.avatar },
+      } : data));
       if (data.booking.status === 'completed') {
         navigate(`/rate/${bookingId}`, { replace: true });
         return;
@@ -120,7 +133,12 @@ export default function TripInProgress() {
   };
 
   const startTrip = async () => {
-    if (!confirm('¿Iniciar el viaje? Se notificará al pasajero.')) return;
+    const ok = await confirmDialog({
+      title: '¿Iniciar el viaje?',
+      message: 'Se le notificará al pasajero que ya arrancaste.',
+      confirmText: 'Iniciar',
+    });
+    if (!ok) return;
     setActing(true);
     try {
       await api.patch(`/bookings/${bookingId}/start`);
@@ -133,7 +151,12 @@ export default function TripInProgress() {
   };
 
   const finishTrip = async () => {
-    if (!confirm('¿Finalizar el viaje?')) return;
+    const ok = await confirmDialog({
+      title: '¿Finalizar el viaje?',
+      message: 'Después podrás calificar a tu acompañante.',
+      confirmText: 'Finalizar',
+    });
+    if (!ok) return;
     setActing(true);
     try {
       await api.patch(`/bookings/${bookingId}/complete`);
