@@ -6,6 +6,7 @@ import { useToast } from '../context/ToastContext';
 import { useConfirm } from '../context/ConfirmContext';
 import { useAuth } from '../context/AuthContext';
 import { parseDate } from '../utils/date';
+import VerifyEmailBanner, { VerifiedBadge } from '../components/VerifyEmailBanner';
 import { checkPassword, passwordError, PASSWORD_MIN } from '../utils/password';
 
 interface ProfileData {
@@ -19,6 +20,7 @@ interface ProfileData {
   trips_as_passenger: number;
   cancellations: number;
   late_cancellations: number;
+  email_verified: boolean;
 }
 
 interface Rating {
@@ -212,6 +214,13 @@ export default function Profile() {
           Volver
         </button>
 
+        {profile.email_verified === false && (
+          <VerifyEmailBanner
+            email={profile.email}
+            onVerified={() => setProfile(p => (p ? { ...p, email_verified: true } : p))}
+          />
+        )}
+
         {/* Avatar section */}
         <div className="flex flex-col items-center mb-8">
           <div className="relative mb-3">
@@ -236,6 +245,7 @@ export default function Profile() {
           </div>
           <h2 className="text-white font-bold text-lg">{profile.name}</h2>
           <p className="text-zinc-500 text-sm">{profile.email}</p>
+          {profile.email_verified && <div className="mt-1"><VerifiedBadge /></div>}
           <p className="text-zinc-700 text-xs mt-1">
             Miembro desde {new Date(profile.created_at).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
           </p>

@@ -3,8 +3,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { query } = require('../db');
-const { sendResetCode } = require('../services/email');
+const { sendResetCode, sendVerifyCode, isEmailConfigured } = require('../services/email');
 const { validatePassword } = require('../utils/validation');
+const auth = require('../middleware/auth');
 
 const router = express.Router();
 const ALLOWED_DOMAIN = '@ucundinamarca.edu.co';
@@ -13,6 +14,77 @@ const ALLOWED_DOMAIN = '@ucundinamarca.edu.co';
 const CODE_TTL_MIN     = 10; // minutos que vive el código
 const MAX_ATTEMPTS     = 5;  // intentos por código antes de invalidarlo
 const MAX_CODES_PER_HR = 3;  // códigos que un usuario puede pedir por hora
+
+/**
+ * Emite un código de 4 dígitos para un usuario y lo guarda hasheado.
+ * Lo usan tanto la recuperación de contraseña como la verificación de correo:
+ * sólo cambia el propósito y la plantilla del correo.
+ *
+ * Devuelve { ok } o { error, status } para que quien llama decida qué hacer:
+ * en el registro un fallo de correo no debe tumbar la creación de la cuenta.
+ */
+async function issueCode(user, purpose, send) {
+  const recentRes = await query(
+    `SELECT COUNT(*)::int AS n FROM password_resets
+     WHERE user_id = $1 AND purpose = $2 AND created_at > NOW() - INTERVAL '1 hour'`,
+    [user.id, purpose]
+  );
+  if (recentRes.rows[0].n >= MAX_CODES_PER_HR)
+    return { error: 'Pediste demasiados códigos. Espera una hora e intenta de nuevo.', status: 429 };
+
+  // Sólo el código más reciente sirve.
+  await query(
+    'UPDATE password_resets SET used = TRUE WHERE user_id = $1 AND purpose = $2 AND used = FALSE',
+    [user.id, purpose]
+  );
+
+  // randomInt es criptográficamente seguro (Math.random no lo es).
+  const code = String(crypto.randomInt(0, 10000)).padStart(4, '0');
+  await query(
+    `INSERT INTO password_resets (user_id, code_hash, expires_at, purpose)
+     VALUES ($1, $2, NOW() + ($3 || ' minutes')::interval, $4)`,
+    [user.id, bcrypt.hashSync(code, 10), String(CODE_TTL_MIN), purpose]
+  );
+
+  const sent = await send(user.email, user.name, code);
+  if (!sent) return { error: 'No pudimos enviar el correo. Intenta más tarde.', status: 502 };
+  return { ok: true };
+}
+
+/**
+ * Comprueba un código y lo consume. Devuelve { userId } o { error, status }.
+ */
+async function consumeCode(userId, purpose, code) {
+  const prRes = await query(
+    `SELECT * FROM password_resets
+     WHERE user_id = $1 AND purpose = $2 AND used = FALSE AND expires_at > NOW()
+     ORDER BY created_at DESC LIMIT 1`,
+    [userId, purpose]
+  );
+  const pr = prRes.rows[0];
+  if (!pr) return { error: 'Código incorrecto o vencido', status: 400 };
+
+  if (pr.attempts >= MAX_ATTEMPTS) {
+    await query('UPDATE password_resets SET used = TRUE WHERE id = $1', [pr.id]);
+    return { error: 'Demasiados intentos. Pide un código nuevo.', status: 400 };
+  }
+
+  if (!bcrypt.compareSync(String(code).trim(), pr.code_hash)) {
+    const attRes = await query(
+      'UPDATE password_resets SET attempts = attempts + 1 WHERE id = $1 RETURNING attempts',
+      [pr.id]
+    );
+    const left = MAX_ATTEMPTS - attRes.rows[0].attempts;
+    return {
+      status: 400,
+      error: left > 0
+        ? `Código incorrecto. Te ${left === 1 ? 'queda 1 intento' : `quedan ${left} intentos`}.`
+        : 'Demasiados intentos. Pide un código nuevo.',
+    };
+  }
+
+  return { ok: true, row: pr };
+}
 
 router.post('/register', async (req, res) => {
   const { name, email, password, phone, role } = req.body;
@@ -39,12 +111,26 @@ router.post('/register', async (req, res) => {
     );
     const userId = result.rows[0].id;
 
+    // Enviar el código de verificación sin bloquear el registro: si el correo
+    // falla, la cuenta ya existe y el usuario puede pedir el código después.
+    // Verificar es un requisito blando, no una puerta cerrada.
+    if (isEmailConfigured()) {
+      issueCode({ id: userId, name: name.trim(), email: email.toLowerCase() }, 'verify', sendVerifyCode)
+        .catch(e => console.error('register: no se pudo enviar la verificación:', e.message));
+    }
+
     const token = jwt.sign(
       { id: userId, name: name.trim(), email: email.toLowerCase() },
       require('../middleware/auth').SECRET,
       { expiresIn: '7d' }
     );
-    res.json({ token, user: { id: userId, name: name.trim(), email: email.toLowerCase(), phone, role: userRole } });
+    res.json({
+      token,
+      user: {
+        id: userId, name: name.trim(), email: email.toLowerCase(),
+        phone, role: userRole, email_verified: false,
+      },
+    });
   } catch (err) {
     if (err.code === '23505')
       return res.status(400).json({ error: 'El email ya está registrado' });
@@ -71,7 +157,11 @@ router.post('/login', async (req, res) => {
     );
     res.json({
       token,
-      user: { id: user.id, name: user.name, email: user.email, phone: user.phone, avatar: user.avatar, role: user.role },
+      user: {
+        id: user.id, name: user.name, email: user.email, phone: user.phone,
+        avatar: user.avatar, role: user.role,
+        email_verified: user.email_verified ?? true,
+      },
     });
   } catch (err) {
     console.error('login error:', err);
@@ -86,14 +176,13 @@ router.post('/login', async (req, res) => {
 // Paso 1: pedir el código.
 router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
-  const ok = { ok: true, message: 'Te enviamos un código a tu correo.' };
 
   if (typeof email !== 'string' || !email.trim())
     return res.status(400).json({ error: 'Escribe tu correo institucional' });
   const mail = email.trim().toLowerCase();
 
   try {
-    const userRes = await query('SELECT id, name FROM users WHERE email = $1', [mail]);
+    const userRes = await query('SELECT id, name, email FROM users WHERE email = $1', [mail]);
     const user = userRes.rows[0];
     // Decidimos avisar cuando el correo no existe. Lo estándar es callarlo para
     // que nadie averigüe quién está registrado, pero aquí los correos son
@@ -102,33 +191,9 @@ router.post('/forgot-password', async (req, res) => {
     if (!user)
       return res.status(404).json({ error: 'Ese correo no está registrado. Revisa que esté bien escrito.' });
 
-    // Tope de códigos por hora, para que nadie use esto como bomba de correos.
-    const recentRes = await query(
-      "SELECT COUNT(*)::int AS n FROM password_resets WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour'",
-      [user.id]
-    );
-    if (recentRes.rows[0].n >= MAX_CODES_PER_HR) {
-      return res.status(429).json({ error: 'Pediste demasiados códigos. Espera una hora e intenta de nuevo.' });
-    }
-
-    // Invalidar los códigos anteriores: solo el más reciente sirve.
-    await query('UPDATE password_resets SET used = TRUE WHERE user_id = $1 AND used = FALSE', [user.id]);
-
-    // randomInt es criptográficamente seguro (Math.random no lo es).
-    const code = String(crypto.randomInt(0, 10000)).padStart(4, '0');
-    const codeHash = bcrypt.hashSync(code, 10);
-
-    await query(
-      `INSERT INTO password_resets (user_id, code_hash, expires_at)
-       VALUES ($1, $2, NOW() + ($3 || ' minutes')::interval)`,
-      [user.id, codeHash, String(CODE_TTL_MIN)]
-    );
-
-    const sent = await sendResetCode(mail, user.name, code);
-    if (!sent) {
-      return res.status(502).json({ error: 'No pudimos enviar el correo. Intenta más tarde.' });
-    }
-    res.json(ok);
+    const r = await issueCode(user, 'reset', sendResetCode);
+    if (r.error) return res.status(r.status).json({ error: r.error });
+    res.json({ ok: true, message: 'Te enviamos un código a tu correo.' });
   } catch (err) {
     // 42P01 = falta la tabla password_resets (no se corrió la migración).
     // Sin esto el error salía como un 500 genérico imposible de diagnosticar.
@@ -144,46 +209,20 @@ router.post('/forgot-password', async (req, res) => {
 // Paso 2: verificar el código. Devuelve un token de un solo uso.
 router.post('/verify-reset-code', async (req, res) => {
   const { email, code } = req.body;
-  const invalid = { error: 'Código incorrecto o vencido' };
-
   if (typeof email !== 'string' || typeof code !== 'string')
-    return res.status(400).json(invalid);
+    return res.status(400).json({ error: 'Código incorrecto o vencido' });
 
   try {
     const userRes = await query('SELECT id FROM users WHERE email = $1', [email.trim().toLowerCase()]);
     const user = userRes.rows[0];
-    if (!user) return res.status(400).json(invalid);
+    if (!user) return res.status(400).json({ error: 'Código incorrecto o vencido' });
 
-    const prRes = await query(
-      `SELECT * FROM password_resets
-       WHERE user_id = $1 AND used = FALSE AND expires_at > NOW()
-       ORDER BY created_at DESC LIMIT 1`,
-      [user.id]
-    );
-    const pr = prRes.rows[0];
-    if (!pr) return res.status(400).json(invalid);
-
-    if (pr.attempts >= MAX_ATTEMPTS) {
-      await query('UPDATE password_resets SET used = TRUE WHERE id = $1', [pr.id]);
-      return res.status(400).json({ error: 'Demasiados intentos. Pide un código nuevo.' });
-    }
-
-    if (!bcrypt.compareSync(code.trim(), pr.code_hash)) {
-      const attRes = await query(
-        'UPDATE password_resets SET attempts = attempts + 1 WHERE id = $1 RETURNING attempts',
-        [pr.id]
-      );
-      const left = MAX_ATTEMPTS - attRes.rows[0].attempts;
-      return res.status(400).json({
-        error: left > 0
-          ? `Código incorrecto. Te ${left === 1 ? 'queda 1 intento' : `quedan ${left} intentos`}.`
-          : 'Demasiados intentos. Pide un código nuevo.',
-      });
-    }
+    const r = await consumeCode(user.id, 'reset', code);
+    if (r.error) return res.status(r.status).json({ error: r.error });
 
     // Código correcto: entregamos un token de un solo uso para el paso 3.
     const token = crypto.randomBytes(32).toString('hex');
-    await query('UPDATE password_resets SET token = $1 WHERE id = $2', [token, pr.id]);
+    await query('UPDATE password_resets SET token = $1 WHERE id = $2', [token, r.row.id]);
     res.json({ token });
   } catch (err) {
     console.error('verify-reset-code:', err);
@@ -203,7 +242,8 @@ router.post('/reset-password', async (req, res) => {
 
   try {
     const prRes = await query(
-      'SELECT * FROM password_resets WHERE token = $1 AND used = FALSE AND expires_at > NOW()',
+      `SELECT * FROM password_resets
+       WHERE token = $1 AND purpose = 'reset' AND used = FALSE AND expires_at > NOW()`,
       [token]
     );
     const pr = prRes.rows[0];
@@ -212,12 +252,68 @@ router.post('/reset-password', async (req, res) => {
     const hashed = bcrypt.hashSync(new_password, 10);
     await query('UPDATE users SET password = $1 WHERE id = $2', [hashed, pr.user_id]);
     // Quemar el token y cualquier otro código pendiente del usuario.
-    await query('UPDATE password_resets SET used = TRUE WHERE user_id = $1', [pr.user_id]);
+    await query("UPDATE password_resets SET used = TRUE WHERE user_id = $1 AND purpose = 'reset'", [pr.user_id]);
 
     res.json({ ok: true, message: 'Contraseña actualizada. Ya puedes iniciar sesión.' });
   } catch (err) {
     console.error('reset-password:', err);
     res.status(500).json({ error: 'Error al cambiar la contraseña' });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Verificación del correo institucional
+//
+// Es un requisito blando: quien no verifica sigue usando la app, pero su
+// perfil muestra el aviso. Bloquear el acceso por un correo que quizá no
+// llegó sería peor que el problema que resuelve.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Pedir (o volver a pedir) el código de verificación
+router.post('/send-verification', auth, async (req, res) => {
+  try {
+    const userRes = await query(
+      'SELECT id, name, email, email_verified FROM users WHERE id = $1',
+      [req.user.id]
+    );
+    const user = userRes.rows[0];
+    if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+    if (user.email_verified) return res.json({ ok: true, already: true });
+
+    if (!isEmailConfigured())
+      return res.status(503).json({ error: 'El envío de correos no está configurado. Avisa al administrador.' });
+
+    const r = await issueCode(user, 'verify', sendVerifyCode);
+    if (r.error) return res.status(r.status).json({ error: r.error });
+    res.json({ ok: true, message: 'Te enviamos un código a tu correo.' });
+  } catch (err) {
+    if (err.code === '42P01' || err.code === '42703') {
+      console.error('send-verification: falta la migración. Corre supabase/email_verification.sql');
+      return res.status(503).json({ error: 'La verificación aún no está habilitada. Avisa al administrador.' });
+    }
+    console.error('send-verification:', err);
+    res.status(500).json({ error: 'Error al enviar el código' });
+  }
+});
+
+// Confirmar el código
+router.post('/verify-email', auth, async (req, res) => {
+  const { code } = req.body;
+  if (typeof code !== 'string' || !code.trim())
+    return res.status(400).json({ error: 'Escribe el código que te llegó' });
+
+  try {
+    const r = await consumeCode(req.user.id, 'verify', code);
+    if (r.error) return res.status(r.status).json({ error: r.error });
+
+    await query('UPDATE password_resets SET used = TRUE WHERE id = $1', [r.row.id]);
+    await query('UPDATE users SET email_verified = TRUE WHERE id = $1', [req.user.id]);
+    res.json({ ok: true, email_verified: true });
+  } catch (err) {
+    if (err.code === '42P01' || err.code === '42703')
+      return res.status(503).json({ error: 'La verificación aún no está habilitada. Avisa al administrador.' });
+    console.error('verify-email:', err);
+    res.status(500).json({ error: 'Error al verificar el correo' });
   }
 });
 

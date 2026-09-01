@@ -8,12 +8,13 @@ const router = express.Router();
 
 router.get('/', auth, async (req, res) => {
   try {
-    const result = await query(
-      'SELECT id, name, email, phone, avatar, role, car_brand, car_color, car_plate, created_at FROM users WHERE id = $1',
-      [req.user.id]
-    );
-    const user = result.rows[0];
-    if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+    // SELECT * y se descarta la contraseña, en vez de listar columnas: así
+    // email_verified se incluye si la migración ya corrió y se omite si no,
+    // sin que la consulta falle y tumbe el perfil entero.
+    const result = await query('SELECT * FROM users WHERE id = $1', [req.user.id]);
+    const row = result.rows[0];
+    if (!row) return res.status(404).json({ error: 'Usuario no encontrado' });
+    const { password: _omit, ...user } = row;
 
     const [drRes, paRes, cancelRes] = await Promise.all([
       query(
@@ -41,6 +42,8 @@ router.get('/', auth, async (req, res) => {
     res.json({
       ...user,
       role: user.role || 'passenger',
+      // Sin la columna todavía, no se molesta a nadie con el aviso.
+      email_verified: user.email_verified ?? true,
       trips_as_driver:    parseInt(drRes.rows[0].n, 10),
       trips_as_passenger: parseInt(paRes.rows[0].n, 10),
       cancellations:      cancelRes.rows[0].total,
