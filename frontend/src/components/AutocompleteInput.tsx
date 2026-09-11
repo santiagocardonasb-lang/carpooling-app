@@ -58,18 +58,18 @@ export default function AutocompleteInput({ value, onChange, options, placeholde
           onFocus={() => { checkDirection(); setOpen(true); }}
           placeholder={placeholder}
           autoComplete="off"
-          className="flex-1 bg-transparent text-white text-sm focus:outline-none placeholder-zinc-600"
+          className="flex-1 bg-transparent text-fg text-sm focus:outline-none placeholder-fg-faint"
         />
       </div>
 
       {showDropdown && (
-        <div className={`absolute ${openUp ? 'bottom-full mb-1' : 'top-full mt-1'} left-0 right-0 bg-zinc-950 border border-zinc-800 rounded-xl shadow-2xl overflow-hidden z-[200]`}>
+        <div className={`absolute ${openUp ? 'bottom-full mb-1' : 'top-full mt-1'} left-0 right-0 bg-surface border border-line rounded-xl shadow-2xl overflow-hidden z-[200]`}>
           {filtered.map(opt => (
             <button
               key={opt}
               type="button"
               onMouseDown={(e) => { e.preventDefault(); select(opt); }}
-              className="w-full text-left px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors border-b border-zinc-800/60 last:border-0"
+              className="w-full text-left px-4 py-2.5 text-sm text-fg-muted hover:bg-subtle hover:text-fg transition-colors border-b border-line last:border-0"
             >
               {opt}
             </button>

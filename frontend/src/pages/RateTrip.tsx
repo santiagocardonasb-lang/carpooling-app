@@ -57,8 +57,8 @@ export default function RateTrip() {
 
   if (loading || !data) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
+      <div className="min-h-screen bg-canvas flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-line-strong border-t-fg rounded-full animate-spin" />
       </div>
     );
   }
@@ -68,41 +68,41 @@ export default function RateTrip() {
   const initials = otherParty.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
 
   return (
-    <div className="min-h-screen bg-black px-6 py-12 flex flex-col">
+    <div className="min-h-screen bg-canvas px-6 py-12 flex flex-col">
       <div className="max-w-sm mx-auto w-full flex-1 flex flex-col">
 
         {/* Resumen del viaje completado */}
         <div className="text-center mb-8">
-          <div className="inline-block bg-blue-900/30 border border-blue-800 rounded-full px-4 py-1 mb-4">
-            <p className="text-blue-400 text-xs font-bold uppercase tracking-wider">✓ Viaje completado</p>
+          <div className="inline-block bg-info-soft border border-info/30 rounded-full px-4 py-1 mb-4">
+            <p className="text-info text-xs font-bold uppercase tracking-wider">✓ Viaje completado</p>
           </div>
-          <p className="text-zinc-500 text-sm">
+          <p className="text-fg-faint text-sm">
             {data.ride.origin} → {data.ride.destination}
           </p>
         </div>
 
         {/* Avatar y nombre del calificado */}
         <div className="flex flex-col items-center mb-2">
-          <div className="w-24 h-24 rounded-full bg-zinc-800 overflow-hidden flex items-center justify-center mb-3">
+          <div className="w-24 h-24 rounded-full bg-subtle overflow-hidden flex items-center justify-center mb-3">
             {otherParty.avatar ? (
               <img src={otherParty.avatar} alt="" className="w-full h-full object-cover" />
             ) : (
-              <span className="text-white text-2xl font-bold">{initials}</span>
+              <span className="text-fg text-2xl font-bold">{initials}</span>
             )}
           </div>
-          <h1 className="text-white text-xl font-bold">{otherParty.name}</h1>
+          <h1 className="text-fg text-xl font-bold">{otherParty.name}</h1>
           {Number(otherParty.rating_count) > 0 ? (
             <div className="flex items-center gap-1 mt-1">
-              <Star size={14} weight="fill" className="text-yellow-400" />
-              <span className="text-yellow-400 text-sm font-semibold">{Number(otherParty.rating ?? 0).toFixed(1)}</span>
-              <span className="text-zinc-600 text-sm">({otherParty.rating_count})</span>
+              <Star size={14} weight="fill" className="text-star" />
+              <span className="text-star text-sm font-semibold">{Number(otherParty.rating ?? 0).toFixed(1)}</span>
+              <span className="text-fg-faint text-sm">({otherParty.rating_count})</span>
             </div>
           ) : (
-            <p className="text-zinc-700 text-xs mt-1">Sin calificaciones aún · serás el primero</p>
+            <p className="text-fg-faint text-xs mt-1">Sin calificaciones aún · serás el primero</p>
           )}
         </div>
 
-        <p className="text-center text-zinc-400 text-sm mt-6 mb-4">
+        <p className="text-center text-fg-muted text-sm mt-6 mb-4">
           ¿Cómo estuvo {isDriver ? 'el pasajero' : 'el conductor'}?
         </p>
 
@@ -120,14 +120,14 @@ export default function RateTrip() {
               <Star
                 size={42}
                 weight={n <= (hover || rating) ? 'fill' : 'regular'}
-                className={n <= (hover || rating) ? 'text-yellow-400' : 'text-zinc-700'}
+                className={n <= (hover || rating) ? 'text-star' : 'text-fg-faint'}
               />
             </button>
           ))}
         </div>
 
         {rating > 0 && (
-          <p className="text-center text-zinc-500 text-xs mb-4">
+          <p className="text-center text-fg-faint text-xs mb-4">
             {['', 'Muy mal', 'Regular', 'Bien', 'Muy bien', 'Excelente'][rating]}
           </p>
         )}
@@ -138,20 +138,20 @@ export default function RateTrip() {
           placeholder="Cuéntanos cómo fue (opcional)"
           rows={3}
           maxLength={500}
-          className="w-full bg-zinc-900 text-white placeholder-zinc-600 px-4 py-3 rounded-xl text-sm resize-none focus:ring-2 focus:ring-white outline-none mb-4"
+          className="w-full bg-surface text-fg placeholder-fg-faint px-4 py-3 rounded-xl text-sm resize-none focus:ring-2 focus:ring-fg outline-none mb-4"
         />
 
         <button
           onClick={submit}
           disabled={rating < 1 || submitting}
-          className="w-full bg-white text-black font-bold py-4 rounded-xl hover:bg-zinc-200 disabled:opacity-40 transition-colors"
+          className="w-full bg-primary text-on-primary font-bold py-4 rounded-xl hover:bg-subtle disabled:opacity-40 transition-colors"
         >
           {submitting ? 'Enviando...' : 'Enviar calificación'}
         </button>
 
         <button
           onClick={() => navigate('/my-rides', { replace: true })}
-          className="w-full text-zinc-600 hover:text-zinc-400 text-sm py-3 mt-2 flex items-center justify-center gap-1 transition-colors"
+          className="w-full text-fg-faint hover:text-fg-muted text-sm py-3 mt-2 flex items-center justify-center gap-1 transition-colors"
         >
           Después <ArrowRight size={13} weight="bold" />
         </button>

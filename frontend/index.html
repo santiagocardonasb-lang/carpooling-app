@@ -6,17 +6,34 @@
 
     <link rel="icon" type="image/svg+xml" href="/car.svg" />
     <link rel="apple-touch-icon" href="/car.svg" />
-    <meta name="theme-color" content="#0B0B0F" media="(prefers-color-scheme: dark)" />
-    <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#FFFFFF" />
 
     <title>carpool · Comparte el viaje</title>
     <meta name="description" content="Comparte tu ruta con estudiantes de la Universidad de Cundinamarca. Divide el costo, reduce las emisiones." />
 
-    <!-- Plus Jakarta Sans para la interfaz, Instrument Serif para los titulares -->
+    <!--
+      El tema se resuelve antes del primer pintado. Si esperara al efecto de
+      React, quien usa el tema oscuro vería un destello blanco en cada carga.
+      Tiene que ser la misma lógica que readTheme() en ThemeContext.tsx.
+    -->
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem('carpooling.theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.querySelector('meta[name=theme-color]')
+              .setAttribute('content', '#09090B');
+          }
+        } catch (e) {
+          /* navegación privada: se queda en claro */
+        }
+      })();
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Instrument+Serif:ital@0;1&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
   </head>

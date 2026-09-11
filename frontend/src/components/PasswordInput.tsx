@@ -34,8 +34,8 @@ export default function PasswordInput({
         autoCapitalize="none"
         autoCorrect="off"
         spellCheck={false}
-        className={`w-full bg-zinc-900 text-white placeholder-zinc-500 pl-4 pr-12 py-4 rounded-xl text-sm transition outline-none ${
-          error ? 'ring-2 ring-red-500' : 'focus:ring-2 focus:ring-white'
+        className={`w-full bg-surface text-fg placeholder-fg-faint pl-4 pr-12 py-4 rounded-xl text-sm transition outline-none ${
+          error ? 'ring-2 ring-danger' : 'focus:ring-2 focus:ring-fg'
         }`}
       />
       <button
@@ -43,7 +43,7 @@ export default function PasswordInput({
         onClick={() => setVisible((v) => !v)}
         tabIndex={-1}
         aria-label={visible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-        className="absolute right-0 top-0 h-full px-4 flex items-center text-zinc-500 hover:text-white transition-colors"
+        className="absolute right-0 top-0 h-full px-4 flex items-center text-fg-faint hover:text-fg transition-colors"
       >
         {visible ? <EyeSlash size={18} weight="duotone" /> : <Eye size={18} weight="duotone" />}
       </button>

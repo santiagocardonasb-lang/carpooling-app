@@ -82,49 +82,49 @@ export default function VehicleProfile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center pt-16">
-        <div className="w-6 h-6 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
+      <div className="min-h-screen bg-canvas flex items-center justify-center pt-16">
+        <div className="w-6 h-6 border-2 border-line-strong border-t-fg rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black pt-20 px-6 pb-12">
+    <div className="min-h-screen bg-canvas pt-20 px-6 pb-12">
       <div className="max-w-sm mx-auto mt-4">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors text-sm mb-6">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-fg-faint hover:text-fg transition-colors text-sm mb-6">
           <ArrowLeft size={16} weight="bold" /> Volver
         </button>
 
-        <h1 className="text-2xl font-black text-white mb-2">Mi vehículo</h1>
-        <p className="text-zinc-500 text-sm mb-8">Esta información es visible para los pasajeros que reserven tu viaje.</p>
+        <h1 className="text-2xl font-black text-fg mb-2">Mi vehículo</h1>
+        <p className="text-fg-faint text-sm mb-8">Esta información es visible para los pasajeros que reserven tu viaje.</p>
 
         {/* Fields — no overflow-hidden so autocomplete dropdowns can escape */}
-        <div className="bg-zinc-900 rounded-2xl mb-4">
-          <div className="px-4 py-3.5 border-b border-zinc-800">
+        <div className="bg-surface rounded-2xl mb-4">
+          <div className="px-4 py-3.5 border-b border-line">
             <AutocompleteInput
               value={carBrand}
               onChange={setCarBrand}
               options={CAR_BRANDS}
               placeholder="Marca y modelo (ej. Chevrolet Spark)"
-              icon={<Car size={15} weight="duotone" className="text-zinc-500 flex-shrink-0" />}
+              icon={<Car size={15} weight="duotone" className="text-fg-faint flex-shrink-0" />}
             />
           </div>
-          <div className="px-4 py-3.5 border-b border-zinc-800">
+          <div className="px-4 py-3.5 border-b border-line">
             <AutocompleteInput
               value={carColor}
               onChange={setCarColor}
               options={CAR_COLORS}
               placeholder="Color (ej. Blanco)"
-              icon={<Palette size={15} weight="duotone" className="text-zinc-500 flex-shrink-0" />}
+              icon={<Palette size={15} weight="duotone" className="text-fg-faint flex-shrink-0" />}
             />
           </div>
           <div className="flex items-center gap-3 px-4 py-3.5">
-            <CreditCard size={15} weight="duotone" className="text-zinc-500 flex-shrink-0" />
+            <CreditCard size={15} weight="duotone" className="text-fg-faint flex-shrink-0" />
             <input
               type="text"
               value={carPlate}
               onChange={(e) => handlePlateChange(e.target.value)}
-              className="flex-1 bg-transparent text-white text-sm focus:outline-none placeholder-zinc-600 tracking-widest font-mono"
+              className="flex-1 bg-transparent text-fg text-sm focus:outline-none placeholder-fg-faint tracking-widest font-mono"
               placeholder="Placa (ej. ABC123)"
               maxLength={6}
             />
@@ -132,7 +132,7 @@ export default function VehicleProfile() {
         </div>
 
         {plateError && (
-          <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-xl text-xs bg-red-900/30 text-red-400">
+          <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-xl text-xs bg-danger-soft text-danger">
             <WarningCircle size={13} weight="duotone" />
             {plateError}
           </div>
@@ -140,23 +140,23 @@ export default function VehicleProfile() {
 
         {msg && (
           <div className={`flex items-center gap-2 mb-3 px-3 py-2 rounded-xl text-xs ${
-            msg.type === 'ok' ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400'
+            msg.type === 'ok' ? 'bg-live-soft text-live' : 'bg-danger-soft text-danger'
           }`}>
             {msg.type === 'ok' ? <Check size={13} weight="bold" /> : <WarningCircle size={13} weight="duotone" />}
             {msg.text}
           </div>
         )}
 
-        <div className="bg-zinc-900 rounded-xl px-4 py-3 mb-6">
-          <p className="text-zinc-500 text-xs font-semibold mb-1.5">Formato de placa permitido</p>
-          <p className="text-zinc-600 text-xs">LLL NNN — 3 letras + 3 números &nbsp;(ej: ABC123)</p>
-          <p className="text-zinc-600 text-xs mt-0.5">LLL NNL — 3 letras + 2 números + 1 letra &nbsp;(ej: ABC12D)</p>
+        <div className="bg-surface rounded-xl px-4 py-3 mb-6">
+          <p className="text-fg-faint text-xs font-semibold mb-1.5">Formato de placa permitido</p>
+          <p className="text-fg-faint text-xs">LLL NNN — 3 letras + 3 números &nbsp;(ej: ABC123)</p>
+          <p className="text-fg-faint text-xs mt-0.5">LLL NNL — 3 letras + 2 números + 1 letra &nbsp;(ej: ABC12D)</p>
         </div>
 
         <button
           onClick={save}
           disabled={saving}
-          className="w-full bg-white text-black font-semibold py-3 rounded-xl hover:bg-zinc-200 disabled:opacity-50 transition-colors text-sm"
+          className="w-full bg-primary text-on-primary font-semibold py-3 rounded-xl hover:bg-subtle disabled:opacity-50 transition-colors text-sm"
         >
           {saving ? 'Guardando...' : 'Guardar vehículo'}
         </button>

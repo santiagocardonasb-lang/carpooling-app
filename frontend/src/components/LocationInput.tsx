@@ -51,8 +51,8 @@ export default function LocationInput({ value, onChange, placeholder, dot = 'ori
     <div ref={ref} className="relative flex-1">
       <div className="flex items-center gap-3">
         <div className={`w-2 h-2 flex-shrink-0 ${
-          dot === 'origin' ? 'rounded-full bg-zinc-500' : 'rounded-sm bg-white'
-        } ${error ? 'bg-red-500' : ''}`} />
+          dot === 'origin' ? 'rounded-full bg-fg-faint' : 'rounded-sm bg-primary'
+        } ${error ? 'bg-notify' : ''}`} />
         <input
           ref={inputRef}
           type="text"
@@ -60,20 +60,20 @@ export default function LocationInput({ value, onChange, placeholder, dot = 'ori
           onChange={(e) => { setQuery(e.target.value); onChange(e.target.value); setOpen(true); }}
           onFocus={() => { checkDirection(); if (query.trim().length > 0) setOpen(true); }}
           placeholder={placeholder}
-          className={`flex-1 bg-transparent placeholder-zinc-500 text-sm focus:outline-none ${error ? 'text-red-300 placeholder-red-800' : 'text-white'}`}
+          className={`flex-1 bg-transparent placeholder-fg-faint text-sm focus:outline-none ${error ? 'text-danger placeholder-danger/60' : 'text-fg'}`}
           autoComplete="off"
         />
         {query && (
-          <button type="button" onClick={() => { setQuery(''); onChange(''); }} className="text-zinc-600 hover:text-zinc-400">
+          <button type="button" onClick={() => { setQuery(''); onChange(''); }} className="text-fg-faint hover:text-fg-muted">
             <X size={13} weight="bold" />
           </button>
         )}
       </div>
 
       {open && (
-        <div className={`absolute ${openUp ? 'bottom-full mb-2' : 'top-full mt-2'} left-0 right-0 bg-zinc-800 border border-zinc-700 rounded-xl overflow-hidden z-[100] shadow-2xl`}>
+        <div className={`absolute ${openUp ? 'bottom-full mb-2' : 'top-full mt-2'} left-0 right-0 bg-subtle border border-line-strong rounded-xl overflow-hidden z-[100] shadow-2xl`}>
           {suggestions.length === 0 ? (
-            <div className="px-4 py-3 flex items-center gap-2 text-zinc-500 text-sm">
+            <div className="px-4 py-3 flex items-center gap-2 text-fg-faint text-sm">
               <MapPin size={14} weight="duotone" />
               Sin resultados
             </div>
@@ -83,7 +83,7 @@ export default function LocationInput({ value, onChange, placeholder, dot = 'ori
                 key={m}
                 type="button"
                 onMouseDown={() => select(m)}
-                className="w-full text-left px-4 py-3 text-sm text-white hover:bg-zinc-700 transition-colors border-b border-zinc-700/50 last:border-0"
+                className="w-full text-left px-4 py-3 text-sm text-fg hover:bg-line-strong transition-colors border-b border-line-strong last:border-0"
               >
                 {m}
               </button>

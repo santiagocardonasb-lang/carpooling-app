@@ -65,24 +65,24 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
           >
             <div className="px-6 pt-6 pb-5 text-center">
               <div className={`w-12 h-12 rounded-2xl mx-auto mb-4 flex items-center justify-center ${
-                opts.danger ? 'bg-red-900/30' : 'bg-zinc-800'
+                opts.danger ? 'bg-danger-soft' : 'bg-subtle'
               }`}>
                 <WarningCircle
                   size={24}
                   weight="duotone"
-                  className={opts.danger ? 'text-red-400' : 'text-zinc-300'}
+                  className={opts.danger ? 'text-danger' : 'text-fg-muted'}
                 />
               </div>
-              <h2 className="text-white font-bold text-lg leading-snug">{opts.title}</h2>
+              <h2 className="text-fg font-bold text-lg leading-snug">{opts.title}</h2>
               {opts.message && (
-                <p className="text-zinc-400 text-sm mt-2 leading-relaxed">{opts.message}</p>
+                <p className="text-fg-muted text-sm mt-2 leading-relaxed">{opts.message}</p>
               )}
             </div>
 
             <div className="px-4 pb-4 grid grid-cols-2 gap-2">
               <button
                 onClick={() => close(false)}
-                className="py-3.5 rounded-2xl text-sm font-semibold bg-zinc-800 text-white hover:bg-zinc-700"
+                className="py-3.5 rounded-2xl text-sm font-semibold bg-subtle text-fg hover:bg-line-strong"
               >
                 {opts.cancelText || 'Cancelar'}
               </button>
@@ -91,8 +91,8 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
                 onClick={() => close(true)}
                 className={`py-3.5 rounded-2xl text-sm font-bold ${
                   opts.danger
-                    ? 'bg-red-500 text-white hover:bg-red-600'
-                    : 'bg-white text-black hover:bg-zinc-200'
+                    ? 'bg-notify text-fg hover:bg-notify'
+                    : 'bg-primary text-on-primary hover:bg-subtle'
                 }`}
               >
                 {opts.confirmText || 'Confirmar'}

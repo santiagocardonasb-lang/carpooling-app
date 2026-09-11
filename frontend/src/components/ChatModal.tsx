@@ -62,30 +62,30 @@ export default function ChatModal({ bookingId, onClose }: Props) {
   return (
     <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm" onClick={onClose}>
       <div
-        className="bg-zinc-900 w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl border-t sm:border border-zinc-800 flex flex-col h-[80vh] sm:h-[600px]"
+        className="bg-surface w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl border-t sm:border border-line flex flex-col h-[80vh] sm:h-[600px]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between p-4 border-b border-zinc-800 flex-shrink-0">
+        <div className="flex items-center justify-between p-4 border-b border-line flex-shrink-0">
           <div>
-            <h2 className="text-white font-bold">{otherName || 'Cargando...'}</h2>
-            <p className="text-zinc-600 text-[11px]">Reserva #{bookingId}</p>
+            <h2 className="text-fg font-bold">{otherName || 'Cargando...'}</h2>
+            <p className="text-fg-faint text-[11px]">Reserva #{bookingId}</p>
           </div>
-          <button onClick={onClose} className="text-zinc-500 hover:text-white"><X size={18} weight="bold" /></button>
+          <button onClick={onClose} className="text-fg-faint hover:text-fg"><X size={18} weight="bold" /></button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {messages.length === 0 ? (
             <div className="text-center py-8 flex flex-col items-center gap-2">
-              <HandWaving size={20} weight="duotone" className="text-zinc-600" />
-              <p className="text-zinc-600 text-sm">No hay mensajes aún. Saluda.</p>
+              <HandWaving size={20} weight="duotone" className="text-fg-faint" />
+              <p className="text-fg-faint text-sm">No hay mensajes aún. Saluda.</p>
             </div>
           ) : messages.map(m => {
             const mine = m.sender_id === user?.id;
             return (
               <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${mine ? 'bg-white text-black' : 'bg-zinc-800 text-white'}`}>
+                <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${mine ? 'bg-primary text-on-primary' : 'bg-subtle text-fg'}`}>
                   <p className="whitespace-pre-wrap break-words">{m.text}</p>
-                  <p className={`text-[10px] mt-1 ${mine ? 'text-zinc-600' : 'text-zinc-500'}`}>{formatTime(m.created_at)}</p>
+                  <p className={`text-[10px] mt-1 ${mine ? 'text-fg-faint' : 'text-fg-faint'}`}>{formatTime(m.created_at)}</p>
                 </div>
               </div>
             );
@@ -94,11 +94,11 @@ export default function ChatModal({ bookingId, onClose }: Props) {
         </div>
 
         {disabled ? (
-          <div className="p-3 border-t border-zinc-800 text-center text-zinc-600 text-xs">
+          <div className="p-3 border-t border-line text-center text-fg-faint text-xs">
             Esta reserva ya fue cancelada
           </div>
         ) : (
-          <div className="p-3 border-t border-zinc-800 flex gap-2 flex-shrink-0">
+          <div className="p-3 border-t border-line flex gap-2 flex-shrink-0">
             <input
               type="text"
               value={input}
@@ -106,12 +106,12 @@ export default function ChatModal({ bookingId, onClose }: Props) {
               onKeyDown={(e) => { if (e.key === 'Enter') send(); }}
               placeholder="Escribe un mensaje..."
               maxLength={500}
-              className="flex-1 bg-zinc-800 text-white px-3 py-2 rounded-xl text-sm focus:ring-2 focus:ring-white outline-none"
+              className="flex-1 bg-subtle text-fg px-3 py-2 rounded-xl text-sm focus:ring-2 focus:ring-fg outline-none"
             />
             <button
               onClick={send}
               disabled={!input.trim() || sending}
-              className="bg-white text-black p-2 rounded-xl hover:bg-zinc-200 disabled:opacity-40 transition-colors"
+              className="bg-primary text-on-primary p-2 rounded-xl hover:bg-subtle disabled:opacity-40 transition-colors"
             >
               <PaperPlaneRight size={16} weight="duotone" />
             </button>

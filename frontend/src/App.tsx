@@ -139,22 +139,22 @@ function TripStartedWatcher() {
 
   return (
     <div className="fixed inset-0 z-[300] bg-black/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-5">
-      <div className="bg-zinc-900 w-full max-w-sm rounded-3xl border border-zinc-800 overflow-hidden shadow-2xl">
+      <div className="bg-surface w-full max-w-sm rounded-3xl border border-line overflow-hidden shadow-2xl">
         {/* Banner amarillo */}
-        <div className="bg-yellow-900/40 border-b border-yellow-800/60 px-6 py-6 text-center">
+        <div className="bg-warn-soft border-b border-warn/30 px-6 py-6 text-center">
           <div className="text-4xl mb-2">🚗</div>
-          <h2 className="text-yellow-300 font-black text-xl">¡Tu viaje inició!</h2>
-          <p className="text-yellow-400/70 text-sm mt-1 leading-relaxed">
+          <h2 className="text-star font-black text-xl">¡Tu viaje inició!</h2>
+          <p className="text-star/70 text-sm mt-1 leading-relaxed">
             {alert.driver_name} arrancó el recorrido
           </p>
         </div>
 
         {/* Info */}
         <div className="px-5 py-5 space-y-3">
-          <div className="bg-zinc-800 rounded-2xl p-4">
-            <div className="flex items-center justify-between text-sm font-semibold text-white">
+          <div className="bg-subtle rounded-2xl p-4">
+            <div className="flex items-center justify-between text-sm font-semibold text-fg">
               <span className="truncate">{alert.origin}</span>
-              <span className="text-zinc-500 mx-2 flex-shrink-0">→</span>
+              <span className="text-fg-faint mx-2 flex-shrink-0">→</span>
               <span className="truncate text-right">{alert.destination}</span>
             </div>
           </div>
@@ -162,7 +162,7 @@ function TripStartedWatcher() {
           {/* Aceptar */}
           <button
             onClick={accept}
-            className="w-full bg-white text-black font-bold py-4 rounded-2xl hover:bg-zinc-100 transition-colors text-sm active:scale-[0.98]"
+            className="w-full bg-primary text-on-primary font-bold py-4 rounded-2xl hover:bg-subtle transition-colors text-sm active:scale-[0.98]"
           >
             ✅ Estoy listo, vamos
           </button>
@@ -171,13 +171,13 @@ function TripStartedWatcher() {
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => requestDelay(5)}
-              className="bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white font-medium py-3 rounded-xl text-sm transition-colors active:scale-[0.98]"
+              className="bg-subtle hover:bg-line-strong border border-line-strong text-fg font-medium py-3 rounded-xl text-sm transition-colors active:scale-[0.98]"
             >
               ⏰ 5 min
             </button>
             <button
               onClick={() => requestDelay(10)}
-              className="bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white font-medium py-3 rounded-xl text-sm transition-colors active:scale-[0.98]"
+              className="bg-subtle hover:bg-line-strong border border-line-strong text-fg font-medium py-3 rounded-xl text-sm transition-colors active:scale-[0.98]"
             >
               ⏰ 10 min
             </button>
@@ -186,7 +186,7 @@ function TripStartedWatcher() {
           {/* Rechazar / cancelar */}
           <button
             onClick={decline}
-            className="w-full text-red-400 hover:text-red-300 text-xs py-2 transition-colors"
+            className="w-full text-danger hover:text-danger text-xs py-2 transition-colors"
           >
             ❌ Cancelar reserva
           </button>
@@ -203,7 +203,7 @@ function TripStartedWatcher() {
 function RouteFallback() {
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <div className="w-6 h-6 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
+      <div className="w-6 h-6 border-2 border-line-strong border-t-fg rounded-full animate-spin" />
     </div>
   );
 }

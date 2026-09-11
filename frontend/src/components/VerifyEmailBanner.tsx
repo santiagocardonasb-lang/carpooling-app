@@ -76,12 +76,12 @@ export default function VerifyEmailBanner({ email, onVerified }: {
   if (dismissed) return null;
 
   return (
-    <div className="bg-yellow-900/20 border border-yellow-800 rounded-2xl p-4 mb-6 animate-rise">
+    <div className="bg-warn-soft border border-warn/30 rounded-2xl p-4 mb-6 animate-rise">
       <div className="flex items-start gap-3">
-        <EnvelopeSimple size={18} weight="duotone" className="text-yellow-400 flex-shrink-0 mt-0.5" />
+        <EnvelopeSimple size={18} weight="duotone" className="text-star flex-shrink-0 mt-0.5" />
         <div className="flex-1 min-w-0">
-          <p className="text-yellow-400 text-sm font-semibold">Verifica tu correo</p>
-          <p className="text-yellow-400/70 text-xs mt-1 leading-relaxed">
+          <p className="text-star text-sm font-semibold">Verifica tu correo</p>
+          <p className="text-star/70 text-xs mt-1 leading-relaxed">
             Confirma que <span className="font-medium">{email}</span> es tuyo. Le da
             confianza a quienes viajen contigo.
           </p>
@@ -90,7 +90,7 @@ export default function VerifyEmailBanner({ email, onVerified }: {
             <button
               onClick={sendCode}
               disabled={sending}
-              className="mt-3 bg-yellow-400 text-black text-xs font-bold px-4 py-2 rounded-xl hover:bg-yellow-300 disabled:opacity-50 transition-colors"
+              className="mt-3 bg-warn text-on-primary text-xs font-bold px-4 py-2 rounded-xl hover:bg-warn disabled:opacity-50 transition-colors"
             >
               {sending ? 'Enviando...' : 'Enviarme el código'}
             </button>
@@ -110,27 +110,27 @@ export default function VerifyEmailBanner({ email, onVerified }: {
                     autoComplete="one-time-code"
                     maxLength={CODE_LEN}
                     disabled={checking}
-                    className="w-10 h-12 text-center text-lg font-black tabular-nums rounded-xl bg-zinc-900 text-white outline-none ring-1 ring-zinc-800 focus:ring-2 focus:ring-yellow-400 disabled:opacity-50"
+                    className="w-10 h-12 text-center text-lg font-black tabular-nums rounded-xl bg-surface text-fg outline-none ring-1 ring-line focus:ring-2 focus:ring-warn disabled:opacity-50"
                   />
                 ))}
               </div>
               <button
                 onClick={sendCode}
                 disabled={sending}
-                className="mt-2 text-yellow-400/70 hover:text-yellow-400 text-[11px] transition-colors"
+                className="mt-2 text-star/70 hover:text-star text-[11px] transition-colors"
               >
                 Reenviar código
               </button>
             </div>
           )}
 
-          {error && <p className="text-red-400 text-xs mt-2">{error}</p>}
+          {error && <p className="text-danger text-xs mt-2">{error}</p>}
         </div>
 
         <button
           onClick={() => setDismissed(true)}
           aria-label="Ocultar aviso"
-          className="text-yellow-400/50 hover:text-yellow-400 transition-colors flex-shrink-0"
+          className="text-star/50 hover:text-star transition-colors flex-shrink-0"
         >
           <X size={14} weight="bold" />
         </button>
@@ -141,7 +141,7 @@ export default function VerifyEmailBanner({ email, onVerified }: {
 
 export function VerifiedBadge() {
   return (
-    <span className="inline-flex items-center gap-1 text-green-400 text-xs">
+    <span className="inline-flex items-center gap-1 text-live text-xs">
       <CheckCircle size={12} weight="duotone" /> Correo verificado
     </span>
   );

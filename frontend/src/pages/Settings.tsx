@@ -12,17 +12,17 @@ export default function Settings() {
   ];
 
   return (
-    <div className="min-h-screen bg-black pt-20 px-6 pb-12">
+    <div className="min-h-screen bg-canvas pt-20 px-6 pb-12">
       <div className="max-w-sm mx-auto mt-4">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors text-sm mb-6">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-fg-faint hover:text-fg transition-colors text-sm mb-6">
           <ArrowLeft size={16} weight="bold" /> Volver
         </button>
 
-        <h1 className="text-2xl font-black text-white mb-2">Configuración</h1>
-        <p className="text-zinc-500 text-sm mb-8">Personaliza la apariencia de la app.</p>
+        <h1 className="text-2xl font-black text-fg mb-2">Configuración</h1>
+        <p className="text-fg-faint text-sm mb-8">Personaliza la apariencia de la app.</p>
 
         <section className="mb-8">
-          <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-3">Apariencia</h3>
+          <h3 className="text-fg-muted text-xs font-semibold uppercase tracking-wider mb-3">Apariencia</h3>
           <div className="space-y-2">
             {options.map(({ value, label, desc, Icon }) => {
               const selected = theme === value;
@@ -31,17 +31,17 @@ export default function Settings() {
                   key={value}
                   onClick={() => setTheme(value)}
                   className={`w-full flex items-center gap-4 p-4 rounded-2xl border transition-all text-left ${
-                    selected ? 'bg-white border-white' : 'bg-zinc-900 border-zinc-800 hover:border-zinc-600'
+                    selected ? 'bg-primary border-primary' : 'bg-surface border-line hover:border-line-strong'
                   }`}
                 >
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${selected ? 'bg-black' : 'bg-zinc-800'}`}>
-                    <Icon size={18} weight="duotone" className={selected ? 'text-white' : 'text-zinc-400'} />
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${selected ? 'bg-canvas' : 'bg-subtle'}`}>
+                    <Icon size={18} weight="duotone" className={selected ? 'text-fg' : 'text-fg-muted'} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className={`font-semibold text-sm ${selected ? 'text-black' : 'text-white'}`}>{label}</p>
-                    <p className={`text-xs mt-0.5 ${selected ? 'text-zinc-600' : 'text-zinc-500'}`}>{desc}</p>
+                    <p className={`font-semibold text-sm ${selected ? 'text-on-primary' : 'text-fg'}`}>{label}</p>
+                    <p className={`text-xs mt-0.5 ${selected ? 'text-fg-faint' : 'text-fg-faint'}`}>{desc}</p>
                   </div>
-                  {selected && <Check size={16} weight="bold" className="text-black flex-shrink-0" />}
+                  {selected && <Check size={16} weight="bold" className="text-on-primary flex-shrink-0" />}
                 </button>
               );
             })}
@@ -49,15 +49,15 @@ export default function Settings() {
         </section>
 
         <section>
-          <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-3">Acerca de</h3>
-          <div className="bg-zinc-900 rounded-2xl p-4 space-y-2">
+          <h3 className="text-fg-muted text-xs font-semibold uppercase tracking-wider mb-3">Acerca de</h3>
+          <div className="bg-surface rounded-2xl p-4 space-y-2">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-zinc-500">Versión</span>
-              <span className="text-white font-semibold">1.0.0</span>
+              <span className="text-fg-faint">Versión</span>
+              <span className="text-fg font-semibold">1.0.0</span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-zinc-500">Plataforma</span>
-              <span className="text-white">Web</span>
+              <span className="text-fg-faint">Plataforma</span>
+              <span className="text-fg">Web</span>
             </div>
           </div>
         </section>

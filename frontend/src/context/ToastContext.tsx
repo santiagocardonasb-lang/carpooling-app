@@ -59,7 +59,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         >
           {/* ── popup card ── */}
           <div
-            className={`relative bg-white rounded-3xl px-8 py-8 w-full max-w-xs flex flex-col items-center gap-4
+            className={`relative bg-primary rounded-3xl px-8 py-8 w-full max-w-xs flex flex-col items-center gap-4
               shadow-2xl transition-all duration-300
               ${visible ? 'scale-100 translate-y-0' : 'scale-90 translate-y-4'}`}
             onClick={(e) => e.stopPropagation()}
@@ -67,32 +67,32 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             {/* close button */}
             <button
               onClick={dismiss}
-              className="absolute top-4 right-4 text-zinc-300 hover:text-zinc-500 transition-colors"
+              className="absolute top-4 right-4 text-fg-muted hover:text-fg-faint transition-colors"
             >
               <X size={18} weight="bold" />
             </button>
 
             {/* icon */}
             <div className={`w-20 h-20 rounded-full flex items-center justify-center
-              ${toast.type === 'success' ? 'bg-green-50' : 'bg-red-50'}`}>
+              ${toast.type === 'success' ? 'bg-live-soft' : 'bg-danger-soft'}`}>
               {toast.type === 'success'
-                ? <CheckCircle size={44} weight="duotone" className="text-green-500" />
-                : <XCircle    size={44} weight="duotone" className="text-red-500"   />
+                ? <CheckCircle size={44} weight="duotone" className="text-live" />
+                : <XCircle    size={44} weight="duotone" className="text-danger"   />
               }
             </div>
 
             {/* text */}
             <div className="text-center">
-              <p className="text-black font-bold text-lg leading-tight">{toast.message}</p>
+              <p className="text-on-primary font-bold text-lg leading-tight">{toast.message}</p>
               {toast.detail && (
-                <p className="text-zinc-500 text-sm mt-1">{toast.detail}</p>
+                <p className="text-fg-faint text-sm mt-1">{toast.detail}</p>
               )}
             </div>
 
             {/* progress bar */}
-            <div className="w-full h-1 bg-zinc-100 rounded-full overflow-hidden">
+            <div className="w-full h-1 bg-subtle rounded-full overflow-hidden">
               <div
-                className={`h-full rounded-full ${toast.type === 'success' ? 'bg-green-400' : 'bg-red-400'}`}
+                className={`h-full rounded-full ${toast.type === 'success' ? 'bg-live' : 'bg-notify'}`}
                 style={{
                   animation: visible ? 'toast-progress 3.2s linear forwards' : 'none',
                 }}

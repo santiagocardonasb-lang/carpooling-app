@@ -143,51 +143,51 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
   };
 
   return (
-    <div className={`bg-zinc-900 rounded-2xl p-5 border transition-colors ${isCancelled ? 'border-zinc-800 opacity-40' : 'border-zinc-800 hover:border-zinc-700'}`}>
+    <div className={`bg-surface rounded-2xl p-5 border transition-colors ${isCancelled ? 'border-line opacity-40' : 'border-line hover:border-line-strong'}`}>
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-zinc-800 rounded-xl flex items-center justify-center flex-shrink-0">
+          <div className="w-9 h-9 bg-subtle rounded-xl flex items-center justify-center flex-shrink-0">
             {ride.vehicle_type === 'moto'
-              ? <Motorcycle size={18} weight="duotone" className="text-zinc-300" />
-              : <Car size={18} weight="duotone" className="text-zinc-300" />
+              ? <Motorcycle size={18} weight="duotone" className="text-fg-muted" />
+              : <Car size={18} weight="duotone" className="text-fg-muted" />
             }
           </div>
           <div>
-            <div className="flex items-center gap-2 text-sm font-semibold text-white">
+            <div className="flex items-center gap-2 text-sm font-semibold text-fg">
               <span>{ride.origin}</span>
-              <span className="text-zinc-700">→</span>
+              <span className="text-fg-faint">→</span>
               <span>{ride.destination}</span>
             </div>
             {ride.driver_name && (
-              <p className="text-zinc-500 text-xs mt-0.5 flex items-center gap-1.5">
+              <p className="text-fg-faint text-xs mt-0.5 flex items-center gap-1.5">
                 <span>{ride.driver_name}</span>
                 {Number(ride.driver_rating_count ?? 0) > 0 && (
-                  <span className="flex items-center gap-0.5 text-yellow-400">
-                    <Star size={10} weight="fill" className="text-yellow-400" />
+                  <span className="flex items-center gap-0.5 text-star">
+                    <Star size={10} weight="fill" className="text-star" />
                     <span>{Number(ride.driver_rating ?? 0).toFixed(1)}</span>
-                    <span className="text-zinc-700">({ride.driver_rating_count})</span>
+                    <span className="text-fg-faint">({ride.driver_rating_count})</span>
                   </span>
                 )}
               </p>
             )}
             {(ride.car_brand || ride.car_color || ride.car_plate) && (
-              <p className="text-zinc-600 text-xs mt-0.5">
+              <p className="text-fg-faint text-xs mt-0.5">
                 {[ride.car_brand, ride.car_color, ride.car_plate].filter(Boolean).join(' · ')}
               </p>
             )}
           </div>
         </div>
         <div className="text-right flex-shrink-0 ml-3">
-          <p className="text-white font-bold text-lg">${Number(ride.price).toLocaleString()}</p>
-          <p className="text-zinc-600 text-xs">por persona</p>
+          <p className="text-fg font-bold text-lg">${Number(ride.price).toLocaleString()}</p>
+          <p className="text-fg-faint text-xs">por persona</p>
         </div>
       </div>
 
       {/* Meta */}
-      <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-500 mb-3">
+      <div className="flex flex-wrap items-center gap-3 text-xs text-fg-faint mb-3">
         {ride.is_recurring ? (
-          <span className="flex items-center gap-1.5 bg-zinc-800 text-zinc-300 px-2.5 py-1 rounded-full">
+          <span className="flex items-center gap-1.5 bg-subtle text-fg-muted px-2.5 py-1 rounded-full">
             <ArrowsClockwise size={11} weight="duotone" /> {ride.days_label}
           </span>
         ) : ride.date && (
@@ -202,24 +202,24 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
       {/* Seats bar */}
       <div className="mb-4">
         <div className="flex justify-between items-center text-xs mb-1.5">
-          <span className="flex items-center gap-1.5 text-zinc-500">
+          <span className="flex items-center gap-1.5 text-fg-faint">
             <Users size={12} weight="duotone" />
             {ride.seats_available} de {ride.seats} asiento{ride.seats !== 1 ? 's' : ''} libre{ride.seats_available !== 1 ? 's' : ''}
           </span>
           {isOwnRide && (ride.pending_requests ?? 0) > 0 && (
-            <span className="text-yellow-500">{ride.pending_requests} pendiente{ride.pending_requests !== 1 ? 's' : ''}</span>
+            <span className="text-star">{ride.pending_requests} pendiente{ride.pending_requests !== 1 ? 's' : ''}</span>
           )}
         </div>
-        <div className="h-1 bg-zinc-800 rounded-full overflow-hidden">
+        <div className="h-1 bg-subtle rounded-full overflow-hidden">
           <div
-            className={`h-full rounded-full transition-all ${seatsPercent >= 80 ? 'bg-red-500' : seatsPercent >= 50 ? 'bg-yellow-500' : 'bg-green-500'}`}
+            className={`h-full rounded-full transition-all ${seatsPercent >= 80 ? 'bg-notify' : seatsPercent >= 50 ? 'bg-warn' : 'bg-live'}`}
             style={{ width: `${Math.min(seatsPercent, 100)}%` }}
           />
         </div>
       </div>
 
       {ride.description && (
-        <p className="text-zinc-600 text-xs mb-4 italic">"{ride.description}"</p>
+        <p className="text-fg-faint text-xs mb-4 italic">"{ride.description}"</p>
       )}
 
       {/* Actions */}
@@ -231,7 +231,7 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
               {!requesting ? (
                 <button
                   onClick={() => setRequesting(true)}
-                  className="w-full bg-white text-black font-semibold py-3 rounded-xl hover:bg-zinc-200 transition-colors text-sm"
+                  className="w-full bg-primary text-on-primary font-semibold py-3 rounded-xl hover:bg-subtle transition-colors text-sm"
                 >
                   Reservar días
                 </button>
@@ -239,7 +239,7 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
                 <div className="space-y-3">
                   {/* Step 1: date */}
                   <div>
-                    <p className="text-zinc-400 text-xs mb-1.5">¿A partir de qué fecha?</p>
+                    <p className="text-fg-muted text-xs mb-1.5">¿A partir de qué fecha?</p>
                     <DatePicker
                       value={bookingDate}
                       onChange={(v) => { setBookingDate(v); setBookingDays([]); }}
@@ -251,11 +251,11 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
                   {/* Step 2: days of that week */}
                   {bookingDate && (
                     <div>
-                      <p className="text-zinc-400 text-xs mb-2">
+                      <p className="text-fg-muted text-xs mb-2">
                         Días disponibles esa semana — toca los que quieres reservar:
                       </p>
                       {dayOptions.length === 0 ? (
-                        <p className="text-zinc-600 text-xs bg-zinc-800 rounded-xl px-3 py-2">
+                        <p className="text-fg-faint text-xs bg-subtle rounded-xl px-3 py-2">
                           No hay días de este viaje en el resto de esa semana. Elige una fecha anterior de la misma semana.
                         </p>
                       ) : (
@@ -267,8 +267,8 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
                               onClick={() => toggleDay(opt.dayOfWeek)}
                               className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all border ${
                                 bookingDays.includes(opt.dayOfWeek)
-                                  ? 'bg-white text-black border-white'
-                                  : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:border-zinc-500'
+                                  ? 'bg-primary text-on-primary border-primary'
+                                  : 'bg-subtle text-fg-muted border-line-strong hover:border-line-strong'
                               }`}
                             >
                               {opt.label}
@@ -281,7 +281,7 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
 
                   {/* Summary */}
                   {bookingDays.length > 0 && (
-                    <p className="text-zinc-400 text-xs bg-zinc-800 rounded-xl px-3 py-2">
+                    <p className="text-fg-muted text-xs bg-subtle rounded-xl px-3 py-2">
                       Reservando {bookingDays.length} día{bookingDays.length !== 1 ? 's' : ''} · ${(Number(ride.price) * bookingDays.length).toLocaleString()} total estimado
                     </p>
                   )}
@@ -289,14 +289,14 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
                   <div className="flex gap-2">
                     <button
                       onClick={resetForm}
-                      className="flex-1 border border-zinc-700 text-zinc-400 py-2.5 rounded-xl text-sm hover:border-zinc-500 transition-colors"
+                      className="flex-1 border border-line-strong text-fg-muted py-2.5 rounded-xl text-sm hover:border-line-strong transition-colors"
                     >
                       Cancelar
                     </button>
                     <button
                       onClick={handleRequest}
                       disabled={loading || !bookingDate || bookingDays.length === 0}
-                      className="flex-1 bg-white text-black font-semibold py-2.5 rounded-xl text-sm hover:bg-zinc-200 disabled:opacity-40 transition-colors"
+                      className="flex-1 bg-primary text-on-primary font-semibold py-2.5 rounded-xl text-sm hover:bg-subtle disabled:opacity-40 transition-colors"
                     >
                       {loading ? 'Enviando...' : 'Confirmar'}
                     </button>
@@ -312,13 +312,13 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
               {!requesting ? (
                 <button
                   onClick={() => setRequesting(true)}
-                  className="w-full bg-white text-black font-semibold py-3 rounded-xl hover:bg-zinc-200 transition-colors text-sm"
+                  className="w-full bg-primary text-on-primary font-semibold py-3 rounded-xl hover:bg-subtle transition-colors text-sm"
                 >
                   Solicitar viaje
                 </button>
               ) : (
                 <div className="space-y-2">
-                  <p className="text-zinc-400 text-xs">¿A qué hora puedes estar listo? (opcional)</p>
+                  <p className="text-fg-muted text-xs">¿A qué hora puedes estar listo? (opcional)</p>
                   <TimePicker
                     value={proposedTime}
                     onChange={setProposedTime}
@@ -327,14 +327,14 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
                   <div className="flex gap-2">
                     <button
                       onClick={resetForm}
-                      className="flex-1 border border-zinc-700 text-zinc-400 py-2.5 rounded-xl text-sm hover:border-zinc-500 transition-colors"
+                      className="flex-1 border border-line-strong text-fg-muted py-2.5 rounded-xl text-sm hover:border-line-strong transition-colors"
                     >
                       Cancelar
                     </button>
                     <button
                       onClick={handleRequest}
                       disabled={loading}
-                      className="flex-1 bg-white text-black font-semibold py-2.5 rounded-xl text-sm hover:bg-zinc-200 disabled:opacity-50 transition-colors"
+                      className="flex-1 bg-primary text-on-primary font-semibold py-2.5 rounded-xl text-sm hover:bg-subtle disabled:opacity-50 transition-colors"
                     >
                       {loading ? 'Enviando...' : 'Confirmar'}
                     </button>
@@ -345,20 +345,20 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
           )}
 
           {!isOwnRide && ride.seats_available === 0 && (
-            <p className="text-center text-zinc-600 text-xs py-2">Sin asientos disponibles</p>
+            <p className="text-center text-fg-faint text-xs py-2">Sin asientos disponibles</p>
           )}
 
           {isOwnRide && (
             <div className="flex gap-2">
               <button
                 onClick={() => navigate(`/edit-ride/${ride.id}`)}
-                className="flex-1 flex items-center justify-center gap-1.5 border border-zinc-700 text-zinc-300 py-3 rounded-xl text-sm hover:border-white hover:text-white transition-colors"
+                className="flex-1 flex items-center justify-center gap-1.5 border border-line-strong text-fg-muted py-3 rounded-xl text-sm hover:border-primary hover:text-fg transition-colors"
               >
                 <PencilSimple size={13} weight="duotone" /> Editar
               </button>
               <button
                 onClick={handleCancel}
-                className="flex-1 border border-zinc-800 text-red-500 py-3 rounded-xl text-sm hover:bg-zinc-800 transition-colors"
+                className="flex-1 border border-line text-danger py-3 rounded-xl text-sm hover:bg-subtle transition-colors"
               >
                 Cancelar
               </button>
@@ -366,7 +366,7 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
           )}
         </>
       )}
-      {isCancelled && <p className="text-xs text-zinc-700 font-medium">Viaje cancelado</p>}
+      {isCancelled && <p className="text-xs text-fg-faint font-medium">Viaje cancelado</p>}
     </div>
   );
 }

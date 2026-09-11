@@ -64,7 +64,8 @@ function formatEta(seconds: number): string {
 export default function TripMap({ driverLat, driverLng, destination, isDriver }: Props) {
   const { theme } = useTheme();
   const isLight = theme === 'light';
-  const routeColor = isLight ? '#18181b' : '#ffffff';
+  // Mismos valores que --fg en cada tema
+  const routeColor = isLight ? '#000000' : '#FAFAFA';
 
   const containerRef     = useRef<HTMLDivElement>(null);
   const mapRef           = useRef<maplibregl.Map | null>(null);
@@ -205,8 +206,8 @@ export default function TripMap({ driverLat, driverLng, destination, isDriver }:
       destMarkerRef.current = null;
     }
 
-    const fill   = isLight ? '#18181b' : '#ffffff';
-    const border = isLight ? '#ffffff' : '#000000';
+    const fill   = isLight ? '#000000' : '#FAFAFA';
+    const border = isLight ? '#FFFFFF' : '#09090B';
     const halo   = isLight ? 'rgba(0,0,0,0.18)' : 'rgba(255,255,255,0.3)';
 
     const el = document.createElement('div');
@@ -271,24 +272,24 @@ export default function TripMap({ driverLat, driverLng, destination, isDriver }:
   }, [mapReady, driverLat, driverLng, destCoords]);
 
   return (
-    <div className="relative rounded-2xl overflow-hidden bg-zinc-900">
+    <div className="relative rounded-2xl overflow-hidden bg-surface">
       {/* Mapa */}
       <div ref={containerRef} style={{ height: '260px', width: '100%' }} />
 
       {/* ETA badge */}
       {eta && (
-        <div className="absolute top-3 left-3 bg-black/80 backdrop-blur-sm border border-zinc-700 px-3 py-1.5 rounded-xl flex items-center gap-1.5 pointer-events-none">
-          <Clock size={13} weight="duotone" className="text-zinc-400" />
-          <span className="text-white text-sm font-bold">{eta}</span>
-          <span className="text-zinc-400 text-xs">al destino</span>
+        <div className="absolute top-3 left-3 bg-black/80 backdrop-blur-sm border border-line-strong px-3 py-1.5 rounded-xl flex items-center gap-1.5 pointer-events-none">
+          <Clock size={13} weight="duotone" className="text-fg-muted" />
+          <span className="text-fg text-sm font-bold">{eta}</span>
+          <span className="text-fg-muted text-xs">al destino</span>
         </div>
       )}
 
       {/* Overlay: esperando GPS */}
       {!driverLat && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950/70 backdrop-blur-sm gap-3">
-          <div className="w-5 h-5 border-2 border-zinc-600 border-t-white rounded-full animate-spin" />
-          <p className="text-zinc-400 text-sm text-center px-6">
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-surface/70 backdrop-blur-sm gap-3">
+          <div className="w-5 h-5 border-2 border-line-strong border-t-fg rounded-full animate-spin" />
+          <p className="text-fg-muted text-sm text-center px-6">
             Esperando ubicación del conductor…
           </p>
         </div>
@@ -296,8 +297,8 @@ export default function TripMap({ driverLat, driverLng, destination, isDriver }:
 
       {/* Overlay: error de geocoding */}
       {geoError && (
-        <div className="absolute inset-0 flex items-center justify-center bg-zinc-950/70">
-          <p className="text-zinc-500 text-sm text-center px-6">
+        <div className="absolute inset-0 flex items-center justify-center bg-surface/70">
+          <p className="text-fg-faint text-sm text-center px-6">
             No se pudo cargar el mapa para "{destination}"
           </p>
         </div>
@@ -305,9 +306,9 @@ export default function TripMap({ driverLat, driverLng, destination, isDriver }:
 
       {/* Badge GPS activo (conductor) */}
       {isDriver && driverLat && (
-        <div className="absolute bottom-3 left-3 bg-black/80 backdrop-blur-sm border border-zinc-700 px-2.5 py-1 rounded-lg pointer-events-none">
-          <p className="text-zinc-400 text-[10px] flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block animate-pulse" />
+        <div className="absolute bottom-3 left-3 bg-black/80 backdrop-blur-sm border border-line-strong px-2.5 py-1 rounded-lg pointer-events-none">
+          <p className="text-fg-muted text-[10px] flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-live inline-block animate-pulse" />
             GPS activo
           </p>
         </div>

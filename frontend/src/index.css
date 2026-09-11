@@ -4,34 +4,99 @@
 
 /* ═══════════════════════════════════════════════════════════════
    SISTEMA DE DISEÑO
-   Superficies translúcidas sobre un fondo con luz ambiental, tipografía
-   con carácter y movimiento con curvas de resorte. La idea es que la app
-   se sienta construida, no ensamblada con piezas por defecto.
+
+   Los colores se declaran una sola vez por su función (canvas, surface,
+   fg…) y cada tema redefine los valores. Antes el oscuro estaba escrito
+   en los componentes y el claro era una capa de 116 líneas de parches
+   que reinterpretaba clases de Tailwind; tenía 15 casos sin cubrir y dos
+   conflictos de especificidad que apagaban el cristal y la luz de fondo.
+
+   Los valores van como tripletas RGB sin `rgb()` para que Tailwind pueda
+   aplicarles opacidad: `bg-surface/70` funciona.
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
-  /* Curvas de animación. La de resorte se pasa un poco del destino y
-     vuelve: es lo que hace que un movimiento se sienta físico. */
+  color-scheme: light;
+
+  /* ── Superficies ── */
+  --canvas:       248 249 250;
+  --surface:      255 255 255;
+  --subtle:       243 244 246;
+  --line:         229 231 235;
+  --line-strong:  209 213 219;
+
+  /* ── Texto: tres escalones, 21:1 · 7.7:1 · 4.8:1 ── */
+  --fg:           0 0 0;
+  --fg-muted:     82 82 91;
+  --fg-faint:     107 114 128;
+
+  /* ── Acción principal: se invierte con el tema ── */
+  --primary:      0 0 0;
+  --on-primary:   255 255 255;
+
+  /* ── Señales ── */
+  --live:         4 122 64;
+  --danger:       225 29 72;
+  --warn:         180 83 9;
+  --star:         180 83 9;
+  --info:         29 78 216;
+
+  --live-soft:    220 252 231;
+  --danger-soft:  255 228 230;
+  --warn-soft:    254 243 199;
+  --info-soft:    219 234 254;
+
+  /* Burbuja de notificaciones. No cambia con el tema: siempre lleva texto
+     blanco encima, y un rojo más claro no daría contraste suficiente. */
+  --notify:       225 29 72;
+
+  /* Base de las sombras: casi negro en claro, negro puro en oscuro */
+  --shadow:       9 9 11;
+
+  /* ── Curvas de animación ──
+     La de resorte se pasa un poco del destino y vuelve: es lo que hace
+     que un movimiento se sienta físico. La de salida es la misma que
+     traían los mockups. */
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-
-  /* Cristal */
-  --glass-bg:     rgba(24, 24, 27, 0.62);
-  --glass-brd:    rgba(255, 255, 255, 0.08);
-  --glass-blur:   20px;
-  --glass-hi:     rgba(255, 255, 255, 0.06);
-
-  /* Profundidad: sombras en capas, nunca una sola sombra dura */
-  --shadow-sm: 0 1px 2px rgba(0,0,0,.28), 0 1px 1px rgba(0,0,0,.16);
-  --shadow-md: 0 4px 12px rgba(0,0,0,.34), 0 1px 3px rgba(0,0,0,.2);
-  --shadow-lg: 0 16px 40px rgba(0,0,0,.46), 0 4px 12px rgba(0,0,0,.26);
-
-  /* Luz ambiental del fondo */
-  --aurora-1: rgba(64, 92, 156, 0.55);
-  --aurora-2: rgba(34, 118, 110, 0.42);
-  --aurora-3: rgba(110, 68, 140, 0.38);
 }
+
+html.dark {
+  color-scheme: dark;
+
+  --canvas:       9 9 11;
+  --surface:      22 22 25;
+  --subtle:       35 35 39;
+  --line:         39 39 42;
+  --line-strong:  63 63 70;
+
+  --fg:           250 250 250;
+  --fg-muted:     161 161 170;
+  --fg-faint:     113 113 122;
+
+  --primary:      250 250 250;
+  --on-primary:   9 9 11;
+
+  --live:         34 197 94;
+  --danger:       251 113 133;
+  --warn:         251 191 36;
+  --star:         251 191 36;
+  --info:         96 165 250;
+
+  --live-soft:    5 46 22;
+  --danger-soft:  69 10 10;
+  --warn-soft:    66 32 6;
+  --info-soft:    23 37 84;
+
+  /* --notify no se redefine: es el mismo rojo en los dos temas, a propósito */
+
+  --shadow:       0 0 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BASE
+   ═══════════════════════════════════════════════════════════════ */
 
 html {
   -webkit-text-size-adjust: 100%;
@@ -44,7 +109,7 @@ html, body {
 }
 
 body {
-  @apply bg-black text-white;
+  @apply bg-canvas text-fg;
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont,
                'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   font-feature-settings: 'ss01' 1, 'cv11' 1;
@@ -58,76 +123,25 @@ body {
 input, textarea, select, button { font-family: inherit; }
 input, textarea, select { @apply outline-none; }
 
-/* Los números en columnas y contadores no deben bailar al cambiar */
-.tabular-nums, time, [class*='tabular'] { font-variant-numeric: tabular-nums; }
+/* Los números en columnas y contadores no deben bailar al actualizarse */
+.tabular-nums, time { font-variant-numeric: tabular-nums; }
 
-/* ── Titulares ────────────────────────────────────────────────
-   Los pesos altos con tracking negativo son lo que da esa sensación
-   compacta y editorial de las apps nativas. */
+/* Titulares compactos: el tracking negativo es lo que da el aire de app nativa */
 h1, h2, h3 { letter-spacing: -0.035em; }
 h1 { letter-spacing: -0.045em; }
 
-/* Acento serif para los titulares de portada. Se aplica con .display */
-.display-serif {
-  font-family: 'Instrument Serif', Georgia, serif;
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  font-style: italic;
-}
-
 /* ═══════════════════════════════════════════════════════════════
-   LUZ AMBIENTAL
-   Manchas de color muy suaves y en movimiento lento detrás de todo.
-   Le dan a las superficies translúcidas algo que revelar; sin esto el
-   efecto de cristal no se nota.
+   SUPERFICIES
+
+   Las tarjetas son sólidas con sombra difusa, como en los mockups. El
+   desenfoque queda solo en las barras fijas, que es donde los mockups
+   también lo usan.
    ═══════════════════════════════════════════════════════════════ */
-body::before {
-  content: '';
-  position: fixed;
-  inset: -20%;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(42rem 42rem at 12% 8%,  var(--aurora-1), transparent 62%),
-    radial-gradient(38rem 38rem at 88% 22%, var(--aurora-2), transparent 60%),
-    radial-gradient(34rem 34rem at 50% 96%, var(--aurora-3), transparent 58%);
-  filter: blur(30px);
-  animation: aurora-drift 26s var(--ease-in-out) infinite alternate;
-}
 
-@keyframes aurora-drift {
-  0%   { transform: translate3d(0, 0, 0) scale(1); }
-  50%  { transform: translate3d(-2%, 2%, 0) scale(1.06); }
-  100% { transform: translate3d(2%, -1.5%, 0) scale(1.02); }
-}
-
-/* Cada pantalla se envuelve en .min-h-screen.bg-black, que pintaba negro
-   sólido y tapaba la luz del body. Se dejan transparentes para que el
-   fondo se vea a través y las superficies de cristal tengan qué revelar. */
-.min-h-screen.bg-black { background-color: transparent; }
-
-/* ═══════════════════════════════════════════════════════════════
-   SUPERFICIES DE CRISTAL
-   Las tarjetas de la app usan bg-zinc-900 con esquinas redondeadas.
-   En vez de tocar cientos de componentes, se reinterpreta esa
-   combinación como una superficie translúcida.
-   ═══════════════════════════════════════════════════════════════ */
-.bg-zinc-900.rounded-2xl,
-.bg-zinc-900.rounded-3xl,
-.bg-zinc-900.rounded-xl,
-.glass {
-  background-color: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur)) saturate(160%);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
-  border: 1px solid var(--glass-brd);
-  box-shadow: var(--shadow-md), inset 0 1px 0 var(--glass-hi);
-}
-
-/* Barras fijas: más desenfoque y menos color, como en iOS */
 .glass-bar {
-  background-color: rgba(11, 11, 15, 0.72);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  background-color: rgb(var(--surface) / 0.92);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -135,7 +149,7 @@ body::before {
    ═══════════════════════════════════════════════════════════════ */
 
 @keyframes rise {
-  from { opacity: 0; transform: translate3d(0, 14px, 0) scale(.985); }
+  from { opacity: 0; transform: translate3d(0, 12px, 0); }
   to   { opacity: 1; transform: none; }
 }
 @keyframes fade {
@@ -155,15 +169,22 @@ body::before {
   from { background-position: -200% 0; }
   to   { background-position: 200% 0; }
 }
+/* Halo que se expande desde el marcador del carro en el mapa */
+@keyframes radar {
+  0%   { transform: scale(0.65); opacity: 0.8; }
+  70%  { transform: scale(2.2);  opacity: 0; }
+  100% { transform: scale(2.4);  opacity: 0; }
+}
 
-.animate-rise  { animation: rise .5s var(--ease-out) both; }
+.animate-rise  { animation: rise .45s var(--ease-out) both; }
 .animate-fade  { animation: fade .35s var(--ease-out) both; }
 .animate-pop   { animation: pop .38s var(--ease-spring) both; }
 .animate-sheet { animation: sheet-up .42s var(--ease-out) both; }
+.animate-radar { animation: radar 2.4s cubic-bezier(.215,.61,.355,1) infinite; }
 
-/* Escalonado: cada hijo entra un poco después que el anterior.
-   Es el detalle que hace que una lista se sienta viva y no de golpe. */
-.stagger > *          { animation: rise .5s var(--ease-out) both; }
+/* Escalonado: cada hijo entra un poco después que el anterior. Es el
+   detalle que hace que una lista se sienta viva y no aparezca de golpe. */
+.stagger > *              { animation: rise .45s var(--ease-out) both; }
 .stagger > *:nth-child(1) { animation-delay: .02s }
 .stagger > *:nth-child(2) { animation-delay: .06s }
 .stagger > *:nth-child(3) { animation-delay: .10s }
@@ -174,7 +195,7 @@ body::before {
 .stagger > *:nth-child(8) { animation-delay: .30s }
 .stagger > *:nth-child(n+9) { animation-delay: .34s }
 
-/* Respuesta al tacto: hundir levemente en vez de solo cambiar color */
+/* Respuesta al tacto: hundir levemente, no solo cambiar de color */
 button:not(:disabled), a, [role='button'] {
   transition: transform .18s var(--ease-spring),
               background-color .2s var(--ease-out),
@@ -186,48 +207,65 @@ button:not(:disabled), a, [role='button'] {
 button:not(:disabled):active,
 [role='button']:active { transform: scale(.97); }
 
-/* Foco visible solo con teclado, con el anillo del sistema */
+/* Foco visible solo con teclado */
 :focus-visible {
-  outline: 2px solid rgba(255,255,255,.75);
+  outline: 2px solid rgb(var(--fg) / 0.75);
   outline-offset: 2px;
   border-radius: 6px;
 }
-html.light :focus-visible { outline-color: rgba(24,24,27,.75); }
 
-/* Carga: brillo que recorre el bloque */
+/* Carga: un brillo que recorre el bloque. Es el único indicador de carga
+   de la app; antes había tres distintos (spinner, texto y cambio de
+   etiqueta) según la pantalla. */
 .skeleton {
   background: linear-gradient(90deg,
-    rgba(255,255,255,.04) 25%,
-    rgba(255,255,255,.10) 50%,
-    rgba(255,255,255,.04) 75%);
+    rgb(var(--subtle)) 25%,
+    rgb(var(--line)) 50%,
+    rgb(var(--subtle)) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.4s linear infinite;
 }
 
-/* ── Pantalla de entrada ──────────────────────────────────────
-   La marca entra con resorte y respira; el nombre sube detrás y una
-   barrita marca el tiempo de espera para que no se sienta detenido. */
+/* Barra de scroll discreta */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--fg) / 0.16);
+  border-radius: 99px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--fg) / 0.28);
+  background-clip: content-box;
+}
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Áreas seguras del dispositivo */
+.pb-safe { padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px); }
+.pt-safe { padding-top: max(env(safe-area-inset-top, 0px), 0px); }
+
+/* ═══════════════════════════════════════════════════════════════
+   PANTALLA DE ENTRADA
+   ═══════════════════════════════════════════════════════════════ */
+
 .splash-mark {
   animation: splash-in .72s var(--ease-spring) both,
              splash-breathe 2.4s var(--ease-in-out) .72s infinite;
-  filter: drop-shadow(0 12px 32px rgba(90, 130, 220, .35));
 }
-.splash-badge { fill: #14141A; }
-.splash-car   { animation: splash-roll .8s var(--ease-out) .1s both; }
-
-.splash-word {
-  animation: rise .55s var(--ease-out) .22s both;
-}
+.splash-car  { animation: splash-roll .8s var(--ease-out) .1s both; }
+.splash-word { animation: rise .55s var(--ease-out) .22s both; }
 
 .splash-track {
   width: 92px; height: 2px; border-radius: 99px;
-  background: rgba(255,255,255,.10);
+  background: rgb(var(--fg) / 0.12);
   overflow: hidden;
   animation: fade .4s var(--ease-out) .4s both;
 }
 .splash-fill {
   display: block; height: 100%; width: 100%;
-  background: linear-gradient(90deg, transparent, #fff, transparent);
+  background: linear-gradient(90deg, transparent, rgb(var(--fg)), transparent);
   transform: translateX(-100%);
   animation: splash-sweep 1.15s var(--ease-in-out) .4s infinite;
 }
@@ -249,18 +287,6 @@ html.light :focus-visible { outline-color: rgba(24,24,27,.75); }
   to { transform: translateX(100%); }
 }
 
-/* Barra de scroll discreta */
-::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,.14);
-  border-radius: 99px;
-  border: 3px solid transparent;
-  background-clip: content-box;
-}
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.24); background-clip: content-box; }
-html.light ::-webkit-scrollbar-thumb { background: rgba(0,0,0,.16); background-clip: content-box; }
-
 /* Quien pidió menos movimiento no debería recibir ninguno */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -269,122 +295,4 @@ html.light ::-webkit-scrollbar-thumb { background: rgba(0,0,0,.16); background-c
     transition-duration: .01ms !important;
     scroll-behavior: auto !important;
   }
-  body::before { animation: none; }
 }
-
-/* ═════════════════════════════════════════════════════════════
-   MODO CLARO
-   La app está escrita en clases oscuras; aquí se invierten las
-   superficies y los textos a una paleta clara.
-   ═════════════════════════════════════════════════════════════ */
-
-html.light { color-scheme: light; }
-html.light body { background-color: #ffffff; color: #18181b; }
-
-html.light {
-  --glass-bg:  rgba(255, 255, 255, 0.66);
-  --glass-brd: rgba(9, 9, 11, 0.08);
-  --glass-hi:  rgba(255, 255, 255, 0.9);
-  --shadow-sm: 0 1px 2px rgba(9,9,11,.06);
-  --shadow-md: 0 4px 16px rgba(9,9,11,.08), 0 1px 3px rgba(9,9,11,.05);
-  --shadow-lg: 0 16px 44px rgba(9,9,11,.12), 0 4px 12px rgba(9,9,11,.06);
-  --aurora-1:  rgba(120, 156, 226, 0.20);
-  --aurora-2:  rgba(96, 196, 186, 0.16);
-  --aurora-3:  rgba(178, 142, 214, 0.14);
-}
-
-html.light .glass-bar { background-color: rgba(255,255,255,.75); }
-
-/* Backgrounds */
-html.light .bg-black           { background-color: #ffffff; }
-html.light .bg-black\/95       { background-color: rgba(255,255,255,0.95); }
-html.light .bg-black\/85       { background-color: rgba(255,255,255,0.92); }
-html.light .bg-black\/80       { background-color: rgba(255,255,255,0.92); }
-html.light .bg-black\/70       { background-color: rgba(0,0,0,0.35); }
-html.light .bg-zinc-950        { background-color: #fafafa; }
-html.light .bg-zinc-900        { background-color: #f4f4f5; }
-html.light .bg-zinc-800        { background-color: #e4e4e7; }
-html.light .bg-zinc-700        { background-color: #d4d4d8; }
-html.light .bg-zinc-800\/50    { background-color: #e4e4e7cc; }
-html.light .bg-zinc-950\/70    { background-color: rgba(255,255,255,0.7); }
-html.light .bg-zinc-950\/60    { background-color: rgba(255,255,255,0.6); }
-
-/* Botones primarios — invertir: fondo oscuro con texto claro */
-html.light .bg-white           { background-color: #18181b; }
-html.light .text-black         { color: #ffffff; }
-html.light .hover\:bg-zinc-200:hover { background-color: #3f3f46; }
-html.light .hover\:bg-zinc-100:hover { background-color: #27272a; }
-
-/* Hover backgrounds */
-html.light .hover\:bg-zinc-900:hover { background-color: #f4f4f5; }
-html.light .hover\:bg-zinc-800:hover { background-color: #e4e4e7; }
-html.light .hover\:bg-zinc-700:hover { background-color: #d4d4d8; }
-
-/* Texto */
-html.light .text-white         { color: #18181b; }
-html.light .text-zinc-300      { color: #3f3f46; }
-html.light .text-zinc-400      { color: #52525b; }
-html.light .text-zinc-500      { color: #71717a; }
-html.light .text-zinc-600      { color: #8b8b93; }
-html.light .text-zinc-700      { color: #a8a8b0; }
-html.light .text-zinc-800      { color: #d4d4d8; }
-html.light .hover\:text-white:hover { color: #18181b; }
-
-/* Bordes */
-html.light .border-zinc-900    { border-color: #ececee; }
-html.light .border-zinc-800    { border-color: #e4e4e7; }
-html.light .border-zinc-700    { border-color: #d4d4d8; }
-html.light .border-zinc-600    { border-color: #a1a1aa; }
-html.light .border-white       { border-color: #18181b; }
-html.light .hover\:border-white:hover { border-color: #18181b; }
-html.light .hover\:border-zinc-600:hover { border-color: #a1a1aa; }
-html.light .hover\:border-zinc-500:hover { border-color: #71717a; }
-
-/* Rings de focus */
-html.light .focus\:ring-white:focus { --tw-ring-color: #18181b; }
-html.light .ring-white { --tw-ring-color: #18181b; }
-html.light .hover\:ring-white:hover { --tw-ring-color: #18181b; }
-html.light .ring-zinc-700 { --tw-ring-color: #d4d4d8; }
-html.light .ring-zinc-800 { --tw-ring-color: #e4e4e7; }
-
-/* Placeholders */
-html.light .placeholder-zinc-500::placeholder,
-html.light .placeholder-zinc-600::placeholder { color: #a1a1aa; }
-
-/* Inputs con [color-scheme:dark] — quitar para que se vean nativos en claro */
-html.light .\[color-scheme\:dark\] { color-scheme: light; }
-
-/* ── Semáforos en modo claro ──────────────────────────────────
-   Los tonos -400 están pensados para fondo negro; sobre blanco quedan
-   casi ilegibles (el verde de "guardado" era invisible). Se oscurece el
-   texto y se aclara el fondo, conservando el significado del color. */
-
-html.light .text-green-400,
-html.light .text-green-500   { color: #15803d; }
-html.light .text-red-300,
-html.light .text-red-400,
-html.light .text-red-500     { color: #b91c1c; }
-html.light .text-yellow-300,
-html.light .text-yellow-400,
-html.light .text-yellow-500  { color: #a16207; }
-
-html.light .bg-green-900\/20,
-html.light .bg-green-900\/30,
-html.light .bg-green-900\/40  { background-color: #dcfce7; }
-html.light .bg-red-900\/20,
-html.light .bg-red-900\/30    { background-color: #fee2e2; }
-html.light .bg-yellow-900\/20,
-html.light .bg-yellow-900\/30,
-html.light .bg-yellow-900\/40,
-html.light .bg-yellow-900\/50 { background-color: #fef3c7; }
-
-html.light .border-green-800      { border-color: #86efac; }
-html.light .border-red-800,
-html.light .border-red-900,
-html.light .border-red-800\/50,
-html.light .border-red-900\/50    { border-color: #fca5a5; }
-html.light .border-yellow-800,
-html.light .border-yellow-800\/60 { border-color: #fde047; }
-
-/* La burbuja roja de notificaciones ya contrasta sobre blanco: se deja igual
-   (bg-red-500 con texto blanco), lo mismo que bg-green-50 y bg-red-50. */

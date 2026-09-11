@@ -17,13 +17,13 @@ export default class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-black flex flex-col items-center justify-center px-6 text-center">
+        <div className="min-h-screen bg-canvas flex flex-col items-center justify-center px-6 text-center">
           <p className="text-4xl mb-4">⚠️</p>
-          <h1 className="text-white font-black text-xl mb-2">Algo salió mal</h1>
-          <p className="text-zinc-500 text-sm mb-6 max-w-xs">{this.state.message}</p>
+          <h1 className="text-fg font-black text-xl mb-2">Algo salió mal</h1>
+          <p className="text-fg-faint text-sm mb-6 max-w-xs">{this.state.message}</p>
           <button
             onClick={() => { this.setState({ hasError: false, message: '' }); window.location.href = '/'; }}
-            className="bg-white text-black font-semibold px-6 py-3 rounded-xl text-sm hover:bg-zinc-200 transition-colors"
+            className="bg-primary text-on-primary font-semibold px-6 py-3 rounded-xl text-sm hover:bg-subtle transition-colors"
           >
             Volver al inicio
           </button>

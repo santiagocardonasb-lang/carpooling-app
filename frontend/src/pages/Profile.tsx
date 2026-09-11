@@ -188,14 +188,14 @@ export default function Profile() {
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center pt-16 gap-3">
+      <div className="min-h-screen bg-canvas flex flex-col items-center justify-center pt-16 gap-3">
         {fetchError ? (
           <>
-            <p className="text-zinc-400 text-sm">{fetchError}</p>
-            <button onClick={() => navigate('/login')} className="text-white underline text-sm">Volver al inicio</button>
+            <p className="text-fg-muted text-sm">{fetchError}</p>
+            <button onClick={() => navigate('/login')} className="text-fg underline text-sm">Volver al inicio</button>
           </>
         ) : (
-          <div className="w-6 h-6 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-line-strong border-t-fg rounded-full animate-spin" />
         )}
       </div>
     );
@@ -207,10 +207,10 @@ export default function Profile() {
   const canChangePw = !!pwForm.current && newPwCheck.valid && pwForm.next === pwForm.confirm;
 
   return (
-    <div className="min-h-screen bg-black pt-20 px-6 pb-12">
+    <div className="min-h-screen bg-canvas pt-20 px-6 pb-12">
       <div className="max-w-sm mx-auto mt-4">
         {/* Back */}
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors text-sm mb-6">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-fg-faint hover:text-fg transition-colors text-sm mb-6">
           <ArrowLeft size={16} weight="bold" />
           Volver
         </button>
@@ -225,29 +225,29 @@ export default function Profile() {
         {/* Avatar section */}
         <div className="flex flex-col items-center mb-8">
           <div className="relative mb-3">
-            <div className="w-24 h-24 rounded-full overflow-hidden bg-zinc-800 flex items-center justify-center">
+            <div className="w-24 h-24 rounded-full overflow-hidden bg-subtle flex items-center justify-center">
               {profile.avatar ? (
                 <img src={profile.avatar} alt="avatar" className="w-full h-full object-cover" />
               ) : (
-                <span className="text-white text-2xl font-bold">{initials}</span>
+                <span className="text-fg text-2xl font-bold">{initials}</span>
               )}
             </div>
             <button
               onClick={() => fileRef.current?.click()}
               disabled={avatarLoading}
-              className="absolute bottom-0 right-0 w-8 h-8 bg-white rounded-full flex items-center justify-center hover:bg-zinc-200 transition-colors shadow-lg"
+              className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center hover:bg-subtle transition-colors shadow-lg"
             >
               {avatarLoading
-                ? <div className="w-4 h-4 border-2 border-zinc-400 border-t-zinc-800 rounded-full animate-spin" />
-                : <Camera size={14} weight="duotone" className="text-black" />
+                ? <div className="w-4 h-4 border-2 border-line-strong border-t-line rounded-full animate-spin" />
+                : <Camera size={14} weight="duotone" className="text-on-primary" />
               }
             </button>
             <input ref={fileRef} type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
           </div>
-          <h2 className="text-white font-bold text-lg">{profile.name}</h2>
-          <p className="text-zinc-500 text-sm">{profile.email}</p>
+          <h2 className="text-fg font-bold text-lg">{profile.name}</h2>
+          <p className="text-fg-faint text-sm">{profile.email}</p>
           {profile.email_verified === true && <div className="mt-1"><VerifiedBadge /></div>}
-          <p className="text-zinc-700 text-xs mt-1">
+          <p className="text-fg-faint text-xs mt-1">
             Miembro desde {new Date(profile.created_at).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
           </p>
 
@@ -255,29 +255,29 @@ export default function Profile() {
               a quien es dueño de la cuenta: sirven para corregirse. */}
           <div className="flex items-center gap-4 mt-4">
             <div className="text-center">
-              <p className="text-white font-bold tabular-nums">
+              <p className="text-fg font-bold tabular-nums">
                 {(profile.trips_as_driver ?? 0) + (profile.trips_as_passenger ?? 0)}
               </p>
-              <p className="text-zinc-600 text-[10px] uppercase tracking-wider">Viajes</p>
+              <p className="text-fg-faint text-[10px] uppercase tracking-wider">Viajes</p>
             </div>
-            <div className="w-px h-8 bg-zinc-800" />
+            <div className="w-px h-8 bg-subtle" />
             <div className="text-center">
-              <p className="text-white font-bold tabular-nums">{ratingStats?.count ?? 0}</p>
-              <p className="text-zinc-600 text-[10px] uppercase tracking-wider">Reseñas</p>
+              <p className="text-fg font-bold tabular-nums">{ratingStats?.count ?? 0}</p>
+              <p className="text-fg-faint text-[10px] uppercase tracking-wider">Reseñas</p>
             </div>
-            <div className="w-px h-8 bg-zinc-800" />
+            <div className="w-px h-8 bg-subtle" />
             <div className="text-center">
               <p className={`font-bold tabular-nums ${
-                (profile.late_cancellations ?? 0) > 0 ? 'text-yellow-400' : 'text-white'
+                (profile.late_cancellations ?? 0) > 0 ? 'text-star' : 'text-fg'
               }`}>
                 {profile.cancellations ?? 0}
               </p>
-              <p className="text-zinc-600 text-[10px] uppercase tracking-wider">Cancelaciones</p>
+              <p className="text-fg-faint text-[10px] uppercase tracking-wider">Cancelaciones</p>
             </div>
           </div>
 
           {(profile.late_cancellations ?? 0) > 0 && (
-            <p className="text-yellow-400 text-[11px] mt-3 text-center leading-relaxed max-w-[15rem]">
+            <p className="text-star text-[11px] mt-3 text-center leading-relaxed max-w-[15rem]">
               {profile.late_cancellations} {profile.late_cancellations === 1 ? 'fue' : 'fueron'} con menos
               de 2 horas de aviso. Cancelar temprano le da tiempo al otro de buscar alternativa.
             </p>
@@ -286,30 +286,30 @@ export default function Profile() {
 
         {/* Info section */}
         <section className="mb-6">
-          <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-3">Información personal</h3>
-          <div className="bg-zinc-900 rounded-2xl overflow-hidden space-y-0">
-            <div className="flex items-center gap-3 px-4 py-3.5 border-b border-zinc-800">
-              <User size={15} weight="duotone" className="text-zinc-500 flex-shrink-0" />
+          <h3 className="text-fg-muted text-xs font-semibold uppercase tracking-wider mb-3">Información personal</h3>
+          <div className="bg-surface rounded-2xl overflow-hidden space-y-0">
+            <div className="flex items-center gap-3 px-4 py-3.5 border-b border-line">
+              <User size={15} weight="duotone" className="text-fg-faint flex-shrink-0" />
               <input
                 type="text"
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
-                className="flex-1 bg-transparent text-white text-sm focus:outline-none"
+                className="flex-1 bg-transparent text-fg text-sm focus:outline-none"
                 placeholder="Nombre completo"
               />
             </div>
-            <div className="flex items-center gap-3 px-4 py-3.5 border-b border-zinc-800">
-              <Envelope size={15} weight="duotone" className="text-zinc-500 flex-shrink-0" />
-              <span className="text-zinc-500 text-sm flex-1 truncate">{profile.email}</span>
-              <span className="text-zinc-700 text-xs">No editable</span>
+            <div className="flex items-center gap-3 px-4 py-3.5 border-b border-line">
+              <Envelope size={15} weight="duotone" className="text-fg-faint flex-shrink-0" />
+              <span className="text-fg-faint text-sm flex-1 truncate">{profile.email}</span>
+              <span className="text-fg-faint text-xs">No editable</span>
             </div>
             <div className="flex items-center gap-3 px-4 py-3.5">
-              <Phone size={15} weight="duotone" className="text-zinc-500 flex-shrink-0" />
+              <Phone size={15} weight="duotone" className="text-fg-faint flex-shrink-0" />
               <input
                 type="tel"
                 value={editPhone}
                 onChange={(e) => setEditPhone(e.target.value)}
-                className="flex-1 bg-transparent text-white text-sm focus:outline-none"
+                className="flex-1 bg-transparent text-fg text-sm focus:outline-none"
                 placeholder="Teléfono (opcional)"
               />
             </div>
@@ -317,7 +317,7 @@ export default function Profile() {
 
           {infoMsg && (
             <div className={`flex items-center gap-2 mt-3 px-3 py-2 rounded-xl text-xs ${
-              infoMsg.type === 'ok' ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400'
+              infoMsg.type === 'ok' ? 'bg-live-soft text-live' : 'bg-danger-soft text-danger'
             }`}>
               {infoMsg.type === 'ok' ? <Check size={13} weight="bold" /> : <WarningCircle size={13} weight="duotone" />}
               {infoMsg.text}
@@ -327,7 +327,7 @@ export default function Profile() {
           <button
             onClick={saveInfo}
             disabled={saving}
-            className="w-full mt-3 bg-white text-black font-semibold py-3 rounded-xl hover:bg-zinc-200 disabled:opacity-50 transition-colors text-sm"
+            className="w-full mt-3 bg-primary text-on-primary font-semibold py-3 rounded-xl hover:bg-subtle disabled:opacity-50 transition-colors text-sm"
           >
             {saving ? 'Guardando...' : 'Guardar cambios'}
           </button>
@@ -335,30 +335,30 @@ export default function Profile() {
 
         {/* Calificaciones recibidas */}
         <section className="mb-6">
-          <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-3">Calificaciones</h3>
+          <h3 className="text-fg-muted text-xs font-semibold uppercase tracking-wider mb-3">Calificaciones</h3>
 
           {ratingStats === null ? (
-            <div className="bg-zinc-900 rounded-2xl p-5 text-center">
-              <div className="w-5 h-5 border-2 border-zinc-700 border-t-white rounded-full animate-spin mx-auto" />
+            <div className="bg-surface rounded-2xl p-5 text-center">
+              <div className="w-5 h-5 border-2 border-line-strong border-t-fg rounded-full animate-spin mx-auto" />
             </div>
           ) : ratingStats.count === 0 ? (
-            <div className="bg-zinc-900 rounded-2xl p-5 text-center">
-              <Star size={28} weight="duotone" className="text-zinc-700 mx-auto mb-2" />
-              <p className="text-zinc-500 text-sm font-medium">Sin calificaciones aún</p>
-              <p className="text-zinc-700 text-xs mt-1">Completa viajes para recibir calificaciones</p>
+            <div className="bg-surface rounded-2xl p-5 text-center">
+              <Star size={28} weight="duotone" className="text-fg-faint mx-auto mb-2" />
+              <p className="text-fg-faint text-sm font-medium">Sin calificaciones aún</p>
+              <p className="text-fg-faint text-xs mt-1">Completa viajes para recibir calificaciones</p>
             </div>
           ) : (
             <>
               {/* Resumen: promedio + total */}
-              <div className="bg-zinc-900 rounded-2xl p-5 mb-3 flex items-center justify-between">
+              <div className="bg-surface rounded-2xl p-5 mb-3 flex items-center justify-between">
                 <div>
                   <div className="flex items-baseline gap-1.5">
-                    <span className="text-3xl font-black text-white tabular-nums">
+                    <span className="text-3xl font-black text-fg tabular-nums">
                       {Number(ratingStats.avg ?? 0).toFixed(1)}
                     </span>
-                    <span className="text-zinc-500 text-sm">/ 5</span>
+                    <span className="text-fg-faint text-sm">/ 5</span>
                   </div>
-                  <p className="text-zinc-500 text-xs mt-1">
+                  <p className="text-fg-faint text-xs mt-1">
                     {ratingStats.count} calificación{ratingStats.count !== 1 ? 'es' : ''}
                   </p>
                 </div>
@@ -368,7 +368,7 @@ export default function Profile() {
                       key={n}
                       size={18}
                       weight={n <= Math.round(ratingStats.avg) ? 'fill' : 'duotone'}
-                      className={n <= Math.round(ratingStats.avg) ? 'text-yellow-400' : 'text-zinc-700'}
+                      className={n <= Math.round(ratingStats.avg) ? 'text-star' : 'text-fg-faint'}
                     />
                   ))}
                 </div>
@@ -377,17 +377,17 @@ export default function Profile() {
               {/* Lista de calificaciones */}
               <div className="space-y-2">
                 {(showAllRatings ? ratings : ratings.slice(0, 3)).map((r, i) => (
-                  <div key={i} className="bg-zinc-900 rounded-2xl p-4">
+                  <div key={i} className="bg-surface rounded-2xl p-4">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2 min-w-0">
-                        <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center flex-shrink-0">
-                          <span className="text-white text-xs font-bold">
+                        <div className="w-8 h-8 rounded-full bg-subtle flex items-center justify-center flex-shrink-0">
+                          <span className="text-fg text-xs font-bold">
                             {r.rater_name?.[0]?.toUpperCase() || '?'}
                           </span>
                         </div>
                         <div className="min-w-0">
-                          <p className="text-white text-sm font-medium truncate">{r.rater_name}</p>
-                          <p className="text-zinc-700 text-[10px]">
+                          <p className="text-fg text-sm font-medium truncate">{r.rater_name}</p>
+                          <p className="text-fg-faint text-[10px]">
                             {r.type === 'passenger_to_driver' ? 'Pasajero' : 'Conductor'} ·{' '}
                             {parseDate(r.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
                           </p>
@@ -399,13 +399,13 @@ export default function Profile() {
                             key={n}
                             size={11}
                             weight={n <= r.rating ? 'fill' : 'duotone'}
-                            className={n <= r.rating ? 'text-yellow-400' : 'text-zinc-700'}
+                            className={n <= r.rating ? 'text-star' : 'text-fg-faint'}
                           />
                         ))}
                       </div>
                     </div>
                     {r.comment && (
-                      <p className="text-zinc-400 text-xs leading-relaxed">"{r.comment}"</p>
+                      <p className="text-fg-muted text-xs leading-relaxed">"{r.comment}"</p>
                     )}
                   </div>
                 ))}
@@ -413,7 +413,7 @@ export default function Profile() {
                 {ratings.length > 3 && (
                   <button
                     onClick={() => setShowAllRatings(v => !v)}
-                    className="w-full text-zinc-500 hover:text-white text-xs py-2 transition-colors"
+                    className="w-full text-fg-faint hover:text-fg text-xs py-2 transition-colors"
                   >
                     {showAllRatings ? 'Ver menos' : `Ver todas (${ratings.length})`}
                   </button>
@@ -425,15 +425,15 @@ export default function Profile() {
 
         {/* Password section */}
         <section className="mb-8">
-          <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-3">Cambiar contraseña</h3>
-          <div className="bg-zinc-900 rounded-2xl overflow-hidden space-y-0">
+          <h3 className="text-fg-muted text-xs font-semibold uppercase tracking-wider mb-3">Cambiar contraseña</h3>
+          <div className="bg-surface rounded-2xl overflow-hidden space-y-0">
             {([
               { key: 'current', placeholder: 'Contraseña actual',           autoComplete: 'current-password' },
               { key: 'next',    placeholder: 'Nueva contraseña',            autoComplete: 'new-password' },
               { key: 'confirm', placeholder: 'Confirmar nueva contraseña',  autoComplete: 'new-password' },
             ] as const).map(({ key, placeholder, autoComplete }, i) => (
-              <div key={key} className={`flex items-center gap-3 px-4 py-3.5 ${i < 2 ? 'border-b border-zinc-800' : ''}`}>
-                <LockSimple size={15} weight="duotone" className="text-zinc-500 flex-shrink-0" />
+              <div key={key} className={`flex items-center gap-3 px-4 py-3.5 ${i < 2 ? 'border-b border-line' : ''}`}>
+                <LockSimple size={15} weight="duotone" className="text-fg-faint flex-shrink-0" />
                 <input
                   type={pwVisible[key] ? 'text' : 'password'}
                   value={pwForm[key]}
@@ -443,14 +443,14 @@ export default function Profile() {
                   autoCapitalize="none"
                   autoCorrect="off"
                   spellCheck={false}
-                  className="flex-1 bg-transparent text-white text-sm focus:outline-none placeholder-zinc-600 min-w-0"
+                  className="flex-1 bg-transparent text-fg text-sm focus:outline-none placeholder-fg-faint min-w-0"
                 />
                 <button
                   type="button"
                   tabIndex={-1}
                   onClick={() => setPwVisible(v => ({ ...v, [key]: !v[key] }))}
                   aria-label={pwVisible[key] ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                  className="text-zinc-500 hover:text-white transition-colors flex-shrink-0"
+                  className="text-fg-faint hover:text-fg transition-colors flex-shrink-0"
                 >
                   {pwVisible[key]
                     ? <EyeSlash size={16} weight="duotone" />
@@ -463,16 +463,16 @@ export default function Profile() {
           {/* Requisitos en vivo de la nueva contraseña */}
           {pwForm.next.length > 0 && (
             <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 px-1">
-              <span className={`text-xs flex items-center gap-1.5 ${newPwCheck.minLength ? 'text-green-400' : 'text-zinc-600'}`}>
+              <span className={`text-xs flex items-center gap-1.5 ${newPwCheck.minLength ? 'text-live' : 'text-fg-faint'}`}>
                 {newPwCheck.minLength ? <Check size={11} weight="bold" /> : <X size={11} weight="bold" />}
                 Mínimo {PASSWORD_MIN} caracteres
               </span>
-              <span className={`text-xs flex items-center gap-1.5 ${newPwCheck.hasNumber ? 'text-green-400' : 'text-zinc-600'}`}>
+              <span className={`text-xs flex items-center gap-1.5 ${newPwCheck.hasNumber ? 'text-live' : 'text-fg-faint'}`}>
                 {newPwCheck.hasNumber ? <Check size={11} weight="bold" /> : <X size={11} weight="bold" />}
                 Al menos un número
               </span>
               {pwForm.confirm.length > 0 && (
-                <span className={`text-xs flex items-center gap-1.5 ${pwForm.next === pwForm.confirm ? 'text-green-400' : 'text-red-400'}`}>
+                <span className={`text-xs flex items-center gap-1.5 ${pwForm.next === pwForm.confirm ? 'text-live' : 'text-danger'}`}>
                   {pwForm.next === pwForm.confirm ? <Check size={11} weight="bold" /> : <X size={11} weight="bold" />}
                   Coinciden
                 </span>
@@ -482,7 +482,7 @@ export default function Profile() {
 
           {pwMsg && (
             <div className={`flex items-center gap-2 mt-3 px-3 py-2 rounded-xl text-xs ${
-              pwMsg.type === 'ok' ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400'
+              pwMsg.type === 'ok' ? 'bg-live-soft text-live' : 'bg-danger-soft text-danger'
             }`}>
               {pwMsg.type === 'ok' ? <Check size={13} weight="bold" /> : <WarningCircle size={13} weight="duotone" />}
               {pwMsg.text}
@@ -492,7 +492,7 @@ export default function Profile() {
           <button
             onClick={changePassword}
             disabled={pwLoading || !canChangePw}
-            className="w-full mt-3 bg-zinc-800 hover:bg-zinc-700 text-white font-semibold py-3 rounded-xl disabled:opacity-50 transition-colors text-sm"
+            className="w-full mt-3 bg-subtle hover:bg-line-strong text-fg font-semibold py-3 rounded-xl disabled:opacity-50 transition-colors text-sm"
           >
             {pwLoading ? 'Cambiando...' : 'Cambiar contraseña'}
           </button>
@@ -500,7 +500,7 @@ export default function Profile() {
 
         {/* Account type */}
         <section className="mb-6">
-          <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-3">Tipo de cuenta</h3>
+          <h3 className="text-fg-muted text-xs font-semibold uppercase tracking-wider mb-3">Tipo de cuenta</h3>
           <div className="space-y-2">
             {([
               { value: 'driver' as const, label: 'Conductor', desc: 'Puedes publicar y gestionar viajes', Icon: Car },
@@ -513,28 +513,28 @@ export default function Profile() {
                   onClick={() => changeRole(value)}
                   disabled={roleLoading}
                   className={`w-full flex items-center gap-4 p-4 rounded-2xl border transition-all text-left disabled:opacity-60 ${
-                    isSelected ? 'bg-white border-white' : 'bg-zinc-900 border-zinc-800 hover:border-zinc-600'
+                    isSelected ? 'bg-primary border-primary' : 'bg-surface border-line hover:border-line-strong'
                   }`}
                 >
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${isSelected ? 'bg-black' : 'bg-zinc-800'}`}>
-                    <Icon size={18} weight="duotone" className={isSelected ? 'text-white' : 'text-zinc-400'} />
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${isSelected ? 'bg-canvas' : 'bg-subtle'}`}>
+                    <Icon size={18} weight="duotone" className={isSelected ? 'text-fg' : 'text-fg-muted'} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className={`font-semibold text-sm ${isSelected ? 'text-black' : 'text-white'}`}>{label}</p>
-                    <p className={`text-xs mt-0.5 ${isSelected ? 'text-zinc-600' : 'text-zinc-500'}`}>{desc}</p>
+                    <p className={`font-semibold text-sm ${isSelected ? 'text-on-primary' : 'text-fg'}`}>{label}</p>
+                    <p className={`text-xs mt-0.5 ${isSelected ? 'text-fg-faint' : 'text-fg-faint'}`}>{desc}</p>
                   </div>
-                  {isSelected && <Check size={16} weight="bold" className="text-black flex-shrink-0" />}
+                  {isSelected && <Check size={16} weight="bold" className="text-on-primary flex-shrink-0" />}
                 </button>
               );
             })}
           </div>
-          <p className="text-zinc-700 text-xs mt-2 px-1">Puedes cambiar tu tipo de cuenta en cualquier momento.</p>
+          <p className="text-fg-faint text-xs mt-2 px-1">Puedes cambiar tu tipo de cuenta en cualquier momento.</p>
         </section>
 
         {/* Logout */}
         <button
           onClick={() => { logout(); navigate('/'); }}
-          className="w-full border border-zinc-800 text-red-500 py-3 rounded-xl text-sm hover:bg-zinc-900 transition-colors"
+          className="w-full border border-line text-danger py-3 rounded-xl text-sm hover:bg-surface transition-colors"
         >
           Cerrar sesión
         </button>

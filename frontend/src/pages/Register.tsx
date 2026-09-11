@@ -11,7 +11,7 @@ const DOMAIN = 'ucundinamarca.edu.co';
 
 function Requirement({ ok, label }: { ok: boolean; label: string }) {
   return (
-    <span className={`text-xs flex items-center gap-1.5 ${ok ? 'text-green-400' : 'text-zinc-600'}`}>
+    <span className={`text-xs flex items-center gap-1.5 ${ok ? 'text-live' : 'text-fg-faint'}`}>
       {ok ? <Check size={11} weight="bold" /> : <X size={11} weight="bold" />}
       {label}
     </span>
@@ -67,27 +67,27 @@ export default function Register() {
 
   if (step === 'role') {
     return (
-      <div className="min-h-screen bg-black flex justify-center px-6 pt-24 pb-10">
+      <div className="min-h-screen bg-canvas flex justify-center px-6 pt-24 pb-10">
         <div className="w-full max-w-sm">
-          <h1 className="text-3xl font-black text-white mb-2">¿Cómo usarás la app?</h1>
-          <p className="text-zinc-500 text-sm mb-8">Elige tu rol principal. Podrás cambiarlo después.</p>
+          <h1 className="text-3xl font-black text-fg mb-2">¿Cómo usarás la app?</h1>
+          <p className="text-fg-faint text-sm mb-8">Elige tu rol principal. Podrás cambiarlo después.</p>
 
           <div className="space-y-3 mb-6">
             <button
               onClick={() => setRole('driver')}
               className={`w-full text-left p-5 rounded-2xl border transition-all ${
                 role === 'driver'
-                  ? 'bg-white border-white'
-                  : 'bg-zinc-900 border-zinc-800 hover:border-zinc-600'
+                  ? 'bg-primary border-primary'
+                  : 'bg-surface border-line hover:border-line-strong'
               }`}
             >
               <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${role === 'driver' ? 'bg-black' : 'bg-zinc-800'}`}>
-                  <Car size={22} weight="duotone" className={role === 'driver' ? 'text-white' : 'text-zinc-400'} />
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${role === 'driver' ? 'bg-canvas' : 'bg-subtle'}`}>
+                  <Car size={22} weight="duotone" className={role === 'driver' ? 'text-fg' : 'text-fg-muted'} />
                 </div>
                 <div>
-                  <p className={`font-semibold text-base ${role === 'driver' ? 'text-black' : 'text-white'}`}>Soy conductor</p>
-                  <p className={`text-sm mt-0.5 ${role === 'driver' ? 'text-zinc-600' : 'text-zinc-500'}`}>
+                  <p className={`font-semibold text-base ${role === 'driver' ? 'text-on-primary' : 'text-fg'}`}>Soy conductor</p>
+                  <p className={`text-sm mt-0.5 ${role === 'driver' ? 'text-fg-faint' : 'text-fg-faint'}`}>
                     Tengo vehículo y quiero ofrecer viajes
                   </p>
                 </div>
@@ -98,17 +98,17 @@ export default function Register() {
               onClick={() => setRole('passenger')}
               className={`w-full text-left p-5 rounded-2xl border transition-all ${
                 role === 'passenger'
-                  ? 'bg-white border-white'
-                  : 'bg-zinc-900 border-zinc-800 hover:border-zinc-600'
+                  ? 'bg-primary border-primary'
+                  : 'bg-surface border-line hover:border-line-strong'
               }`}
             >
               <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${role === 'passenger' ? 'bg-black' : 'bg-zinc-800'}`}>
-                  <Users size={22} weight="duotone" className={role === 'passenger' ? 'text-white' : 'text-zinc-400'} />
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${role === 'passenger' ? 'bg-canvas' : 'bg-subtle'}`}>
+                  <Users size={22} weight="duotone" className={role === 'passenger' ? 'text-fg' : 'text-fg-muted'} />
                 </div>
                 <div>
-                  <p className={`font-semibold text-base ${role === 'passenger' ? 'text-black' : 'text-white'}`}>Soy pasajero</p>
-                  <p className={`text-sm mt-0.5 ${role === 'passenger' ? 'text-zinc-600' : 'text-zinc-500'}`}>
+                  <p className={`font-semibold text-base ${role === 'passenger' ? 'text-on-primary' : 'text-fg'}`}>Soy pasajero</p>
+                  <p className={`text-sm mt-0.5 ${role === 'passenger' ? 'text-fg-faint' : 'text-fg-faint'}`}>
                     Busco viajes para compartir trayecto
                   </p>
                 </div>
@@ -119,14 +119,14 @@ export default function Register() {
           <button
             disabled={!role}
             onClick={() => setStep('info')}
-            className="w-full bg-white text-black font-semibold py-4 rounded-xl hover:bg-zinc-200 disabled:opacity-30 transition-colors text-sm"
+            className="w-full bg-primary text-on-primary font-semibold py-4 rounded-xl hover:bg-subtle disabled:opacity-30 transition-colors text-sm"
           >
             Continuar →
           </button>
 
-          <p className="text-center text-zinc-600 text-sm mt-5">
+          <p className="text-center text-fg-faint text-sm mt-5">
             ¿Ya tienes cuenta?{' '}
-            <Link to="/login" className="text-white font-medium">Inicia sesión</Link>
+            <Link to="/login" className="text-fg font-medium">Inicia sesión</Link>
           </p>
         </div>
       </div>
@@ -134,15 +134,15 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex justify-center px-6 pt-24 pb-10">
+    <div className="min-h-screen bg-canvas flex justify-center px-6 pt-24 pb-10">
       <div className="w-full max-w-sm">
-        <button onClick={() => setStep('role')} className="text-zinc-500 text-sm mb-4 hover:text-white transition-colors flex items-center gap-1">
+        <button onClick={() => setStep('role')} className="text-fg-faint text-sm mb-4 hover:text-fg transition-colors flex items-center gap-1">
           ← Volver
         </button>
-        <h1 className="text-3xl font-black text-white mb-1">Crear cuenta</h1>
-        <p className="text-zinc-500 text-sm mb-2">
+        <h1 className="text-3xl font-black text-fg mb-1">Crear cuenta</h1>
+        <p className="text-fg-faint text-sm mb-2">
           {role === 'driver' ? 'Conductor · ' : 'Pasajero · '}
-          <span className="text-zinc-400">Solo correo institucional</span>
+          <span className="text-fg-muted">Solo correo institucional</span>
         </p>
         <form onSubmit={handleSubmit} className="space-y-3">
           <input
@@ -152,11 +152,11 @@ export default function Register() {
             required
             placeholder="Nombre completo"
             autoComplete="name"
-            className="w-full bg-zinc-900 text-white placeholder-zinc-500 px-4 py-4 rounded-xl text-sm focus:ring-2 focus:ring-white transition"
+            className="w-full bg-surface text-fg placeholder-fg-faint px-4 py-4 rounded-xl text-sm focus:ring-2 focus:ring-fg transition"
           />
 
           {/* Email dividido: usuario | @dominio fijo */}
-          <div className="flex items-stretch bg-zinc-900 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-white transition">
+          <div className="flex items-stretch bg-surface rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-fg transition">
             <input
               type="text"
               value={form.emailUser}
@@ -172,9 +172,9 @@ export default function Register() {
               autoCorrect="off"
               spellCheck={false}
               inputMode="email"
-              className="flex-1 bg-transparent text-white placeholder-zinc-500 px-4 py-4 text-sm outline-none min-w-0"
+              className="flex-1 bg-transparent text-fg placeholder-fg-faint px-4 py-4 text-sm outline-none min-w-0"
             />
-            <div className="flex items-center pr-4 text-zinc-500 text-sm select-none whitespace-nowrap">
+            <div className="flex items-center pr-4 text-fg-faint text-sm select-none whitespace-nowrap">
               @{DOMAIN}
             </div>
           </div>
@@ -205,7 +205,7 @@ export default function Register() {
             error={confirmMismatch}
           />
           {confirmMismatch && (
-            <p className="text-red-400 text-xs px-1 flex items-center gap-1.5">
+            <p className="text-danger text-xs px-1 flex items-center gap-1.5">
               <X size={11} weight="bold" /> Las contraseñas no coinciden
             </p>
           )}
@@ -215,11 +215,11 @@ export default function Register() {
             value={form.phone}
             onChange={(e) => setForm({ ...form, phone: e.target.value })}
             placeholder="Teléfono (opcional)"
-            className="w-full bg-zinc-900 text-white placeholder-zinc-500 px-4 py-4 rounded-xl text-sm focus:ring-2 focus:ring-white transition"
+            className="w-full bg-surface text-fg placeholder-fg-faint px-4 py-4 rounded-xl text-sm focus:ring-2 focus:ring-fg transition"
           />
 
           {error && (
-            <p className="text-red-400 text-xs text-center bg-red-900/20 py-2 rounded-lg flex items-center justify-center gap-1.5">
+            <p className="text-danger text-xs text-center bg-danger-soft py-2 rounded-lg flex items-center justify-center gap-1.5">
               <WarningCircle size={12} weight="duotone" /> {error}
             </p>
           )}
@@ -227,15 +227,15 @@ export default function Register() {
           <button
             type="submit"
             disabled={loading || !canSubmit}
-            className="w-full bg-white text-black font-semibold py-4 rounded-xl hover:bg-zinc-200 disabled:opacity-50 transition-colors text-sm mt-2"
+            className="w-full bg-primary text-on-primary font-semibold py-4 rounded-xl hover:bg-subtle disabled:opacity-50 transition-colors text-sm mt-2"
           >
             {loading ? 'Creando cuenta...' : 'Crear cuenta'}
           </button>
         </form>
 
-        <p className="text-center text-zinc-600 text-sm mt-5">
+        <p className="text-center text-fg-faint text-sm mt-5">
           ¿Ya tienes cuenta?{' '}
-          <Link to="/login" className="text-white font-medium">Inicia sesión</Link>
+          <Link to="/login" className="text-fg font-medium">Inicia sesión</Link>
         </p>
       </div>
     </div>

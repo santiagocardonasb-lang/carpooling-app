@@ -93,16 +93,16 @@ export default function SearchRides() {
   };
 
   return (
-    <div className="min-h-screen bg-black pt-20 px-6 pb-10">
+    <div className="min-h-screen bg-canvas pt-20 px-6 pb-10">
       <div className="max-w-xl mx-auto">
         <div className="mt-4 mb-6 space-y-3">
 
           {/* Search box */}
-          <div className="bg-zinc-900 rounded-2xl">
-            <div className="flex items-center px-4 py-3.5 border-b border-zinc-800">
+          <div className="bg-surface rounded-2xl">
+            <div className="flex items-center px-4 py-3.5 border-b border-line">
               <LocationInput value={filters.origin} onChange={(v) => setFilters({ ...filters, origin: v })} placeholder="Origen" dot="origin" />
             </div>
-            <div className="flex items-center px-4 py-3.5 border-b border-zinc-800">
+            <div className="flex items-center px-4 py-3.5 border-b border-line">
               <LocationInput value={filters.destination} onChange={(v) => setFilters({ ...filters, destination: v })} placeholder="Destino" dot="destination" />
             </div>
             <div className="px-4 py-2">
@@ -116,7 +116,7 @@ export default function SearchRides() {
               <button
                 onClick={fetchRides}
                 disabled={loading || !canSearch}
-                className="w-full bg-white text-black font-semibold py-3 rounded-xl hover:bg-zinc-200 disabled:opacity-40 transition-colors text-sm flex items-center justify-center gap-2"
+                className="w-full bg-primary text-on-primary font-semibold py-3 rounded-xl hover:bg-subtle disabled:opacity-40 transition-colors text-sm flex items-center justify-center gap-2"
               >
                 <MagnifyingGlass size={15} weight="duotone" />
                 {loading ? 'Buscando...' : 'Buscar'}
@@ -135,7 +135,7 @@ export default function SearchRides() {
                 key={key}
                 onClick={() => setVehicleType(key)}
                 className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-medium transition-all border ${
-                  vehicleType === key ? 'bg-white text-black border-white' : 'bg-transparent text-zinc-500 border-zinc-800 hover:border-zinc-600'
+                  vehicleType === key ? 'bg-primary text-on-primary border-primary' : 'bg-transparent text-fg-faint border-line hover:border-line-strong'
                 }`}
               >
                 {icon} {label}
@@ -152,8 +152,8 @@ export default function SearchRides() {
                   onClick={() => setSort(key)}
                   className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all border ${
                     sort === key
-                      ? 'bg-white text-black border-white'
-                      : 'bg-transparent text-zinc-500 border-zinc-800 hover:border-zinc-600'
+                      ? 'bg-primary text-on-primary border-primary'
+                      : 'bg-transparent text-fg-faint border-line hover:border-line-strong'
                   }`}
                 >
                   {label}
@@ -166,10 +166,10 @@ export default function SearchRides() {
         {/* Placeholder cuando no hay origen+destino */}
         {!searched && !canSearch && (
           <div className="text-center py-14 px-4">
-            <div className="w-14 h-14 bg-zinc-900 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <MagnifyingGlass size={24} weight="duotone" className="text-zinc-700" />
+            <div className="w-14 h-14 bg-surface rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <MagnifyingGlass size={24} weight="duotone" className="text-fg-faint" />
             </div>
-            <p className="text-zinc-500 text-sm">Ingresa origen y destino para ver los viajes disponibles</p>
+            <p className="text-fg-faint text-sm">Ingresa origen y destino para ver los viajes disponibles</p>
           </div>
         )}
 
@@ -177,24 +177,24 @@ export default function SearchRides() {
         {searched && (
           rides.length === 0 ? (
             <div className="text-center py-14 px-4">
-              <div className="w-14 h-14 bg-zinc-900 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <MagnifyingGlass size={24} weight="duotone" className="text-zinc-600" />
+              <div className="w-14 h-14 bg-surface rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <MagnifyingGlass size={24} weight="duotone" className="text-fg-faint" />
               </div>
-              <p className="text-white text-lg font-semibold mb-2">Sin viajes disponibles</p>
-              <p className="text-zinc-600 text-sm mb-6 leading-relaxed">
+              <p className="text-fg text-lg font-semibold mb-2">Sin viajes disponibles</p>
+              <p className="text-fg-faint text-sm mb-6 leading-relaxed">
                 No hay conductores en esa ruta por ahora.
                 {filters.date ? ' Prueba otra fecha o amplía el origen.' : ' Prueba sin filtro de fecha.'}
               </p>
               <div className="space-y-2">
                 <button
                   onClick={() => { setFilters(f => ({ ...f, date: '' })); setTimeout(fetchRides, 0); }}
-                  className="block w-full border border-zinc-800 text-zinc-400 py-3 rounded-xl text-sm hover:border-zinc-600 hover:text-white transition-colors"
+                  className="block w-full border border-line text-fg-muted py-3 rounded-xl text-sm hover:border-line-strong hover:text-fg transition-colors"
                 >
                   Ver todos los viajes
                 </button>
                 <button
                   onClick={() => navigate('/create-ride')}
-                  className="block w-full bg-white text-black py-3 rounded-xl text-sm font-medium hover:bg-zinc-200 transition-colors"
+                  className="block w-full bg-primary text-on-primary py-3 rounded-xl text-sm font-medium hover:bg-subtle transition-colors"
                 >
                   ¿Tienes auto? Publica tu viaje →
                 </button>
@@ -202,7 +202,7 @@ export default function SearchRides() {
             </div>
           ) : (
             <div className="space-y-3 stagger">
-              <p className="text-zinc-600 text-xs">{rides.length} viaje{rides.length !== 1 ? 's' : ''} disponible{rides.length !== 1 ? 's' : ''}</p>
+              <p className="text-fg-faint text-xs">{rides.length} viaje{rides.length !== 1 ? 's' : ''} disponible{rides.length !== 1 ? 's' : ''}</p>
               {rides.map((ride) => (
                 <RideCard
                   key={ride.id}
@@ -212,7 +212,7 @@ export default function SearchRides() {
                 />
               ))}
               {!isAuthenticated && (
-                <button onClick={() => navigate('/login')} className="w-full border border-zinc-800 text-zinc-400 py-3.5 rounded-2xl text-sm hover:border-zinc-600 hover:text-white transition-colors mt-2">
+                <button onClick={() => navigate('/login')} className="w-full border border-line text-fg-muted py-3.5 rounded-2xl text-sm hover:border-line-strong hover:text-fg transition-colors mt-2">
                   Inicia sesión para solicitar un viaje →
                 </button>
               )}

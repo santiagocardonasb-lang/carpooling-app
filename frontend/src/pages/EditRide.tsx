@@ -97,36 +97,36 @@ export default function EditRide() {
   const hasErrors = Object.values(fieldErrors).some(Boolean);
 
   const inputCls = (field: keyof FieldErrors) =>
-    `w-full bg-zinc-900 text-white placeholder-zinc-600 px-4 py-3.5 rounded-xl text-sm transition [color-scheme:dark] ${
-      fieldErrors[field] ? 'ring-2 ring-red-500' : 'focus:ring-2 focus:ring-white'
+    `w-full bg-surface text-fg placeholder-fg-faint px-4 py-3.5 rounded-xl text-sm transition ${
+      fieldErrors[field] ? 'ring-2 ring-danger' : 'focus:ring-2 focus:ring-fg'
     }`;
 
   if (fetching) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center pt-16">
-        <div className="w-6 h-6 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
+      <div className="min-h-screen bg-canvas flex items-center justify-center pt-16">
+        <div className="w-6 h-6 border-2 border-line-strong border-t-fg rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black pt-20 px-6 pb-10">
+    <div className="min-h-screen bg-canvas pt-20 px-6 pb-10">
       <div className="max-w-sm mx-auto mt-4">
-        <button onClick={() => navigate('/my-rides')} className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors text-sm mb-4">
+        <button onClick={() => navigate('/my-rides')} className="flex items-center gap-2 text-fg-faint hover:text-fg transition-colors text-sm mb-4">
           <ArrowLeft size={15} weight="bold" /> Volver
         </button>
-        <h1 className="text-2xl font-black text-white mb-1">Editar viaje</h1>
-        <p className="text-zinc-600 text-sm mb-6">Los cambios se aplicarán a las solicitudes pendientes.</p>
+        <h1 className="text-2xl font-black text-fg mb-1">Editar viaje</h1>
+        <p className="text-fg-faint text-sm mb-6">Los cambios se aplicarán a las solicitudes pendientes.</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
 
           {/* Vehicle type */}
           <div>
-            <label className="block text-zinc-500 text-xs mb-2">Vehículo</label>
+            <label className="block text-fg-faint text-xs mb-2">Vehículo</label>
             <div className="flex gap-2">
               {(['car', 'moto'] as const).map((type) => (
                 <button key={type} type="button" onClick={() => setVehicleType(type)}
-                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium transition-all border ${vehicleType === type ? 'bg-white text-black border-white' : 'bg-transparent text-zinc-500 border-zinc-800 hover:border-zinc-600'}`}>
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium transition-all border ${vehicleType === type ? 'bg-primary text-on-primary border-primary' : 'bg-transparent text-fg-faint border-line hover:border-line-strong'}`}>
                   {type === 'car' ? <Car size={16} weight="duotone" /> : <Motorcycle size={16} weight="duotone" />}
                   {type === 'car' ? 'Carro' : 'Moto'}
                 </button>
@@ -136,11 +136,11 @@ export default function EditRide() {
 
           {/* Origin / Destination */}
           <div>
-            <label className="block text-zinc-500 text-xs mb-2">
-              Ruta {(fieldErrors.origin || fieldErrors.destination) && <span className="text-red-400">← requerido</span>}
+            <label className="block text-fg-faint text-xs mb-2">
+              Ruta {(fieldErrors.origin || fieldErrors.destination) && <span className="text-danger">← requerido</span>}
             </label>
-            <div className="bg-zinc-900 rounded-2xl">
-              <div className={`flex items-center px-4 py-3.5 border-b ${fieldErrors.origin ? 'border-red-800' : 'border-zinc-800'}`}>
+            <div className="bg-surface rounded-2xl">
+              <div className={`flex items-center px-4 py-3.5 border-b ${fieldErrors.origin ? 'border-danger/30' : 'border-line'}`}>
                 <LocationInput value={form.origin} onChange={(v) => { setForm({ ...form, origin: v }); setFieldErrors(p => ({ ...p, origin: false })); }} placeholder="Origen" dot="origin" error={fieldErrors.origin} />
               </div>
               <div className="flex items-center px-4 py-3.5">
@@ -150,31 +150,31 @@ export default function EditRide() {
           </div>
 
           {/* Recurring toggle */}
-          <div className="bg-zinc-900 rounded-xl px-4 py-3.5">
+          <div className="bg-surface rounded-xl px-4 py-3.5">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 min-w-0 flex-1">
-                <ArrowsClockwise size={15} weight="duotone" className="text-zinc-500 flex-shrink-0" />
+                <ArrowsClockwise size={15} weight="duotone" className="text-fg-faint flex-shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-white text-sm font-medium">Viaje recurrente</p>
-                  <p className="text-zinc-600 text-xs">Sale varios días a la semana</p>
+                  <p className="text-fg text-sm font-medium">Viaje recurrente</p>
+                  <p className="text-fg-faint text-xs">Sale varios días a la semana</p>
                 </div>
               </div>
               <Toggle checked={isRecurring} onChange={() => setIsRecurring(!isRecurring)} />
             </div>
 
             {isRecurring && (
-              <div className="mt-4 pt-4 border-t border-zinc-800">
+              <div className="mt-4 pt-4 border-t border-line">
                 <div className="flex items-center justify-between mb-3">
-                  <p className="text-zinc-400 text-xs">Días {fieldErrors.days_of_week && <span className="text-red-400">← selecciona al menos uno</span>}</p>
+                  <p className="text-fg-muted text-xs">Días {fieldErrors.days_of_week && <span className="text-danger">← selecciona al menos uno</span>}</p>
                   <div className="flex gap-3">
-                    <button type="button" onClick={() => setSelectedDays([1,2,3,4,5])} className="text-zinc-500 text-xs hover:text-white">L–V</button>
-                    <button type="button" onClick={() => setSelectedDays([0,1,2,3,4,5,6])} className="text-zinc-500 text-xs hover:text-white">Todos</button>
+                    <button type="button" onClick={() => setSelectedDays([1,2,3,4,5])} className="text-fg-faint text-xs hover:text-fg">L–V</button>
+                    <button type="button" onClick={() => setSelectedDays([0,1,2,3,4,5,6])} className="text-fg-faint text-xs hover:text-fg">Todos</button>
                   </div>
                 </div>
                 <div className="grid grid-cols-7 gap-1">
                   {DAYS.map(({ id: dayId, short, label }) => (
                     <button key={dayId} type="button" title={label} onClick={() => toggleDay(dayId)}
-                      className={`py-2 rounded-lg text-xs font-semibold transition-all ${selectedDays.includes(dayId) ? 'bg-white text-black' : 'bg-zinc-800 text-zinc-500 hover:bg-zinc-700'}`}>
+                      className={`py-2 rounded-lg text-xs font-semibold transition-all ${selectedDays.includes(dayId) ? 'bg-primary text-on-primary' : 'bg-subtle text-fg-faint hover:bg-line-strong'}`}>
                       {short}
                     </button>
                   ))}
@@ -185,7 +185,7 @@ export default function EditRide() {
 
           {!isRecurring && (
             <div>
-              <label className="block text-zinc-500 text-xs mb-1.5">Fecha {fieldErrors.date && <span className="text-red-400">← requerido</span>}</label>
+              <label className="block text-fg-faint text-xs mb-1.5">Fecha {fieldErrors.date && <span className="text-danger">← requerido</span>}</label>
               <DatePicker
                 value={form.date}
                 onChange={(v) => { setForm({ ...form, date: v }); setFieldErrors(p => ({ ...p, date: false })); }}
@@ -197,7 +197,7 @@ export default function EditRide() {
           )}
 
           <div>
-            <label className="block text-zinc-500 text-xs mb-1.5">Hora de salida {fieldErrors.time && <span className="text-red-400">← requerido</span>}</label>
+            <label className="block text-fg-faint text-xs mb-1.5">Hora de salida {fieldErrors.time && <span className="text-danger">← requerido</span>}</label>
             <TimePicker
               value={form.time}
               onChange={(v) => { setForm({ ...form, time: v }); setFieldErrors(p => ({ ...p, time: false })); }}
@@ -208,28 +208,28 @@ export default function EditRide() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-zinc-500 text-xs mb-1.5">Asientos {fieldErrors.seats && <span className="text-red-400">!</span>}</label>
+              <label className="block text-fg-faint text-xs mb-1.5">Asientos {fieldErrors.seats && <span className="text-danger">!</span>}</label>
               <input type="number" value={form.seats} onChange={(e) => { setForm({ ...form, seats: e.target.value }); setFieldErrors(p => ({ ...p, seats: false })); }} min={1} max={vehicleType === 'moto' ? 1 : 8} className={inputCls('seats')} />
             </div>
             <div>
-              <label className="block text-zinc-500 text-xs mb-1.5">Precio ($) {fieldErrors.price && <span className="text-red-400">!</span>}</label>
+              <label className="block text-fg-faint text-xs mb-1.5">Precio ($) {fieldErrors.price && <span className="text-danger">!</span>}</label>
               <input type="number" value={form.price} onChange={(e) => { setForm({ ...form, price: e.target.value }); setFieldErrors(p => ({ ...p, price: false })); }} min={0} step="100" className={inputCls('price')} />
             </div>
           </div>
 
           <div>
-            <label className="block text-zinc-500 text-xs mb-1.5">Nota (opcional)</label>
-            <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} placeholder="Ej. Salgo puntual..." className="w-full bg-zinc-900 text-white placeholder-zinc-600 px-4 py-3.5 rounded-xl text-sm resize-none focus:ring-2 focus:ring-white transition" />
+            <label className="block text-fg-faint text-xs mb-1.5">Nota (opcional)</label>
+            <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} placeholder="Ej. Salgo puntual..." className="w-full bg-surface text-fg placeholder-fg-faint px-4 py-3.5 rounded-xl text-sm resize-none focus:ring-2 focus:ring-fg transition" />
           </div>
 
           {hasErrors && (
-            <div className="flex items-center gap-2 bg-red-900/20 border border-red-900/50 px-3 py-2.5 rounded-xl">
-              <WarningCircle size={14} weight="duotone" className="text-red-400 flex-shrink-0" />
-              <p className="text-red-400 text-xs">Completa los campos marcados en rojo.</p>
+            <div className="flex items-center gap-2 bg-danger-soft border border-danger/30 px-3 py-2.5 rounded-xl">
+              <WarningCircle size={14} weight="duotone" className="text-danger flex-shrink-0" />
+              <p className="text-danger text-xs">Completa los campos marcados en rojo.</p>
             </div>
           )}
 
-          <button type="submit" disabled={loading} className="w-full bg-white text-black font-semibold py-4 rounded-xl hover:bg-zinc-200 disabled:opacity-50 transition-colors text-sm">
+          <button type="submit" disabled={loading} className="w-full bg-primary text-on-primary font-semibold py-4 rounded-xl hover:bg-subtle disabled:opacity-50 transition-colors text-sm">
             {loading ? 'Guardando...' : 'Guardar cambios'}
           </button>
         </form>

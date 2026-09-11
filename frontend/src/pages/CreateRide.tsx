@@ -96,27 +96,27 @@ export default function CreateRide() {
   const hasErrors = Object.values(fieldErrors).some(Boolean);
 
   const inputCls = (field: keyof FieldErrors) =>
-    `w-full bg-zinc-900 text-white placeholder-zinc-600 px-4 py-3.5 rounded-xl text-sm transition [color-scheme:dark] ${
-      fieldErrors[field] ? 'ring-2 ring-red-500 placeholder-red-900' : 'focus:ring-2 focus:ring-white'
+    `w-full bg-surface text-fg placeholder-fg-faint px-4 py-3.5 rounded-xl text-sm transition ${
+      fieldErrors[field] ? 'ring-2 ring-danger placeholder-danger/60' : 'focus:ring-2 focus:ring-fg'
     }`;
 
   // Pantalla de bloqueo si no hay datos de vehículo
   if (vehicleOk === false) {
     return (
-      <div className="min-h-screen bg-black pt-20 px-6 pb-10 flex items-center justify-center">
+      <div className="min-h-screen bg-canvas pt-20 px-6 pb-10 flex items-center justify-center">
         <div className="max-w-sm w-full text-center">
-          <div className="w-16 h-16 bg-zinc-900 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Car size={28} weight="duotone" className="text-zinc-500" />
+          <div className="w-16 h-16 bg-surface rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Car size={28} weight="duotone" className="text-fg-faint" />
           </div>
-          <h2 className="text-white text-xl font-bold mb-2">Completa tu vehículo</h2>
-          <p className="text-zinc-500 text-sm mb-6 leading-relaxed">
+          <h2 className="text-fg text-xl font-bold mb-2">Completa tu vehículo</h2>
+          <p className="text-fg-faint text-sm mb-6 leading-relaxed">
             Antes de publicar un viaje, los pasajeros necesitan conocer tu vehículo.
             Agrega la marca y placa para continuar.
           </p>
           <Link
             to="/vehicle"
             state={{ from: '/create-ride' }}
-            className="inline-block bg-white text-black font-semibold px-6 py-3 rounded-xl hover:bg-zinc-200 transition-colors text-sm"
+            className="inline-block bg-primary text-on-primary font-semibold px-6 py-3 rounded-xl hover:bg-subtle transition-colors text-sm"
           >
             Agregar información del vehículo →
           </Link>
@@ -126,16 +126,16 @@ export default function CreateRide() {
   }
 
   return (
-    <div className="min-h-screen bg-black pt-20 px-6 pb-10">
+    <div className="min-h-screen bg-canvas pt-20 px-6 pb-10">
       <div className="max-w-sm mx-auto mt-4">
-        <h1 className="text-2xl font-black text-white mb-1">Publicar viaje</h1>
-        <p className="text-zinc-600 text-sm mb-6">Comparte tu ruta y gana dinero</p>
+        <h1 className="text-2xl font-black text-fg mb-1">Publicar viaje</h1>
+        <p className="text-fg-faint text-sm mb-6">Comparte tu ruta y gana dinero</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
 
           {/* Vehicle type */}
           <div>
-            <label className="block text-zinc-500 text-xs mb-2">Vehículo</label>
+            <label className="block text-fg-faint text-xs mb-2">Vehículo</label>
             <div className="flex gap-2">
               {(['car', 'moto'] as const).map((type) => (
                 <button
@@ -143,7 +143,7 @@ export default function CreateRide() {
                   type="button"
                   onClick={() => setVehicleType(type)}
                   className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium transition-all border ${
-                    vehicleType === type ? 'bg-white text-black border-white' : 'bg-transparent text-zinc-500 border-zinc-800 hover:border-zinc-600'
+                    vehicleType === type ? 'bg-primary text-on-primary border-primary' : 'bg-transparent text-fg-faint border-line hover:border-line-strong'
                   }`}
                 >
                   {type === 'car' ? <Car size={16} weight="duotone" /> : <Motorcycle size={16} weight="duotone" />}
@@ -155,30 +155,30 @@ export default function CreateRide() {
 
           {/* Origin / Destination — overflow-visible to allow dropdown */}
           <div>
-            <label className="block text-zinc-500 text-xs mb-2">
+            <label className="block text-fg-faint text-xs mb-2">
               Ruta
               {(fieldErrors.origin || fieldErrors.destination) && (
-                <span className="ml-2 text-red-400">← requerido</span>
+                <span className="ml-2 text-danger">← requerido</span>
               )}
             </label>
-            <div className="bg-zinc-900 rounded-2xl">
-              <div className={`flex items-center px-4 py-3.5 border-b ${fieldErrors.origin ? 'border-red-800' : 'border-zinc-800'}`}>
+            <div className="bg-surface rounded-2xl">
+              <div className={`flex items-center px-4 py-3.5 border-b ${fieldErrors.origin ? 'border-danger/30' : 'border-line'}`}>
                 <LocationInput value={form.origin} onChange={(v) => { setForm({ ...form, origin: v }); setFieldErrors(p => ({ ...p, origin: false })); }} placeholder="Origen" dot="origin" error={fieldErrors.origin} />
               </div>
-              <div className={`flex items-center px-4 py-3.5 ${fieldErrors.destination ? 'border border-red-800 rounded-b-2xl' : ''}`}>
+              <div className={`flex items-center px-4 py-3.5 ${fieldErrors.destination ? 'border border-danger/30 rounded-b-2xl' : ''}`}>
                 <LocationInput value={form.destination} onChange={(v) => { setForm({ ...form, destination: v }); setFieldErrors(p => ({ ...p, destination: false })); }} placeholder="Destino" dot="destination" error={fieldErrors.destination} />
               </div>
             </div>
           </div>
 
           {/* Recurring toggle */}
-          <div className="bg-zinc-900 rounded-xl px-4 py-3.5">
+          <div className="bg-surface rounded-xl px-4 py-3.5">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 min-w-0 flex-1">
-                <ArrowsClockwise size={15} weight="duotone" className="text-zinc-500 flex-shrink-0" />
+                <ArrowsClockwise size={15} weight="duotone" className="text-fg-faint flex-shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-white text-sm font-medium">Viaje recurrente</p>
-                  <p className="text-zinc-600 text-xs">Sale varios días a la semana</p>
+                  <p className="text-fg text-sm font-medium">Viaje recurrente</p>
+                  <p className="text-fg-faint text-xs">Sale varios días a la semana</p>
                 </div>
               </div>
               <Toggle checked={isRecurring} onChange={() => setIsRecurring(!isRecurring)} />
@@ -186,12 +186,12 @@ export default function CreateRide() {
 
             {/* Days inside the same card to avoid overflow */}
             {isRecurring && (
-              <div className="mt-4 pt-4 border-t border-zinc-800">
+              <div className="mt-4 pt-4 border-t border-line">
                 <div className="flex items-center justify-between mb-3">
-                  <p className="text-zinc-400 text-xs">Días de la semana {fieldErrors.days_of_week && <span className="text-red-400">← selecciona al menos uno</span>}</p>
+                  <p className="text-fg-muted text-xs">Días de la semana {fieldErrors.days_of_week && <span className="text-danger">← selecciona al menos uno</span>}</p>
                   <div className="flex gap-3">
-                    <button type="button" onClick={() => setSelectedDays([1,2,3,4,5])} className="text-zinc-500 text-xs hover:text-white transition-colors">L–V</button>
-                    <button type="button" onClick={() => setSelectedDays([0,1,2,3,4,5,6])} className="text-zinc-500 text-xs hover:text-white transition-colors">Todos</button>
+                    <button type="button" onClick={() => setSelectedDays([1,2,3,4,5])} className="text-fg-faint text-xs hover:text-fg transition-colors">L–V</button>
+                    <button type="button" onClick={() => setSelectedDays([0,1,2,3,4,5,6])} className="text-fg-faint text-xs hover:text-fg transition-colors">Todos</button>
                   </div>
                 </div>
                 <div className="grid grid-cols-7 gap-1">
@@ -202,7 +202,7 @@ export default function CreateRide() {
                       title={label}
                       onClick={() => { toggleDay(id); setFieldErrors(p => ({ ...p, days_of_week: false })); }}
                       className={`py-2 rounded-lg text-xs font-semibold transition-all ${
-                        selectedDays.includes(id) ? 'bg-white text-black' : fieldErrors.days_of_week ? 'bg-red-900/30 text-red-500 border border-red-800' : 'bg-zinc-800 text-zinc-500 hover:bg-zinc-700'
+                        selectedDays.includes(id) ? 'bg-primary text-on-primary' : fieldErrors.days_of_week ? 'bg-danger-soft text-danger border border-danger/30' : 'bg-subtle text-fg-faint hover:bg-line-strong'
                       }`}
                     >
                       {short}
@@ -216,8 +216,8 @@ export default function CreateRide() {
           {/* Date (one-time only) */}
           {!isRecurring && (
             <div>
-              <label className="block text-zinc-500 text-xs mb-1.5">
-                Fecha {fieldErrors.date && <span className="text-red-400">← requerido</span>}
+              <label className="block text-fg-faint text-xs mb-1.5">
+                Fecha {fieldErrors.date && <span className="text-danger">← requerido</span>}
               </label>
               <DatePicker
                 value={form.date}
@@ -231,8 +231,8 @@ export default function CreateRide() {
 
           {/* Time */}
           <div>
-            <label className="block text-zinc-500 text-xs mb-1.5">
-              Hora de salida {fieldErrors.time && <span className="text-red-400">← requerido</span>}
+            <label className="block text-fg-faint text-xs mb-1.5">
+              Hora de salida {fieldErrors.time && <span className="text-danger">← requerido</span>}
             </label>
             <TimePicker
               value={form.time}
@@ -245,8 +245,8 @@ export default function CreateRide() {
           {/* Seats + Price */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-zinc-500 text-xs mb-1.5">
-                Asientos {fieldErrors.seats && <span className="text-red-400">!</span>}
+              <label className="block text-fg-faint text-xs mb-1.5">
+                Asientos {fieldErrors.seats && <span className="text-danger">!</span>}
               </label>
               <input
                 type="number"
@@ -259,8 +259,8 @@ export default function CreateRide() {
               />
             </div>
             <div>
-              <label className="block text-zinc-500 text-xs mb-1.5">
-                Precio ($) {fieldErrors.price && <span className="text-red-400">!</span>}
+              <label className="block text-fg-faint text-xs mb-1.5">
+                Precio ($) {fieldErrors.price && <span className="text-danger">!</span>}
               </label>
               <input
                 type="number"
@@ -276,33 +276,33 @@ export default function CreateRide() {
 
           {/* Note */}
           <div>
-            <label className="block text-zinc-500 text-xs mb-1.5">Nota (opcional)</label>
+            <label className="block text-fg-faint text-xs mb-1.5">Nota (opcional)</label>
             <textarea
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               rows={2}
               placeholder="Ej. Salgo puntual, música suave..."
-              className="w-full bg-zinc-900 text-white placeholder-zinc-600 px-4 py-3.5 rounded-xl text-sm resize-none focus:ring-2 focus:ring-white transition"
+              className="w-full bg-surface text-fg placeholder-fg-faint px-4 py-3.5 rounded-xl text-sm resize-none focus:ring-2 focus:ring-fg transition"
             />
           </div>
 
           {sameRouteError && (
-            <div className="flex items-center gap-2 bg-red-900/20 border border-red-900/50 px-3 py-2.5 rounded-xl">
-              <WarningCircle size={14} weight="duotone" className="text-red-400 flex-shrink-0" />
-              <p className="text-red-400 text-xs">El origen y el destino no pueden ser el mismo lugar.</p>
+            <div className="flex items-center gap-2 bg-danger-soft border border-danger/30 px-3 py-2.5 rounded-xl">
+              <WarningCircle size={14} weight="duotone" className="text-danger flex-shrink-0" />
+              <p className="text-danger text-xs">El origen y el destino no pueden ser el mismo lugar.</p>
             </div>
           )}
           {hasErrors && !sameRouteError && (
-            <div className="flex items-center gap-2 bg-red-900/20 border border-red-900/50 px-3 py-2.5 rounded-xl">
-              <WarningCircle size={14} weight="duotone" className="text-red-400 flex-shrink-0" />
-              <p className="text-red-400 text-xs">Completa los campos marcados en rojo antes de continuar.</p>
+            <div className="flex items-center gap-2 bg-danger-soft border border-danger/30 px-3 py-2.5 rounded-xl">
+              <WarningCircle size={14} weight="duotone" className="text-danger flex-shrink-0" />
+              <p className="text-danger text-xs">Completa los campos marcados en rojo antes de continuar.</p>
             </div>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-white text-black font-semibold py-4 rounded-xl hover:bg-zinc-200 disabled:opacity-50 transition-colors text-sm"
+            className="w-full bg-primary text-on-primary font-semibold py-4 rounded-xl hover:bg-subtle disabled:opacity-50 transition-colors text-sm"
           >
             {loading ? 'Publicando...' : 'Publicar viaje'}
           </button>

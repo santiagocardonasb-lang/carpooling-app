@@ -35,13 +35,13 @@ export default function RatingModal({ bookingId, rateeName, rateeRole, onClose, 
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={onClose}>
-      <div className="bg-zinc-900 rounded-2xl p-6 max-w-sm w-full border border-zinc-800" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-surface rounded-2xl p-6 max-w-sm w-full border border-line" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between mb-4">
           <div>
-            <h2 className="text-white font-bold text-lg">Califica al {rateeRole === 'driver' ? 'conductor' : 'pasajero'}</h2>
-            <p className="text-zinc-500 text-sm mt-0.5">{rateeName}</p>
+            <h2 className="text-fg font-bold text-lg">Califica al {rateeRole === 'driver' ? 'conductor' : 'pasajero'}</h2>
+            <p className="text-fg-faint text-sm mt-0.5">{rateeName}</p>
           </div>
-          <button onClick={onClose} className="text-zinc-500 hover:text-white"><X size={18} weight="bold" /></button>
+          <button onClick={onClose} className="text-fg-faint hover:text-fg"><X size={18} weight="bold" /></button>
         </div>
 
         <div className="flex justify-center gap-2 mb-5">
@@ -57,7 +57,7 @@ export default function RatingModal({ bookingId, rateeName, rateeRole, onClose, 
               <Star
                 size={36}
                 weight={n <= (hover || rating) ? 'fill' : 'regular'}
-                className={n <= (hover || rating) ? 'text-yellow-400' : 'text-zinc-700'}
+                className={n <= (hover || rating) ? 'text-star' : 'text-fg-faint'}
               />
             </button>
           ))}
@@ -69,17 +69,17 @@ export default function RatingModal({ bookingId, rateeName, rateeRole, onClose, 
           placeholder="Cuéntale a otros usuarios cómo estuvo (opcional)"
           rows={3}
           maxLength={500}
-          className="w-full bg-zinc-800 text-white placeholder-zinc-500 px-4 py-3 rounded-xl text-sm resize-none focus:ring-2 focus:ring-white outline-none"
+          className="w-full bg-subtle text-fg placeholder-fg-faint px-4 py-3 rounded-xl text-sm resize-none focus:ring-2 focus:ring-fg outline-none"
         />
 
         <div className="flex gap-2 mt-4">
-          <button onClick={onClose} className="flex-1 border border-zinc-700 text-zinc-400 py-2.5 rounded-xl text-sm hover:border-zinc-500 transition-colors">
+          <button onClick={onClose} className="flex-1 border border-line-strong text-fg-muted py-2.5 rounded-xl text-sm hover:border-line-strong transition-colors">
             Después
           </button>
           <button
             onClick={submit}
             disabled={rating < 1 || saving}
-            className="flex-1 bg-white text-black font-semibold py-2.5 rounded-xl text-sm hover:bg-zinc-200 disabled:opacity-40 transition-colors"
+            className="flex-1 bg-primary text-on-primary font-semibold py-2.5 rounded-xl text-sm hover:bg-subtle disabled:opacity-40 transition-colors"
           >
             {saving ? 'Enviando...' : 'Enviar'}
           </button>

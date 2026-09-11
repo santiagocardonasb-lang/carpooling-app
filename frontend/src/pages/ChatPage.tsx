@@ -103,20 +103,20 @@ export default function ChatPage() {
   const canChat = !['cancelled', 'rejected'].includes(bookingStatus);
 
   return (
-    <div className="min-h-screen bg-black flex flex-col">
+    <div className="min-h-screen bg-canvas flex flex-col">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-4 border-b border-zinc-900 bg-black/90 backdrop-blur-sm sticky top-0 z-10">
+      <div className="flex items-center gap-3 px-4 py-4 border-b border-line glass-bar sticky top-0 z-10">
         <button
           onClick={() => navigate(-1)}
-          className="text-zinc-500 hover:text-white transition-colors p-1 -ml-1 flex-shrink-0"
+          className="text-fg-faint hover:text-fg transition-colors p-1 -ml-1 flex-shrink-0"
         >
           <ArrowLeft size={22} weight="bold" />
         </button>
         <div className="flex-1 min-w-0">
-          <h2 className="text-white font-bold truncate">
+          <h2 className="text-fg font-bold truncate">
             {loading ? 'Cargando...' : otherName}
           </h2>
-          <p className="text-zinc-600 text-xs">
+          <p className="text-fg-faint text-xs">
             {bookingStatus === 'in_progress' ? '🚗 Viaje en curso' : bookingStatus === 'confirmed' ? '✓ Reserva confirmada' : ''}
           </p>
         </div>
@@ -124,15 +124,15 @@ export default function ChatPage() {
 
       {/* Banner de error transitorio */}
       {error && !fatalRef.current && (
-        <div className="bg-red-900/30 border-b border-red-800/50 px-4 py-2 text-center text-red-400 text-xs">
+        <div className="bg-danger-soft border-b border-danger/30 px-4 py-2 text-center text-danger text-xs">
           {error}
         </div>
       )}
       {fatalRef.current && (
         <div className="flex-1 flex items-center justify-center p-6">
           <div className="text-center">
-            <p className="text-red-400 text-sm mb-3">{error}</p>
-            <button onClick={() => navigate(-1)} className="text-white text-sm underline">Volver</button>
+            <p className="text-danger text-sm mb-3">{error}</p>
+            <button onClick={() => navigate(-1)} className="text-fg text-sm underline">Volver</button>
           </div>
         </div>
       )}
@@ -142,15 +142,15 @@ export default function ChatPage() {
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
         {loading ? (
           <div className="flex justify-center py-16">
-            <div className="w-6 h-6 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
+            <div className="w-6 h-6 border-2 border-line-strong border-t-fg rounded-full animate-spin" />
           </div>
         ) : messages.length === 0 ? (
           <div className="text-center py-16">
-            <div className="w-12 h-12 rounded-2xl bg-zinc-900 flex items-center justify-center mx-auto mb-3">
-              <HandWaving size={22} weight="duotone" className="text-zinc-500" />
+            <div className="w-12 h-12 rounded-2xl bg-surface flex items-center justify-center mx-auto mb-3">
+              <HandWaving size={22} weight="duotone" className="text-fg-faint" />
             </div>
-            <p className="text-zinc-500 text-sm">No hay mensajes aún</p>
-            <p className="text-zinc-700 text-xs mt-1">Saluda a {otherName?.split(' ')[0]}</p>
+            <p className="text-fg-faint text-sm">No hay mensajes aún</p>
+            <p className="text-fg-faint text-xs mt-1">Saluda a {otherName?.split(' ')[0]}</p>
           </div>
         ) : (
           messages.map(m => {
@@ -158,19 +158,19 @@ export default function ChatPage() {
             return (
               <div key={m.id} className={`flex items-end gap-2 ${mine ? 'justify-end' : 'justify-start'}`}>
                 {!mine && (
-                  <div className="w-7 h-7 rounded-full bg-zinc-800 flex items-center justify-center text-xs text-white font-bold flex-shrink-0">
+                  <div className="w-7 h-7 rounded-full bg-subtle flex items-center justify-center text-xs text-fg font-bold flex-shrink-0">
                     {m.sender_name[0]?.toUpperCase()}
                   </div>
                 )}
                 <div className={`max-w-[78%]`}>
                   <div className={`rounded-2xl px-4 py-2.5 text-sm ${
                     mine
-                      ? 'bg-white text-black rounded-br-sm'
-                      : 'bg-zinc-800 text-white rounded-bl-sm'
+                      ? 'bg-primary text-on-primary rounded-br-sm'
+                      : 'bg-subtle text-fg rounded-bl-sm'
                   }`}>
                     <p className="whitespace-pre-wrap break-words leading-relaxed">{m.text}</p>
                   </div>
-                  <p className={`text-[10px] mt-1 text-zinc-600 ${mine ? 'text-right' : ''}`}>
+                  <p className={`text-[10px] mt-1 text-fg-faint ${mine ? 'text-right' : ''}`}>
                     {formatTime(m.created_at)}
                   </p>
                 </div>
@@ -184,7 +184,7 @@ export default function ChatPage() {
 
       {/* Input */}
       {!fatalRef.current && canChat ? (
-        <div className="px-4 py-3 border-t border-zinc-900 flex gap-2 bg-black">
+        <div className="px-4 py-3 border-t border-line flex gap-2 bg-canvas">
           <input
             ref={inputRef}
             type="text"
@@ -195,18 +195,18 @@ export default function ChatPage() {
             }}
             placeholder={`Mensaje a ${otherName?.split(' ')[0] || '...'}...`}
             maxLength={500}
-            className="flex-1 bg-zinc-900 text-white px-4 py-3 rounded-2xl text-sm focus:ring-2 focus:ring-white outline-none placeholder-zinc-600"
+            className="flex-1 bg-surface text-fg px-4 py-3 rounded-2xl text-sm focus:ring-2 focus:ring-fg outline-none placeholder-fg-faint"
           />
           <button
             onClick={send}
             disabled={!input.trim() || sending}
-            className="bg-white text-black p-3 rounded-2xl hover:bg-zinc-200 disabled:opacity-40 transition-all active:scale-95 flex-shrink-0"
+            className="bg-primary text-on-primary p-3 rounded-2xl hover:bg-subtle disabled:opacity-40 transition-all active:scale-95 flex-shrink-0"
           >
             <PaperPlaneRight size={18} weight="duotone" />
           </button>
         </div>
       ) : !fatalRef.current ? (
-        <div className="px-4 py-4 border-t border-zinc-900 text-center text-zinc-600 text-xs bg-black">
+        <div className="px-4 py-4 border-t border-line text-center text-fg-faint text-xs bg-canvas">
           Esta reserva ya no está activa
         </div>
       ) : null}

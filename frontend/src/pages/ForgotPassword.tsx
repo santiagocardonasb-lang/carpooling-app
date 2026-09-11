@@ -119,28 +119,28 @@ export default function ForgotPassword() {
   };
 
   const ErrorBox = () => error ? (
-    <p className="text-red-400 text-xs text-center bg-red-900/20 py-2 rounded-lg flex items-center justify-center gap-1.5">
+    <p className="text-danger text-xs text-center bg-danger-soft py-2 rounded-lg flex items-center justify-center gap-1.5">
       <WarningCircle size={12} weight="duotone" /> {error}
     </p>
   ) : null;
 
   return (
-    <div className="min-h-screen bg-black flex justify-center px-6 pt-24 pb-10">
+    <div className="min-h-screen bg-canvas flex justify-center px-6 pt-24 pb-10">
       <div className="w-full max-w-sm">
 
         {/* ── Paso 1: correo ── */}
         {step === 'email' && (
           <>
-            <Link to="/login" className="text-zinc-500 text-sm mb-4 hover:text-white transition-colors flex items-center gap-1.5">
+            <Link to="/login" className="text-fg-faint text-sm mb-4 hover:text-fg transition-colors flex items-center gap-1.5">
               <ArrowLeft size={14} weight="bold" /> Volver
             </Link>
-            <h1 className="text-3xl font-black text-white mb-1">Recuperar contraseña</h1>
-            <p className="text-zinc-500 text-sm mb-6">
+            <h1 className="text-3xl font-black text-fg mb-1">Recuperar contraseña</h1>
+            <p className="text-fg-faint text-sm mb-6">
               Te enviamos un código de {CODE_LEN} dígitos a tu correo institucional.
             </p>
 
             <form onSubmit={requestCode} className="space-y-3">
-              <div className="flex items-stretch bg-zinc-900 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-white transition">
+              <div className="flex items-stretch bg-surface rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-fg transition">
                 <input
                   type="text"
                   value={emailUser}
@@ -152,9 +152,9 @@ export default function ForgotPassword() {
                   autoCorrect="off"
                   spellCheck={false}
                   inputMode="email"
-                  className="flex-1 bg-transparent text-white placeholder-zinc-500 px-4 py-4 text-sm outline-none min-w-0"
+                  className="flex-1 bg-transparent text-fg placeholder-fg-faint px-4 py-4 text-sm outline-none min-w-0"
                 />
-                <div className="flex items-center pr-4 text-zinc-500 text-sm select-none whitespace-nowrap">
+                <div className="flex items-center pr-4 text-fg-faint text-sm select-none whitespace-nowrap">
                   @{DOMAIN}
                 </div>
               </div>
@@ -164,7 +164,7 @@ export default function ForgotPassword() {
               <button
                 type="submit"
                 disabled={loading || !emailUser.trim()}
-                className="w-full bg-white text-black font-semibold py-4 rounded-xl hover:bg-zinc-200 disabled:opacity-50 transition-colors text-sm"
+                className="w-full bg-primary text-on-primary font-semibold py-4 rounded-xl hover:bg-subtle disabled:opacity-50 transition-colors text-sm"
               >
                 {loading ? 'Enviando...' : 'Enviarme el código'}
               </button>
@@ -177,17 +177,17 @@ export default function ForgotPassword() {
           <>
             <button
               onClick={() => { setStep('email'); setError(''); }}
-              className="text-zinc-500 text-sm mb-4 hover:text-white transition-colors flex items-center gap-1.5"
+              className="text-fg-faint text-sm mb-4 hover:text-fg transition-colors flex items-center gap-1.5"
             >
               <ArrowLeft size={14} weight="bold" /> Cambiar correo
             </button>
 
-            <div className="w-12 h-12 rounded-2xl bg-zinc-900 flex items-center justify-center mb-4">
-              <EnvelopeSimple size={22} weight="duotone" className="text-zinc-400" />
+            <div className="w-12 h-12 rounded-2xl bg-surface flex items-center justify-center mb-4">
+              <EnvelopeSimple size={22} weight="duotone" className="text-fg-muted" />
             </div>
-            <h1 className="text-3xl font-black text-white mb-1">Revisa tu correo</h1>
-            <p className="text-zinc-500 text-sm mb-6 leading-relaxed">
-              Enviamos un código a <span className="text-white">{fullEmail}</span>.
+            <h1 className="text-3xl font-black text-fg mb-1">Revisa tu correo</h1>
+            <p className="text-fg-faint text-sm mb-6 leading-relaxed">
+              Enviamos un código a <span className="text-fg">{fullEmail}</span>.
               Vence en 10 minutos.
             </p>
 
@@ -203,8 +203,8 @@ export default function ForgotPassword() {
                   autoComplete="one-time-code"
                   maxLength={CODE_LEN}
                   disabled={loading}
-                  className={`w-14 h-16 text-center text-2xl font-black tabular-nums rounded-xl bg-zinc-900 text-white outline-none transition disabled:opacity-50 ${
-                    error ? 'ring-2 ring-red-500' : d ? 'ring-2 ring-white' : 'ring-1 ring-zinc-800 focus:ring-2 focus:ring-white'
+                  className={`w-14 h-16 text-center text-2xl font-black tabular-nums rounded-xl bg-surface text-fg outline-none transition disabled:opacity-50 ${
+                    error ? 'ring-2 ring-danger' : d ? 'ring-2 ring-fg' : 'ring-1 ring-line focus:ring-2 focus:ring-fg'
                   }`}
                 />
               ))}
@@ -213,20 +213,20 @@ export default function ForgotPassword() {
             <ErrorBox />
 
             {loading && (
-              <p className="text-zinc-500 text-xs text-center mt-3">Verificando...</p>
+              <p className="text-fg-faint text-xs text-center mt-3">Verificando...</p>
             )}
 
             <button
               onClick={() => requestCode()}
               disabled={cooldown > 0 || loading}
-              className="w-full text-zinc-500 hover:text-white disabled:hover:text-zinc-500 text-xs py-3 mt-2 transition-colors disabled:opacity-60"
+              className="w-full text-fg-faint hover:text-fg disabled:hover:text-fg-faint text-xs py-3 mt-2 transition-colors disabled:opacity-60"
             >
               {cooldown > 0
                 ? `Reenviar código en ${cooldown}s`
                 : 'No me llegó, reenviar código'}
             </button>
 
-            <p className="text-zinc-700 text-xs text-center leading-relaxed">
+            <p className="text-fg-faint text-xs text-center leading-relaxed">
               Si no lo ves, revisa la carpeta de spam.
             </p>
           </>
@@ -235,8 +235,8 @@ export default function ForgotPassword() {
         {/* ── Paso 3: nueva contraseña ── */}
         {step === 'password' && (
           <>
-            <h1 className="text-3xl font-black text-white mb-1">Nueva contraseña</h1>
-            <p className="text-zinc-500 text-sm mb-6">Elige una contraseña que no uses en otro sitio.</p>
+            <h1 className="text-3xl font-black text-fg mb-1">Nueva contraseña</h1>
+            <p className="text-fg-faint text-sm mb-6">Elige una contraseña que no uses en otro sitio.</p>
 
             <form onSubmit={submitPassword} className="space-y-3">
               <PasswordInput
@@ -250,11 +250,11 @@ export default function ForgotPassword() {
 
               {password.length > 0 && (
                 <div className="flex flex-wrap gap-x-4 gap-y-1 px-1">
-                  <span className={`text-xs flex items-center gap-1.5 ${pwCheck.minLength ? 'text-green-400' : 'text-zinc-600'}`}>
+                  <span className={`text-xs flex items-center gap-1.5 ${pwCheck.minLength ? 'text-live' : 'text-fg-faint'}`}>
                     {pwCheck.minLength ? <Check size={11} weight="bold" /> : <X size={11} weight="bold" />}
                     Mínimo {PASSWORD_MIN} caracteres
                   </span>
-                  <span className={`text-xs flex items-center gap-1.5 ${pwCheck.hasNumber ? 'text-green-400' : 'text-zinc-600'}`}>
+                  <span className={`text-xs flex items-center gap-1.5 ${pwCheck.hasNumber ? 'text-live' : 'text-fg-faint'}`}>
                     {pwCheck.hasNumber ? <Check size={11} weight="bold" /> : <X size={11} weight="bold" />}
                     Al menos un número
                   </span>
@@ -270,7 +270,7 @@ export default function ForgotPassword() {
                 error={mismatch}
               />
               {mismatch && (
-                <p className="text-red-400 text-xs px-1 flex items-center gap-1.5">
+                <p className="text-danger text-xs px-1 flex items-center gap-1.5">
                   <X size={11} weight="bold" /> Las contraseñas no coinciden
                 </p>
               )}
@@ -280,7 +280,7 @@ export default function ForgotPassword() {
               <button
                 type="submit"
                 disabled={loading || !pwCheck.valid || password !== confirm}
-                className="w-full bg-white text-black font-semibold py-4 rounded-xl hover:bg-zinc-200 disabled:opacity-50 transition-colors text-sm mt-2"
+                className="w-full bg-primary text-on-primary font-semibold py-4 rounded-xl hover:bg-subtle disabled:opacity-50 transition-colors text-sm mt-2"
               >
                 {loading ? 'Guardando...' : 'Cambiar contraseña'}
               </button>
@@ -291,16 +291,16 @@ export default function ForgotPassword() {
         {/* ── Listo ── */}
         {step === 'done' && (
           <div className="text-center">
-            <div className="w-16 h-16 rounded-2xl bg-green-900/20 border border-green-800 flex items-center justify-center mx-auto mb-4">
-              <CheckCircle size={30} weight="duotone" className="text-green-400" />
+            <div className="w-16 h-16 rounded-2xl bg-live-soft border border-live/30 flex items-center justify-center mx-auto mb-4">
+              <CheckCircle size={30} weight="duotone" className="text-live" />
             </div>
-            <h1 className="text-2xl font-black text-white mb-2">Contraseña actualizada</h1>
-            <p className="text-zinc-500 text-sm mb-8 leading-relaxed">
+            <h1 className="text-2xl font-black text-fg mb-2">Contraseña actualizada</h1>
+            <p className="text-fg-faint text-sm mb-8 leading-relaxed">
               Ya puedes iniciar sesión con tu contraseña nueva.
             </p>
             <button
               onClick={() => navigate('/login')}
-              className="w-full bg-white text-black font-semibold py-4 rounded-xl hover:bg-zinc-200 transition-colors text-sm"
+              className="w-full bg-primary text-on-primary font-semibold py-4 rounded-xl hover:bg-subtle transition-colors text-sm"
             >
               Iniciar sesión
             </button>

@@ -110,20 +110,20 @@ export default function DatePicker({ value, onChange, min, error, placeholder = 
   const calendar = open && (
     <div
       ref={calendarRef}
-      className="bg-zinc-950 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden"
+      className="bg-surface border border-line rounded-2xl shadow-2xl overflow-hidden"
       style={{ position: 'fixed', top: dropdownPos.top, left: dropdownPos.left, width: dropdownPos.width, zIndex: 9999 }}
     >
       {/* header */}
-      <div className="flex items-center justify-between px-4 py-3.5 border-b border-zinc-800">
+      <div className="flex items-center justify-between px-4 py-3.5 border-b border-line">
         <button type="button" onClick={prevMonth}
-          className="w-7 h-7 flex items-center justify-center text-zinc-500 hover:text-white rounded-lg hover:bg-zinc-800 transition-colors">
+          className="w-7 h-7 flex items-center justify-center text-fg-faint hover:text-fg rounded-lg hover:bg-subtle transition-colors">
           <CaretLeft size={15} weight="bold" />
         </button>
-        <span className="text-white text-sm font-bold tracking-wide">
+        <span className="text-fg text-sm font-bold tracking-wide">
           {MONTHS[viewMonth]} {viewYear}
         </span>
         <button type="button" onClick={nextMonth}
-          className="w-7 h-7 flex items-center justify-center text-zinc-500 hover:text-white rounded-lg hover:bg-zinc-800 transition-colors">
+          className="w-7 h-7 flex items-center justify-center text-fg-faint hover:text-fg rounded-lg hover:bg-subtle transition-colors">
           <CaretRight size={15} weight="bold" />
         </button>
       </div>
@@ -131,7 +131,7 @@ export default function DatePicker({ value, onChange, min, error, placeholder = 
       {/* weekday headers */}
       <div className="grid grid-cols-7 px-3 pt-3">
         {DAYS_HDR.map(d => (
-          <div key={d} className="text-center text-[10px] text-zinc-600 font-semibold py-1 uppercase tracking-wider">
+          <div key={d} className="text-center text-[10px] text-fg-faint font-semibold py-1 uppercase tracking-wider">
             {d}
           </div>
         ))}
@@ -148,17 +148,17 @@ export default function DatePicker({ value, onChange, min, error, placeholder = 
                 onClick={() => select(day)}
                 className={`relative w-8 h-8 rounded-full text-xs font-medium transition-all ${
                   isSelected(day)
-                    ? 'bg-white text-black font-bold'
+                    ? 'bg-primary text-on-primary font-bold'
                     : isDisabled(day)
-                      ? 'text-zinc-700 cursor-not-allowed'
+                      ? 'text-fg-faint cursor-not-allowed'
                       : isTodayCell(day)
-                        ? 'text-white ring-1 ring-zinc-600 hover:bg-zinc-800'
-                        : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                        ? 'text-fg ring-1 ring-line hover:bg-subtle'
+                        : 'text-fg-muted hover:bg-subtle hover:text-fg'
                 }`}
               >
                 {day}
                 {isTodayCell(day) && !isSelected(day) && (
-                  <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-white opacity-70" />
+                  <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary opacity-70" />
                 )}
               </button>
             ) : <div className="w-8 h-8" />}
@@ -174,12 +174,12 @@ export default function DatePicker({ value, onChange, min, error, placeholder = 
         ref={triggerRef}
         type="button"
         onClick={openCalendar}
-        className={`w-full flex items-center gap-3 bg-zinc-900 px-4 py-3.5 rounded-xl text-sm transition outline-none ${
-          error ? 'ring-2 ring-red-500' : open ? 'ring-2 ring-white' : ''
+        className={`w-full flex items-center gap-3 bg-surface px-4 py-3.5 rounded-xl text-sm transition outline-none ${
+          error ? 'ring-2 ring-danger' : open ? 'ring-2 ring-fg' : ''
         }`}
       >
-        <CalendarBlank size={15} weight="duotone" className="text-zinc-500 flex-shrink-0" />
-        <span className={`truncate ${displayLabel ? 'text-white' : 'text-zinc-600'}`}>
+        <CalendarBlank size={15} weight="duotone" className="text-fg-faint flex-shrink-0" />
+        <span className={`truncate ${displayLabel ? 'text-fg' : 'text-fg-faint'}`}>
           {displayLabel || placeholder}
         </span>
       </button>

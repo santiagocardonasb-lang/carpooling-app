@@ -38,10 +38,10 @@ type Filter = 'all' | 'driver' | 'passenger';
 const money = (n: number) => `$${Number(n ?? 0).toLocaleString('es-CO')}`;
 
 const STATUS = {
-  completed: { label: 'Completado', cls: 'text-green-400', Icon: CheckCircle },
-  cancelled: { label: 'Cancelado',  cls: 'text-red-400',   Icon: XCircle },
-  rejected:  { label: 'Rechazado',  cls: 'text-red-400',   Icon: XCircle },
-  expired:   { label: 'Expirado',   cls: 'text-zinc-500',  Icon: XCircle },
+  completed: { label: 'Completado', cls: 'text-live', Icon: CheckCircle },
+  cancelled: { label: 'Cancelado',  cls: 'text-danger',   Icon: XCircle },
+  rejected:  { label: 'Rechazado',  cls: 'text-danger',   Icon: XCircle },
+  expired:   { label: 'Expirado',   cls: 'text-fg-faint',  Icon: XCircle },
 } as const;
 
 export default function History() {
@@ -68,48 +68,48 @@ export default function History() {
   };
 
   return (
-    <div className="min-h-screen bg-black pt-20 px-6 pb-12">
+    <div className="min-h-screen bg-canvas pt-20 px-6 pb-12">
       <div className="max-w-sm mx-auto mt-4">
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors text-sm mb-6"
+          className="flex items-center gap-2 text-fg-faint hover:text-fg transition-colors text-sm mb-6"
         >
           <ArrowLeft size={16} weight="bold" /> Volver
         </button>
 
-        <h1 className="text-2xl font-black text-white mb-1">Historial</h1>
-        <p className="text-zinc-500 text-sm mb-6">Todos tus viajes cerrados.</p>
+        <h1 className="text-2xl font-black text-fg mb-1">Historial</h1>
+        <p className="text-fg-faint text-sm mb-6">Todos tus viajes cerrados.</p>
 
         {loading ? (
           <div className="space-y-2">
             {[0, 1, 2].map(i => <div key={i} className="skeleton h-20 rounded-2xl" />)}
           </div>
         ) : error ? (
-          <div className="bg-zinc-900 rounded-2xl p-5 text-center">
-            <p className="text-zinc-400 text-sm">{error}</p>
+          <div className="bg-surface rounded-2xl p-5 text-center">
+            <p className="text-fg-muted text-sm">{error}</p>
           </div>
         ) : (
           <>
             {/* Resumen */}
             {totals && (
               <div className="grid grid-cols-2 gap-2 mb-4">
-                <div className="bg-zinc-900 rounded-2xl p-4">
+                <div className="bg-surface rounded-2xl p-4">
                   <div className="flex items-center gap-1.5 mb-1">
-                    <Car size={13} weight="duotone" className="text-zinc-500" />
-                    <p className="text-zinc-500 text-[11px] uppercase tracking-wider">Conduciendo</p>
+                    <Car size={13} weight="duotone" className="text-fg-faint" />
+                    <p className="text-fg-faint text-[11px] uppercase tracking-wider">Conduciendo</p>
                   </div>
-                  <p className="text-white text-xl font-black tabular-nums">{money(totals.earned)}</p>
-                  <p className="text-zinc-600 text-xs mt-0.5">
+                  <p className="text-fg text-xl font-black tabular-nums">{money(totals.earned)}</p>
+                  <p className="text-fg-faint text-xs mt-0.5">
                     {totals.trips_as_driver} viaje{totals.trips_as_driver !== 1 ? 's' : ''}
                   </p>
                 </div>
-                <div className="bg-zinc-900 rounded-2xl p-4">
+                <div className="bg-surface rounded-2xl p-4">
                   <div className="flex items-center gap-1.5 mb-1">
-                    <Users size={13} weight="duotone" className="text-zinc-500" />
-                    <p className="text-zinc-500 text-[11px] uppercase tracking-wider">Como pasajero</p>
+                    <Users size={13} weight="duotone" className="text-fg-faint" />
+                    <p className="text-fg-faint text-[11px] uppercase tracking-wider">Como pasajero</p>
                   </div>
-                  <p className="text-white text-xl font-black tabular-nums">{money(totals.spent)}</p>
-                  <p className="text-zinc-600 text-xs mt-0.5">
+                  <p className="text-fg text-xl font-black tabular-nums">{money(totals.spent)}</p>
+                  <p className="text-fg-faint text-xs mt-0.5">
                     {totals.trips_as_passenger} viaje{totals.trips_as_passenger !== 1 ? 's' : ''}
                   </p>
                 </div>
@@ -129,8 +129,8 @@ export default function History() {
                     onClick={() => setFilter(key)}
                     className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all border ${
                       filter === key
-                        ? 'bg-white text-black border-white'
-                        : 'bg-transparent text-zinc-500 border-zinc-800 hover:border-zinc-600'
+                        ? 'bg-primary text-on-primary border-primary'
+                        : 'bg-transparent text-fg-faint border-line hover:border-line-strong'
                     }`}
                   >
                     {label}
@@ -141,11 +141,11 @@ export default function History() {
 
             {shown.length === 0 ? (
               <div className="text-center py-14">
-                <div className="w-14 h-14 bg-zinc-900 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <ClockCounterClockwise size={24} weight="duotone" className="text-zinc-700" />
+                <div className="w-14 h-14 bg-surface rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <ClockCounterClockwise size={24} weight="duotone" className="text-fg-faint" />
                 </div>
-                <p className="text-white font-semibold">Todavía no hay viajes</p>
-                <p className="text-zinc-600 text-sm mt-1 leading-relaxed">
+                <p className="text-fg font-semibold">Todavía no hay viajes</p>
+                <p className="text-fg-faint text-sm mt-1 leading-relaxed">
                   Cuando completes uno, aparecerá acá.
                 </p>
               </div>
@@ -154,19 +154,19 @@ export default function History() {
                 {shown.map(item => {
                   const st = STATUS[item.status] ?? STATUS.expired;
                   return (
-                    <div key={item.id} className="bg-zinc-900 rounded-2xl p-4">
+                    <div key={item.id} className="bg-surface rounded-2xl p-4">
                       <div className="flex items-start justify-between gap-3 mb-2">
                         <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                          <div className="flex items-center gap-2 text-sm font-semibold text-fg">
                             <span className="truncate">{item.origin}</span>
-                            <span className="text-zinc-700 flex-shrink-0">→</span>
+                            <span className="text-fg-faint flex-shrink-0">→</span>
                             <span className="truncate">{item.destination}</span>
                           </div>
-                          <p className="text-zinc-600 text-xs mt-0.5">
+                          <p className="text-fg-faint text-xs mt-0.5">
                             {formatWhen(item)} · {item.role === 'driver' ? 'Conduje' : 'Viajé'} con {item.other_name.split(' ')[0]}
                           </p>
                         </div>
-                        <p className="text-white font-bold text-sm tabular-nums flex-shrink-0">
+                        <p className="text-fg font-bold text-sm tabular-nums flex-shrink-0">
                           {money(item.amount)}
                         </p>
                       </div>
@@ -180,13 +180,13 @@ export default function History() {
                         {item.status === 'completed' && !item.rated && (
                           <Link
                             to={`/rate/${item.id}`}
-                            className="flex items-center gap-1 text-xs text-yellow-400 hover:text-yellow-300 transition-colors"
+                            className="flex items-center gap-1 text-xs text-star hover:text-star transition-colors"
                           >
                             <Star size={12} weight="duotone" /> Calificar
                           </Link>
                         )}
                         {item.status === 'completed' && item.rated && (
-                          <span className="flex items-center gap-1 text-xs text-zinc-700">
+                          <span className="flex items-center gap-1 text-xs text-fg-faint">
                             <Star size={12} weight="fill" /> Calificado
                           </span>
                         )}

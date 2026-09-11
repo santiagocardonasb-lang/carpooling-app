@@ -170,8 +170,8 @@ export default function TripInProgress() {
 
   if (loading || !data) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
+      <div className="min-h-screen bg-canvas flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-line-strong border-t-fg rounded-full animate-spin" />
       </div>
     );
   }
@@ -185,57 +185,57 @@ export default function TripInProgress() {
   const RatingDisplay = ({ rating, count }: { rating: number; count: number }) => (
     Number(count) > 0 ? (
       <div className="flex items-center gap-1">
-        <Star size={12} weight="fill" className="text-yellow-400" />
-        <span className="text-yellow-400 text-xs font-semibold">{Number(rating ?? 0).toFixed(1)}</span>
-        <span className="text-zinc-600 text-xs">({count})</span>
+        <Star size={12} weight="fill" className="text-star" />
+        <span className="text-star text-xs font-semibold">{Number(rating ?? 0).toFixed(1)}</span>
+        <span className="text-fg-faint text-xs">({count})</span>
       </div>
     ) : (
-      <span className="text-zinc-700 text-xs">Sin calificaciones aún</span>
+      <span className="text-fg-faint text-xs">Sin calificaciones aún</span>
     )
   );
 
   return (
-    <div className="min-h-screen bg-black px-6 pt-8 pb-10">
+    <div className="min-h-screen bg-canvas px-6 pt-8 pb-10">
       <div className="max-w-sm mx-auto space-y-4">
 
         {/* Header: label + avatar dropdown */}
         <div className="flex items-center justify-between mb-1">
-          <span className="text-zinc-600 text-xs font-medium uppercase tracking-wider">Viaje activo</span>
+          <span className="text-fg-faint text-xs font-medium uppercase tracking-wider">Viaje activo</span>
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setDropdownOpen(v => !v)}
-              className="relative w-8 h-8 rounded-full bg-zinc-800 hover:ring-2 hover:ring-white transition-all flex items-center justify-center"
+              className="relative w-8 h-8 rounded-full bg-subtle hover:ring-2 hover:ring-fg transition-all flex items-center justify-center"
             >
               <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center">
                 {user?.avatar
                   ? <img src={user.avatar} alt="avatar" className="w-full h-full object-cover" />
-                  : <span className="text-white text-sm font-semibold">{user?.name?.[0]?.toUpperCase()}</span>
+                  : <span className="text-fg text-sm font-semibold">{user?.name?.[0]?.toUpperCase()}</span>
                 }
               </div>
             </button>
             {dropdownOpen && (
-              <div className="absolute right-0 top-10 w-52 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden py-1 z-50">
+              <div className="absolute right-0 top-10 w-52 bg-surface border border-line rounded-2xl shadow-2xl overflow-hidden py-1 z-50">
                 <Link to="/profile" onClick={() => setDropdownOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-zinc-800 transition-colors">
-                  <User size={15} weight="duotone" className="text-zinc-400" /> Perfil
+                  className="flex items-center gap-3 px-4 py-3 text-sm text-fg hover:bg-subtle transition-colors">
+                  <User size={15} weight="duotone" className="text-fg-muted" /> Perfil
                 </Link>
                 <Link to="/notifications" onClick={() => setDropdownOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-zinc-800 transition-colors">
-                  <Bell size={15} weight="duotone" className="text-zinc-400" /> Notificaciones
+                  className="flex items-center gap-3 px-4 py-3 text-sm text-fg hover:bg-subtle transition-colors">
+                  <Bell size={15} weight="duotone" className="text-fg-muted" /> Notificaciones
                 </Link>
                 {user?.role !== 'passenger' && (
                   <Link to="/vehicle" onClick={() => setDropdownOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-zinc-800 transition-colors">
-                    <CreditCard size={15} weight="duotone" className="text-zinc-400" /> Mi vehículo
+                    className="flex items-center gap-3 px-4 py-3 text-sm text-fg hover:bg-subtle transition-colors">
+                    <CreditCard size={15} weight="duotone" className="text-fg-muted" /> Mi vehículo
                   </Link>
                 )}
                 <Link to="/settings" onClick={() => setDropdownOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-zinc-800 transition-colors">
-                  <GearSix size={15} weight="duotone" className="text-zinc-400" /> Configuración
+                  className="flex items-center gap-3 px-4 py-3 text-sm text-fg hover:bg-subtle transition-colors">
+                  <GearSix size={15} weight="duotone" className="text-fg-muted" /> Configuración
                 </Link>
-                <div className="border-t border-zinc-800 my-1" />
+                <div className="border-t border-line my-1" />
                 <button onClick={() => { logout(); navigate('/login'); }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-zinc-800 transition-colors">
+                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-danger hover:bg-subtle transition-colors">
                   <SignOut size={15} weight="duotone" /> Cerrar sesión
                 </button>
               </div>
@@ -245,9 +245,9 @@ export default function TripInProgress() {
 
         {/* Estado del viaje */}
         <div className={`rounded-2xl p-4 text-center border ${
-          inProgress ? 'bg-yellow-900/20 border-yellow-800' : 'bg-green-900/20 border-green-800'
+          inProgress ? 'bg-warn-soft border-warn/30' : 'bg-live-soft border-live/30'
         }`}>
-          <p className={`text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 ${inProgress ? 'text-yellow-400' : 'text-green-400'}`}>
+          <p className={`text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 ${inProgress ? 'text-star' : 'text-live'}`}>
             {inProgress ? (
               <>
                 <Car size={13} weight="duotone" />
@@ -261,7 +261,7 @@ export default function TripInProgress() {
             )}
           </p>
           {data.booking.started_at && (
-            <p className="text-zinc-500 text-[11px] mt-1 flex items-center justify-center gap-1">
+            <p className="text-fg-faint text-[11px] mt-1 flex items-center justify-center gap-1">
               <Clock size={10} weight="duotone" />
               Iniciado a las {parseDate(data.booking.started_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
             </p>
@@ -279,48 +279,48 @@ export default function TripInProgress() {
         )}
 
         {/* Ruta */}
-        <div className="bg-zinc-900 rounded-2xl p-5">
-          <p className="text-zinc-500 text-xs mb-3">Ruta del viaje</p>
+        <div className="bg-surface rounded-2xl p-5">
+          <p className="text-fg-faint text-xs mb-3">Ruta del viaje</p>
           <div className="flex items-start gap-3">
             <div className="flex flex-col items-center pt-1 flex-shrink-0">
-              <div className="w-2.5 h-2.5 rounded-full bg-zinc-500" />
-              <div className="w-px h-8 bg-zinc-700" />
-              <div className="w-2.5 h-2.5 bg-white rounded-sm" />
+              <div className="w-2.5 h-2.5 rounded-full bg-fg-faint" />
+              <div className="w-px h-8 bg-line-strong" />
+              <div className="w-2.5 h-2.5 bg-primary rounded-sm" />
             </div>
             <div className="flex-1 min-w-0 space-y-3">
               <div>
-                <p className="text-zinc-600 text-[10px] uppercase tracking-wider">Origen</p>
-                <p className="text-white font-semibold">{data.ride.origin}</p>
+                <p className="text-fg-faint text-[10px] uppercase tracking-wider">Origen</p>
+                <p className="text-fg font-semibold">{data.ride.origin}</p>
               </div>
               <div>
-                <p className="text-zinc-600 text-[10px] uppercase tracking-wider">Destino</p>
-                <p className="text-white font-semibold">{data.ride.destination}</p>
+                <p className="text-fg-faint text-[10px] uppercase tracking-wider">Destino</p>
+                <p className="text-fg font-semibold">{data.ride.destination}</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Otra parte */}
-        <div className="bg-zinc-900 rounded-2xl p-5">
-          <p className="text-zinc-500 text-xs mb-3">{isDriver ? 'Tu pasajero' : 'Tu conductor'}</p>
+        <div className="bg-surface rounded-2xl p-5">
+          <p className="text-fg-faint text-xs mb-3">{isDriver ? 'Tu pasajero' : 'Tu conductor'}</p>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-zinc-800 overflow-hidden flex-shrink-0 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-full bg-subtle overflow-hidden flex-shrink-0 flex items-center justify-center">
               {otherParty.avatar
                 ? <img src={otherParty.avatar} alt="" className="w-full h-full object-cover" />
-                : <span className="text-white font-bold">{otherParty.name[0]?.toUpperCase()}</span>
+                : <span className="text-fg font-bold">{otherParty.name[0]?.toUpperCase()}</span>
               }
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-white font-semibold truncate">{otherParty.name}</p>
+              <p className="text-fg font-semibold truncate">{otherParty.name}</p>
               <RatingDisplay rating={otherParty.rating} count={otherParty.rating_count} />
             </div>
             {otherParty.phone && (
               <a
                 href={`tel:${otherParty.phone}`}
-                className="bg-zinc-800 hover:bg-zinc-700 p-2.5 rounded-xl transition-colors flex-shrink-0"
+                className="bg-subtle hover:bg-line-strong p-2.5 rounded-xl transition-colors flex-shrink-0"
                 title={`Llamar ${otherParty.phone}`}
               >
-                <Phone size={14} weight="duotone" className="text-white" />
+                <Phone size={14} weight="duotone" className="text-fg" />
               </a>
             )}
           </div>
@@ -328,47 +328,47 @@ export default function TripInProgress() {
 
         {/* Vehículo (solo pasajero) */}
         {!isDriver && carInfo && (
-          <div className="bg-zinc-900 rounded-2xl p-4">
-            <p className="text-zinc-500 text-xs mb-2">Vehículo</p>
+          <div className="bg-surface rounded-2xl p-4">
+            <p className="text-fg-faint text-xs mb-2">Vehículo</p>
             <div className="flex items-center gap-2">
-              <Car size={14} weight="duotone" className="text-zinc-500" />
-              <p className="text-white text-sm">{carInfo}</p>
+              <Car size={14} weight="duotone" className="text-fg-faint" />
+              <p className="text-fg text-sm">{carInfo}</p>
             </div>
           </div>
         )}
 
         {/* Detalles */}
-        <div className="bg-zinc-900 rounded-2xl p-4 space-y-2.5">
+        <div className="bg-surface rounded-2xl p-4 space-y-2.5">
           <div className="flex justify-between text-sm">
-            <span className="text-zinc-500">Hora de salida</span>
-            <span className="text-white font-medium">{data.ride.time}</span>
+            <span className="text-fg-faint">Hora de salida</span>
+            <span className="text-fg font-medium">{data.ride.time}</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-zinc-500">Asientos</span>
-            <span className="text-white font-medium">{data.booking.seats}</span>
+            <span className="text-fg-faint">Asientos</span>
+            <span className="text-fg font-medium">{data.booking.seats}</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-zinc-500">Precio total</span>
-            <span className="text-white font-bold">${(Number(data.ride.price) * data.booking.seats).toLocaleString()}</span>
+            <span className="text-fg-faint">Precio total</span>
+            <span className="text-fg font-bold">${(Number(data.ride.price) * data.booking.seats).toLocaleString()}</span>
           </div>
         </div>
 
         {/* Botón de chat con badge de mensajes no leídos */}
         <button
           onClick={openChat}
-          className="w-full flex items-center justify-center gap-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-white text-sm py-3 rounded-xl transition-colors relative"
+          className="w-full flex items-center justify-center gap-2 bg-surface hover:bg-subtle border border-line text-fg text-sm py-3 rounded-xl transition-colors relative"
         >
           <span className="relative">
             <ChatCircle size={15} weight="duotone" />
             {unreadCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] font-bold rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5">
+              <span className="absolute -top-1.5 -right-1.5 bg-notify text-fg text-[9px] font-bold rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5">
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}
           </span>
           Chatear con {otherParty.name.split(' ')[0]}
           {unreadCount > 0 && (
-            <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+            <span className="bg-notify text-fg text-[10px] font-bold px-1.5 py-0.5 rounded-full">
               {unreadCount} nuevo{unreadCount !== 1 ? 's' : ''}
             </span>
           )}
@@ -379,7 +379,7 @@ export default function TripInProgress() {
           <button
             onClick={startTrip}
             disabled={acting}
-            className="w-full flex items-center justify-center gap-2 bg-white text-black font-bold py-4 rounded-xl hover:bg-zinc-200 disabled:opacity-50 transition-colors"
+            className="w-full flex items-center justify-center gap-2 bg-primary text-on-primary font-bold py-4 rounded-xl hover:bg-subtle disabled:opacity-50 transition-colors"
           >
             <Play size={16} weight="duotone" /> {acting ? 'Iniciando...' : 'Iniciar viaje'}
           </button>
@@ -388,13 +388,13 @@ export default function TripInProgress() {
           <button
             onClick={finishTrip}
             disabled={acting}
-            className="w-full flex items-center justify-center gap-2 bg-white text-black font-bold py-4 rounded-xl hover:bg-zinc-200 disabled:opacity-50 transition-colors"
+            className="w-full flex items-center justify-center gap-2 bg-primary text-on-primary font-bold py-4 rounded-xl hover:bg-subtle disabled:opacity-50 transition-colors"
           >
             <Flag size={16} weight="duotone" /> {acting ? 'Finalizando...' : 'Finalizar viaje'}
           </button>
         )}
         {!isDriver && inProgress && (
-          <p className="text-center text-zinc-600 text-xs py-2">
+          <p className="text-center text-fg-faint text-xs py-2">
             El conductor te avisará cuando finalice el viaje.
           </p>
         )}
