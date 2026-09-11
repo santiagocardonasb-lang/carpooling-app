@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
-  ChatCircle, Phone, Star, Flag, Play, Car,
-  Clock, User, Bell, GearSix, SignOut, CreditCard, CheckCircle,
+  ChatCircle, Phone, Flag, Play, Clock, CheckCircle, ArrowLeft,
 } from '@phosphor-icons/react';
 import api from '../api';
 import { useConfirm } from '../context/ConfirmContext';
@@ -10,6 +9,10 @@ import { parseDate } from '../utils/date';
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
 import TripMap from '../components/TripMap';
+import Sheet from '../components/Sheet';
+import RouteLine from '../components/RouteLine';
+import DriverRow from '../components/DriverRow';
+import LiveDot from '../components/LiveDot';
 
 interface TripData {
   booking: {
@@ -27,26 +30,14 @@ export default function TripInProgress() {
   const { bookingId } = useParams();
   const navigate = useNavigate();
   const { showToast } = useToast();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const confirmDialog = useConfirm();
 
   const [data, setData] = useState<TripData | null>(null);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const firstLoadRef = useRef(true);
-
-  // Cerrar dropdown al hacer click fuera
-  useEffect(() => {
-    if (!dropdownOpen) return;
-    const h = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setDropdownOpen(false);
-    };
-    document.addEventListener('mousedown', h);
-    return () => document.removeEventListener('mousedown', h);
-  }, [dropdownOpen]);
 
   // Detectar mensajes no leídos
   const checkUnread = useCallback(async () => {
@@ -170,235 +161,179 @@ export default function TripInProgress() {
 
   if (loading || !data) {
     return (
-      <div className="min-h-screen bg-canvas flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-line-strong border-t-fg rounded-full animate-spin" />
+      <div className="min-h-screen bg-canvas p-5 pt-20 space-y-4 max-w-md mx-auto">
+        <div className="skeleton h-52 rounded-2xl" />
+        <div className="skeleton h-40 rounded-2xl" />
       </div>
     );
   }
 
   const isDriver = data.my_role === 'driver';
   const otherParty = isDriver ? data.passenger : data.driver;
-  const carInfo = [data.driver.car_brand, data.driver.car_color, data.driver.car_plate].filter(Boolean).join(' · ');
+  const carInfo = [data.driver.car_brand, data.driver.car_color, data.driver.car_plate]
+    .filter(Boolean).join(' · ');
   const inProgress = data.booking.status === 'in_progress';
   const confirmed = data.booking.status === 'confirmed';
 
-  const RatingDisplay = ({ rating, count }: { rating: number; count: number }) => (
-    Number(count) > 0 ? (
-      <div className="flex items-center gap-1">
-        <Star size={12} weight="fill" className="text-star" />
-        <span className="text-star text-xs font-semibold">{Number(rating ?? 0).toFixed(1)}</span>
-        <span className="text-fg-faint text-xs">({count})</span>
+  /** El contenido es el mismo con mapa y sin él; cambia solo el envoltorio. */
+  const body = (
+    <div className="space-y-4 pb-4">
+      <div className="flex items-center justify-between gap-3">
+        <DriverRow
+          name={otherParty.name}
+          avatar={otherParty.avatar}
+          rating={otherParty.rating}
+          ratingCount={otherParty.rating_count}
+          vehicle={isDriver ? undefined : carInfo}
+          role={isDriver ? 'Pasajero' : 'Conductor'}
+          size="lg"
+        />
+        {otherParty.phone && (
+          <a
+            href={`tel:${otherParty.phone}`}
+            aria-label={`Llamar a ${otherParty.name}`}
+            className="w-11 h-11 rounded-full bg-subtle hover:bg-line-strong
+              flex items-center justify-center flex-shrink-0"
+          >
+            <Phone size={18} weight="fill" className="text-fg" />
+          </a>
+        )}
       </div>
-    ) : (
-      <span className="text-fg-faint text-xs">Sin calificaciones aún</span>
-    )
+
+      <div className="bg-subtle rounded-xl p-3">
+        <RouteLine
+          origin={data.ride.origin}
+          destination={data.ride.destination}
+          originTime={data.ride.time}
+        />
+      </div>
+
+      {data.booking.started_at && (
+        <p className="text-fg-faint text-[11px] flex items-center gap-1.5">
+          <Clock size={12} weight="fill" />
+          Salieron a las{' '}
+          {parseDate(data.booking.started_at).toLocaleTimeString('es-ES', {
+            hour: '2-digit', minute: '2-digit',
+          })}
+        </p>
+      )}
+
+      <button
+        onClick={openChat}
+        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl
+          bg-subtle hover:bg-line-strong text-fg text-[13px] font-bold transition-colors"
+      >
+        <span className="relative">
+          <ChatCircle size={17} weight="fill" />
+          {unreadCount > 0 && (
+            <span className="absolute -top-1.5 -right-2 bg-notify text-white text-[9px]
+              font-bold rounded-full min-w-[15px] h-[15px] flex items-center justify-center px-0.5">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
+        </span>
+        Mensaje a {otherParty.name.split(' ')[0]}
+      </button>
+
+      <div className="flex items-end justify-between pt-3 border-t border-line">
+        <div>
+          <p className="text-label text-fg-faint uppercase">Aporte total</p>
+          <p className="text-hero text-fg tabular-nums">
+            ${(Number(data.ride.price) * data.booking.seats).toLocaleString('es-CO')}
+          </p>
+        </div>
+        <p className="text-xs text-fg-faint">
+          {data.booking.seats} {data.booking.seats === 1 ? 'asiento' : 'asientos'}
+        </p>
+      </div>
+
+      {isDriver && confirmed && (
+        <button
+          onClick={startTrip}
+          disabled={acting}
+          className="w-full h-14 flex items-center justify-center gap-2 bg-primary text-on-primary
+            font-bold rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-colors"
+        >
+          <Play size={18} weight="fill" /> {acting ? 'Iniciando…' : 'Iniciar viaje'}
+        </button>
+      )}
+      {isDriver && inProgress && (
+        <button
+          onClick={finishTrip}
+          disabled={acting}
+          className="w-full h-14 flex items-center justify-center gap-2 bg-primary text-on-primary
+            font-bold rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-colors"
+        >
+          <Flag size={18} weight="fill" /> {acting ? 'Finalizando…' : 'Finalizar viaje'}
+        </button>
+      )}
+      {!isDriver && inProgress && (
+        <p className="text-center text-fg-faint text-xs py-1">
+          El conductor te avisará cuando lleguen.
+        </p>
+      )}
+    </div>
   );
 
   return (
-    <div className="min-h-screen bg-canvas px-6 pt-8 pb-10">
-      <div className="max-w-sm mx-auto space-y-4">
+    <div className="min-h-screen bg-canvas flex flex-col">
+      {inProgress ? (
+        <>
+          {/* El mapa manda arriba y la hoja se monta encima. Es la única
+              pantalla donde el recorrido se ve pasar, así que se lleva el
+              espacio que necesita. */}
+          <div className="relative h-[42vh] min-h-[260px] max-h-[380px] flex-shrink-0">
+            <TripMap
+              driverLat={data.booking.driver_lat}
+              driverLng={data.booking.driver_lng}
+              destination={data.ride.destination}
+              isDriver={isDriver}
+              fill
+            />
 
-        {/* Header: label + avatar dropdown */}
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-fg-faint text-xs font-medium uppercase tracking-wider">Viaje activo</span>
-          <div className="relative" ref={dropdownRef}>
-            <button
-              onClick={() => setDropdownOpen(v => !v)}
-              className="relative w-8 h-8 rounded-full bg-subtle hover:ring-2 hover:ring-fg transition-all flex items-center justify-center"
-            >
-              <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center">
-                {user?.avatar
-                  ? <img src={user.avatar} alt="avatar" className="w-full h-full object-cover" />
-                  : <span className="text-fg text-sm font-semibold">{user?.name?.[0]?.toUpperCase()}</span>
-                }
-              </div>
-            </button>
-            {dropdownOpen && (
-              <div className="absolute right-0 top-10 w-52 bg-surface border border-line rounded-2xl shadow-2xl overflow-hidden py-1 z-50">
-                <Link to="/profile" onClick={() => setDropdownOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 text-sm text-fg hover:bg-subtle transition-colors">
-                  <User size={15} weight="duotone" className="text-fg-muted" /> Perfil
-                </Link>
-                <Link to="/notifications" onClick={() => setDropdownOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 text-sm text-fg hover:bg-subtle transition-colors">
-                  <Bell size={15} weight="duotone" className="text-fg-muted" /> Notificaciones
-                </Link>
-                {user?.role !== 'passenger' && (
-                  <Link to="/vehicle" onClick={() => setDropdownOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 text-sm text-fg hover:bg-subtle transition-colors">
-                    <CreditCard size={15} weight="duotone" className="text-fg-muted" /> Mi vehículo
-                  </Link>
-                )}
-                <Link to="/settings" onClick={() => setDropdownOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 text-sm text-fg hover:bg-subtle transition-colors">
-                  <GearSix size={15} weight="duotone" className="text-fg-muted" /> Configuración
-                </Link>
-                <div className="border-t border-line my-1" />
-                <button onClick={() => { logout(); navigate('/login'); }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-danger hover:bg-subtle transition-colors">
-                  <SignOut size={15} weight="duotone" /> Cerrar sesión
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Estado del viaje */}
-        <div className={`rounded-2xl p-4 text-center border ${
-          inProgress ? 'bg-warn-soft border-warn/30' : 'bg-live-soft border-live/30'
-        }`}>
-          <p className={`text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 ${inProgress ? 'text-star' : 'text-live'}`}>
-            {inProgress ? (
-              <>
-                <Car size={13} weight="duotone" />
-                Viaje en curso
-              </>
-            ) : (
-              <>
-                <CheckCircle size={13} weight="duotone" />
-                Confirmado · Listo para iniciar
-              </>
-            )}
-          </p>
-          {data.booking.started_at && (
-            <p className="text-fg-faint text-[11px] mt-1 flex items-center justify-center gap-1">
-              <Clock size={10} weight="duotone" />
-              Iniciado a las {parseDate(data.booking.started_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
-            </p>
-          )}
-        </div>
-
-        {/* Mapa en tiempo real — solo cuando el viaje está en curso */}
-        {inProgress && (
-          <TripMap
-            driverLat={data.booking.driver_lat}
-            driverLng={data.booking.driver_lng}
-            destination={data.ride.destination}
-            isDriver={isDriver}
-          />
-        )}
-
-        {/* Ruta */}
-        <div className="bg-surface rounded-2xl p-5">
-          <p className="text-fg-faint text-xs mb-3">Ruta del viaje</p>
-          <div className="flex items-start gap-3">
-            <div className="flex flex-col items-center pt-1 flex-shrink-0">
-              <div className="w-2.5 h-2.5 rounded-full bg-fg-faint" />
-              <div className="w-px h-8 bg-line-strong" />
-              <div className="w-2.5 h-2.5 bg-primary rounded-sm" />
-            </div>
-            <div className="flex-1 min-w-0 space-y-3">
-              <div>
-                <p className="text-fg-faint text-[10px] uppercase tracking-wider">Origen</p>
-                <p className="text-fg font-semibold">{data.ride.origin}</p>
-              </div>
-              <div>
-                <p className="text-fg-faint text-[10px] uppercase tracking-wider">Destino</p>
-                <p className="text-fg font-semibold">{data.ride.destination}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Otra parte */}
-        <div className="bg-surface rounded-2xl p-5">
-          <p className="text-fg-faint text-xs mb-3">{isDriver ? 'Tu pasajero' : 'Tu conductor'}</p>
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-subtle overflow-hidden flex-shrink-0 flex items-center justify-center">
-              {otherParty.avatar
-                ? <img src={otherParty.avatar} alt="" className="w-full h-full object-cover" />
-                : <span className="text-fg font-bold">{otherParty.name[0]?.toUpperCase()}</span>
-              }
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-fg font-semibold truncate">{otherParty.name}</p>
-              <RatingDisplay rating={otherParty.rating} count={otherParty.rating_count} />
-            </div>
-            {otherParty.phone && (
-              <a
-                href={`tel:${otherParty.phone}`}
-                className="bg-subtle hover:bg-line-strong p-2.5 rounded-xl transition-colors flex-shrink-0"
-                title={`Llamar ${otherParty.phone}`}
+            <div className="absolute inset-x-0 top-0 pt-safe px-4 z-20 flex items-center justify-between gap-2">
+              <button
+                onClick={() => navigate('/my-rides')}
+                aria-label="Volver a mis viajes"
+                className="w-10 h-10 rounded-full glass-bar border border-line shadow-float
+                  flex items-center justify-center text-fg flex-shrink-0"
               >
-                <Phone size={14} weight="duotone" className="text-fg" />
-              </a>
-            )}
-          </div>
-        </div>
-
-        {/* Vehículo (solo pasajero) */}
-        {!isDriver && carInfo && (
-          <div className="bg-surface rounded-2xl p-4">
-            <p className="text-fg-faint text-xs mb-2">Vehículo</p>
-            <div className="flex items-center gap-2">
-              <Car size={14} weight="duotone" className="text-fg-faint" />
-              <p className="text-fg text-sm">{carInfo}</p>
+                <ArrowLeft size={19} weight="bold" />
+              </button>
+              <LiveDot label="Viaje en curso" onDark />
             </div>
           </div>
-        )}
 
-        {/* Detalles */}
-        <div className="bg-surface rounded-2xl p-4 space-y-2.5">
-          <div className="flex justify-between text-sm">
-            <span className="text-fg-faint">Hora de salida</span>
-            <span className="text-fg font-medium">{data.ride.time}</span>
+          <Sheet className="flex-1">{body}</Sheet>
+        </>
+      ) : (
+        /* Antes de arrancar no hay recorrido que mostrar, así que es una
+           página normal con el estado arriba. */
+        <div className="flex-1 px-5 pt-20 pb-nav max-w-md mx-auto w-full">
+          <button
+            onClick={() => navigate('/my-rides')}
+            className="flex items-center gap-2 text-fg-muted hover:text-fg transition-colors text-sm mb-5"
+          >
+            <ArrowLeft size={16} weight="bold" /> Mis viajes
+          </button>
+
+          <div className="bg-live-soft border border-live/30 rounded-2xl p-4 text-center mb-4">
+            <p className="text-live text-sm font-bold flex items-center justify-center gap-1.5">
+              <CheckCircle size={16} weight="fill" />
+              Confirmado · listo para salir
+            </p>
+            <p className="text-fg-muted text-xs mt-1 leading-relaxed">
+              {isDriver
+                ? 'Cuando arranques, tu pasajero verá el recorrido en vivo.'
+                : 'Vas a poder seguir el recorrido cuando el conductor inicie.'}
+            </p>
           </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-fg-faint">Asientos</span>
-            <span className="text-fg font-medium">{data.booking.seats}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-fg-faint">Precio total</span>
-            <span className="text-fg font-bold">${(Number(data.ride.price) * data.booking.seats).toLocaleString()}</span>
+
+          <div className="bg-surface rounded-2xl border border-line shadow-card p-4">
+            {body}
           </div>
         </div>
-
-        {/* Botón de chat con badge de mensajes no leídos */}
-        <button
-          onClick={openChat}
-          className="w-full flex items-center justify-center gap-2 bg-surface hover:bg-subtle border border-line text-fg text-sm py-3 rounded-xl transition-colors relative"
-        >
-          <span className="relative">
-            <ChatCircle size={15} weight="duotone" />
-            {unreadCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 bg-notify text-fg text-[9px] font-bold rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5">
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </span>
-            )}
-          </span>
-          Chatear con {otherParty.name.split(' ')[0]}
-          {unreadCount > 0 && (
-            <span className="bg-notify text-fg text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-              {unreadCount} nuevo{unreadCount !== 1 ? 's' : ''}
-            </span>
-          )}
-        </button>
-
-        {/* CTAs del conductor */}
-        {isDriver && confirmed && (
-          <button
-            onClick={startTrip}
-            disabled={acting}
-            className="w-full flex items-center justify-center gap-2 bg-primary text-on-primary font-bold py-4 rounded-xl hover:bg-subtle disabled:opacity-50 transition-colors"
-          >
-            <Play size={16} weight="duotone" /> {acting ? 'Iniciando...' : 'Iniciar viaje'}
-          </button>
-        )}
-        {isDriver && inProgress && (
-          <button
-            onClick={finishTrip}
-            disabled={acting}
-            className="w-full flex items-center justify-center gap-2 bg-primary text-on-primary font-bold py-4 rounded-xl hover:bg-subtle disabled:opacity-50 transition-colors"
-          >
-            <Flag size={16} weight="duotone" /> {acting ? 'Finalizando...' : 'Finalizar viaje'}
-          </button>
-        )}
-        {!isDriver && inProgress && (
-          <p className="text-center text-fg-faint text-xs py-2">
-            El conductor te avisará cuando finalice el viaje.
-          </p>
-        )}
-      </div>
+      )}
     </div>
   );
 }

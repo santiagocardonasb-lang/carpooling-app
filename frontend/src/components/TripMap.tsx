@@ -13,6 +13,11 @@ interface Props {
   driverLng: number | null;
   destination: string;
   isDriver: boolean;
+  /**
+   * Ocupa todo el contenedor padre en vez de una tarjeta de 260px. Lo usa la
+   * pantalla de viaje en curso, donde el mapa es el fondo y no un recuadro.
+   */
+  fill?: boolean;
 }
 
 // Convierte nombre de ciudad → coordenadas usando Nominatim (OpenStreetMap, gratis)
@@ -61,7 +66,7 @@ function formatEta(seconds: number): string {
   return `~${mins} min`;
 }
 
-export default function TripMap({ driverLat, driverLng, destination, isDriver }: Props) {
+export default function TripMap({ driverLat, driverLng, destination, isDriver, fill }: Props) {
   const { theme } = useTheme();
   const isLight = theme === 'light';
   // Mismos valores que --fg en cada tema
@@ -272,16 +277,18 @@ export default function TripMap({ driverLat, driverLng, destination, isDriver }:
   }, [mapReady, driverLat, driverLng, destCoords]);
 
   return (
-    <div className="relative rounded-2xl overflow-hidden bg-surface">
+    <div className={`relative overflow-hidden bg-subtle ${
+      fill ? 'absolute inset-0' : 'rounded-2xl'
+    }`}>
       {/* Mapa */}
-      <div ref={containerRef} style={{ height: '260px', width: '100%' }} />
+      <div ref={containerRef} style={{ height: fill ? '100%' : '260px', width: '100%' }} />
 
       {/* ETA badge */}
       {eta && (
-        <div className="absolute top-3 left-3 bg-black/80 backdrop-blur-sm border border-line-strong px-3 py-1.5 rounded-xl flex items-center gap-1.5 pointer-events-none">
-          <Clock size={13} weight="duotone" className="text-fg-muted" />
-          <span className="text-fg text-sm font-bold">{eta}</span>
-          <span className="text-fg-muted text-xs">al destino</span>
+        <div className={`absolute left-3 bg-black/80 backdrop-blur-sm border border-white/15 px-3 py-1.5 rounded-xl flex items-center gap-1.5 pointer-events-none ${fill ? 'bottom-4' : 'top-3'}`}>
+          <Clock size={13} weight="fill" className="text-white/70" />
+          <span className="text-white text-sm font-bold">{eta}</span>
+          <span className="text-white/70 text-xs">al destino</span>
         </div>
       )}
 
