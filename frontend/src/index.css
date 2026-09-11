@@ -246,6 +246,13 @@ button:not(:disabled):active,
 .pb-safe { padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px); }
 .pt-safe { padding-top: max(env(safe-area-inset-top, 0px), 0px); }
 
+/* Hueco para la barra inferior.
+   Las páginas usan `min-h-screen`, que mide la ventana completa e ignora que
+   la barra está fija encima; sin esto, lo último de la página queda debajo de
+   ella. En escritorio la barra no existe, así que el hueco desaparece. */
+.pb-nav { padding-bottom: calc(4rem + max(env(safe-area-inset-bottom, 0px), 12px)); }
+@media (min-width: 640px) { .pb-nav { padding-bottom: 2rem; } }
+
 /* ═══════════════════════════════════════════════════════════════
    PANTALLA DE ENTRADA
    ═══════════════════════════════════════════════════════════════ */

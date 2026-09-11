@@ -7,6 +7,12 @@ interface User {
   phone?: string;
   avatar?: string;
   role?: 'driver' | 'passenger';
+  /**
+   * true verificado, false sin verificar, null cuando todavía no se puede
+   * saber porque falta la migración. Lo desconocido nunca se muestra como
+   * verificado: ver verificationState() en el backend.
+   */
+  email_verified?: boolean | null;
 }
 
 interface AuthContextType {
