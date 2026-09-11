@@ -2,6 +2,7 @@ import { describe, test, expect } from 'vitest';
 import { checkPassword, passwordError, PASSWORD_MIN } from './password';
 import { apiError } from './apiError';
 import { parseDate } from './date';
+import { formatClock } from './time';
 
 describe('checkPassword', () => {
   test('aprueba una contraseña con letras y número', () => {
@@ -95,5 +96,33 @@ describe('parseDate', () => {
 
   test('devuelve una fecha inválida en vez de reventar', () => {
     expect(Number.isNaN(parseDate('').getTime())).toBe(true);
+  });
+});
+
+describe('formatClock', () => {
+  test('parte la hora en número y sufijo', () => {
+    expect(formatClock('06:30')).toEqual({ time: '6:30', suffix: 'AM' });
+    expect(formatClock('18:05')).toEqual({ time: '6:05', suffix: 'PM' });
+  });
+
+  test('resuelve medianoche y mediodía', () => {
+    // Los dos casos que rompe el módulo: 0 % 12 y 12 % 12 dan cero, y en el
+    // reloj de 12 horas ninguno de los dos se muestra como "0".
+    expect(formatClock('00:15')).toEqual({ time: '12:15', suffix: 'AM' });
+    expect(formatClock('12:00')).toEqual({ time: '12:00', suffix: 'PM' });
+  });
+
+  test('quita el cero de la izquierda pero conserva el de los minutos', () => {
+    expect(formatClock('09:05').time).toBe('9:05');
+  });
+
+  test('devuelve la entrada tal cual si no es una hora', () => {
+    expect(formatClock('sin-hora')).toEqual({ time: 'sin-hora', suffix: '' });
+    expect(formatClock('99:99')).toEqual({ time: '99:99', suffix: '' });
+  });
+
+  test('no revienta sin valor', () => {
+    expect(formatClock(null).time).toBe('—');
+    expect(formatClock(undefined).time).toBe('—');
   });
 });

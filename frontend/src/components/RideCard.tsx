@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Car, Motorcycle, Clock, CalendarBlank, Users, Phone, ArrowsClockwise, PencilSimple, Star } from '@phosphor-icons/react';
+import { Car, Motorcycle, CalendarBlank, ArrowsClockwise, PencilSimple } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import { useConfirm } from '../context/ConfirmContext';
@@ -7,6 +7,10 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import DatePicker from './DatePicker';
 import TimePicker from './TimePicker';
+import RouteLine from './RouteLine';
+import DriverRow from './DriverRow';
+import SeatDots from './SeatDots';
+import { formatClock } from '../utils/time';
 
 interface Ride {
   id: number;
@@ -57,11 +61,11 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
 
   const isOwnRide = user?.id === ride.driver_id;
   const isCancelled = ride.status === 'cancelled';
-  const seatsUsed = ride.seats - ride.seats_available;
-  const seatsPercent = ride.seats > 0 ? (seatsUsed / ride.seats) * 100 : 0;
   // Fecha local (toISOString usa UTC y puede dar "mañana" en zonas -UTC)
   const _d = new Date();
   const today = `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`;
+
+  const clock = formatClock(ride.time);
 
   const formatDate = (d?: string) => {
     if (!d) return null;
@@ -143,84 +147,75 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
   };
 
   return (
-    <div className={`bg-surface rounded-2xl p-5 border transition-colors ${isCancelled ? 'border-line opacity-40' : 'border-line hover:border-line-strong'}`}>
-      {/* Header */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-subtle rounded-xl flex items-center justify-center flex-shrink-0">
-            {ride.vehicle_type === 'moto'
-              ? <Motorcycle size={18} weight="duotone" className="text-fg-muted" />
-              : <Car size={18} weight="duotone" className="text-fg-muted" />
-            }
+    <div className={`bg-surface rounded-2xl p-4 border border-line shadow-card
+      transition-shadow hover:shadow-float ${isCancelled ? 'opacity-50' : ''}`}>
+
+      {/* Hora y precio como protagonistas: es lo que se compara al elegir viaje */}
+      <div className="flex items-start justify-between gap-3 mb-3.5">
+        <div className="min-w-0">
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-hero text-fg tabular-nums">{clock.time}</span>
+            <span className="text-xs font-extrabold text-fg-faint">{clock.suffix}</span>
           </div>
-          <div>
-            <div className="flex items-center gap-2 text-sm font-semibold text-fg">
-              <span>{ride.origin}</span>
-              <span className="text-fg-faint">→</span>
-              <span>{ride.destination}</span>
-            </div>
-            {ride.driver_name && (
-              <p className="text-fg-faint text-xs mt-0.5 flex items-center gap-1.5">
-                <span>{ride.driver_name}</span>
-                {Number(ride.driver_rating_count ?? 0) > 0 && (
-                  <span className="flex items-center gap-0.5 text-star">
-                    <Star size={10} weight="fill" className="text-star" />
-                    <span>{Number(ride.driver_rating ?? 0).toFixed(1)}</span>
-                    <span className="text-fg-faint">({ride.driver_rating_count})</span>
-                  </span>
-                )}
-              </p>
-            )}
-            {(ride.car_brand || ride.car_color || ride.car_plate) && (
-              <p className="text-fg-faint text-xs mt-0.5">
-                {[ride.car_brand, ride.car_color, ride.car_plate].filter(Boolean).join(' · ')}
-              </p>
+          <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+            <span className="inline-flex items-center gap-1 bg-subtle text-fg
+              text-label px-2 py-0.5 rounded-md uppercase">
+              {ride.vehicle_type === 'moto'
+                ? <Motorcycle size={12} weight="fill" />
+                : <Car size={12} weight="fill" />}
+              {ride.vehicle_type === 'moto' ? 'Moto' : 'Carro'}
+            </span>
+            {ride.is_recurring ? (
+              <span className="inline-flex items-center gap-1 text-[11px] text-fg-muted">
+                <ArrowsClockwise size={11} weight="bold" /> {ride.days_label}
+              </span>
+            ) : ride.date && (
+              <span className="inline-flex items-center gap-1 text-[11px] text-fg-muted">
+                <CalendarBlank size={11} weight="bold" /> {formatDate(ride.date)}
+              </span>
             )}
           </div>
         </div>
-        <div className="text-right flex-shrink-0 ml-3">
-          <p className="text-fg font-bold text-lg">${Number(ride.price).toLocaleString()}</p>
-          <p className="text-fg-faint text-xs">por persona</p>
+
+        <div className="text-right flex-shrink-0">
+          <p className="text-hero text-fg tabular-nums">
+            ${Number(ride.price).toLocaleString('es-CO')}
+          </p>
+          <p className="text-[11px] font-semibold text-fg-faint">por persona</p>
         </div>
       </div>
 
-      {/* Meta */}
-      <div className="flex flex-wrap items-center gap-3 text-xs text-fg-faint mb-3">
-        {ride.is_recurring ? (
-          <span className="flex items-center gap-1.5 bg-subtle text-fg-muted px-2.5 py-1 rounded-full">
-            <ArrowsClockwise size={11} weight="duotone" /> {ride.days_label}
-          </span>
-        ) : ride.date && (
-          <span className="flex items-center gap-1.5"><CalendarBlank size={12} weight="duotone" /> {formatDate(ride.date)}</span>
-        )}
-        <span className="flex items-center gap-1.5"><Clock size={12} weight="duotone" /> {ride.time}</span>
-        {ride.driver_phone && (
-          <span className="flex items-center gap-1.5"><Phone size={12} weight="duotone" /> {ride.driver_phone}</span>
-        )}
+      {/* El trayecto, dibujado */}
+      <div className="bg-subtle rounded-xl p-3 mb-3.5">
+        <RouteLine origin={ride.origin} destination={ride.destination} originTime={ride.time} />
       </div>
 
-      {/* Seats bar */}
-      <div className="mb-4">
-        <div className="flex justify-between items-center text-xs mb-1.5">
-          <span className="flex items-center gap-1.5 text-fg-faint">
-            <Users size={12} weight="duotone" />
-            {ride.seats_available} de {ride.seats} asiento{ride.seats !== 1 ? 's' : ''} libre{ride.seats_available !== 1 ? 's' : ''}
-          </span>
-          {isOwnRide && (ride.pending_requests ?? 0) > 0 && (
-            <span className="text-star">{ride.pending_requests} pendiente{ride.pending_requests !== 1 ? 's' : ''}</span>
-          )}
-        </div>
-        <div className="h-1 bg-subtle rounded-full overflow-hidden">
-          <div
-            className={`h-full rounded-full transition-all ${seatsPercent >= 80 ? 'bg-notify' : seatsPercent >= 50 ? 'bg-warn' : 'bg-live'}`}
-            style={{ width: `${Math.min(seatsPercent, 100)}%` }}
+      {ride.driver_name && (
+        <div className="mb-3.5">
+          <DriverRow
+            name={ride.driver_name}
+            rating={ride.driver_rating}
+            ratingCount={ride.driver_rating_count}
+            vehicle={[ride.car_brand, ride.car_color, ride.car_plate].filter(Boolean).join(' · ')}
+            size="sm"
           />
         </div>
-      </div>
+      )}
 
       {ride.description && (
-        <p className="text-fg-faint text-xs mb-4 italic">"{ride.description}"</p>
+        <p className="text-fg-muted text-xs mb-3.5 leading-relaxed">"{ride.description}"</p>
       )}
+
+      <div className="flex items-end justify-between gap-3 pt-3 border-t border-line">
+        <SeatDots total={ride.seats} available={ride.seats_available} />
+        {isOwnRide && (ride.pending_requests ?? 0) > 0 && (
+          <span className="text-[11px] font-bold text-warn flex-shrink-0">
+            {ride.pending_requests} pendiente{ride.pending_requests !== 1 ? 's' : ''}
+          </span>
+        )}
+      </div>
+      <div className="mt-3.5">
+        {/* Las acciones conservan toda su lógica; solo cambia su envoltorio */}
 
       {/* Actions */}
       {showActions && !isCancelled && (
@@ -366,7 +361,10 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
           )}
         </>
       )}
-      {isCancelled && <p className="text-xs text-fg-faint font-medium">Viaje cancelado</p>}
+      </div>
+      {isCancelled && (
+        <p className="text-xs text-fg-faint font-medium mt-3">Este viaje fue cancelado</p>
+      )}
     </div>
   );
 }
