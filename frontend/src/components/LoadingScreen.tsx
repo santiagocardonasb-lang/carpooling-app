@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Wordmark from './Wordmark';
 
 /**
  * Pantalla de entrada.
@@ -32,24 +33,21 @@ export default function LoadingScreen({ onDone }: { onDone: () => void }) {
           al revés. Los rellenos salen de los tokens, no de hexadecimales, para
           que no haya una versión que desaparezca contra su propio fondo. */}
       <div className="splash-mark">
-        <svg viewBox="0 0 32 32" width="88" height="88" fill="none" aria-hidden="true">
-          <rect width="32" height="32" rx="7.5" className="fill-fg" />
-          <g className="splash-car fill-canvas">
-            <path d="M6.4 19.9h19.2a1.5 1.5 0 0 0 1.5-1.5v-2.2a2.9 2.9 0 0 0-2.1-2.8l-1.3-.4-1.9-3.6A3.1 3.1 0 0 0 19 7.7h-6a3.1 3.1 0 0 0-2.8 1.7L8.3 13l-1.3.4a2.9 2.9 0 0 0-2.1 2.8v2.2a1.5 1.5 0 0 0 1.5 1.5Z" />
-            <circle cx="10.4" cy="20.7" r="3" />
-            <circle cx="21.6" cy="20.7" r="3" />
+        <svg viewBox="0 0 36 36" width="92" height="92" fill="none" aria-hidden="true">
+          <rect x="0" y="4" width="36" height="28" rx="8" className="fill-fg" />
+          <g className="splash-car">
+            <path d="M7 16L12 10H24L29 16V22H7V16Z" className="fill-canvas" />
+            <circle cx="10" cy="24" r="3" className="fill-canvas" />
+            <circle cx="26" cy="24" r="3" className="fill-canvas" />
           </g>
-          <g className="fill-fg">
-            <path d="M13 10h6c.45 0 .87.25 1.08.66L21.5 13.3h-11l1.42-2.64A1.22 1.22 0 0 1 13 10Z" />
-            <circle cx="10.4" cy="20.7" r="1.25" />
-            <circle cx="21.6" cy="20.7" r="1.25" />
-          </g>
+          <rect x="11" y="12" width="6" height="4" rx="1" className="fill-fg" />
+          <rect x="19" y="12" width="6" height="4" rx="1" className="fill-fg" />
         </svg>
       </div>
 
-      <p className="splash-word mt-6 text-fg text-2xl font-extrabold tracking-tight select-none">
-        carpool
-      </p>
+      <div className="splash-word mt-6">
+        <Wordmark size="lg" mark={false} />
+      </div>
 
       <div className="splash-track mt-5" aria-hidden="true">
         <span className="splash-fill" />

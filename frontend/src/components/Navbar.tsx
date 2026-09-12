@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { MagnifyingGlass, Plus, BookOpen, Bell, User, Car, SignOut, GearSix, ChatCircle, ClockCounterClockwise } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext';
+import Wordmark from './Wordmark';
 import { useUnread } from '../context/UnreadContext';
 
 export default function Navbar() {
@@ -46,8 +47,8 @@ export default function Navbar() {
   return (
     <nav className="glass-bar fixed top-0 left-0 right-0 z-50 border-b border-line">
       <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-        <Link to="/" className="text-fg font-black text-xl tracking-tight">
-          carpool
+        <Link to="/" aria-label="Ir al inicio">
+          <Wordmark size="sm" />
         </Link>
 
         {isAuthenticated ? (

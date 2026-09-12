@@ -9,7 +9,7 @@ import { useAuth } from '../context/AuthContext';
 import LocationInput from '../components/LocationInput';
 import RouteLine from '../components/RouteLine';
 import StatusPill from '../components/StatusPill';
-import StatsRow from '../components/StatsRow';
+import Wordmark from '../components/Wordmark';
 import { formatClock } from '../utils/time';
 
 /** Lo mínimo que la portada necesita de un viaje próximo. */
@@ -96,7 +96,9 @@ export default function Home() {
         </div>
 
         <div className="border-t border-line pt-8 pb-nav px-5">
-          <div className="max-w-md mx-auto"><StatsRow /></div>
+          <div className="max-w-md mx-auto flex justify-center">
+            <Wordmark size="lg" />
+          </div>
         </div>
       </div>
     );
@@ -228,7 +230,9 @@ export default function Home() {
       </div>
 
       <div className="border-t border-line pt-7 pb-nav px-5">
-        <div className="max-w-md mx-auto"><StatsRow /></div>
+        <div className="max-w-md mx-auto flex justify-center">
+          <Wordmark size="lg" />
+        </div>
       </div>
     </div>
   );
