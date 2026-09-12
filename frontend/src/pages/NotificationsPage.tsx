@@ -173,7 +173,7 @@ export default function NotificationsPage() {
                   onKeyDown={(e) => { if (clickable && (e.key === 'Enter' || e.key === ' ')) handleClick(n); }}
                   className={`flex gap-3 bg-surface rounded-2xl p-4 border transition-all ${
                     !n.read ? 'border-line-strong' : 'border-line'
-                  } ${clickable ? 'cursor-pointer hover:bg-subtle hover:border-line-strong active:scale-[0.99]' : ''}`}
+                  } ${clickable ? 'cursor-pointer hover:bg-subtle hover:border-line-strong' : ''}`}
                 >
                   <div className="flex-shrink-0 mt-0.5">{icon(n.type)}</div>
                   <div className="flex-1 min-w-0">

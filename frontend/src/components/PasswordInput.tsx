@@ -34,8 +34,8 @@ export default function PasswordInput({
         autoCapitalize="none"
         autoCorrect="off"
         spellCheck={false}
-        className={`w-full bg-surface text-fg placeholder-fg-faint pl-4 pr-12 py-4 rounded-xl text-sm transition outline-none ${
-          error ? 'ring-2 ring-danger' : 'focus:ring-2 focus:ring-fg'
+        className={`field w-full pl-4 pr-12 py-4 text-sm ${
+          error ? 'border-danger ring-1 ring-danger' : ''
         }`}
       />
       <button

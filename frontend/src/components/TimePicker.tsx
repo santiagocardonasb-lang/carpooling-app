@@ -58,7 +58,7 @@ export default function TimePicker({ value, onChange, error, placeholder = 'Sele
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
       <div
-        className="bg-surface border border-line w-full sm:max-w-sm sm:rounded-2xl rounded-t-3xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto"
+        className="bg-surface border border-line w-full sm:max-w-sm sm:rounded-2xl rounded-t-3xl shadow-pop overflow-hidden max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -168,7 +168,7 @@ export default function TimePicker({ value, onChange, error, placeholder = 'Sele
           <button
             type="button"
             onClick={confirm}
-            className="w-full bg-primary text-on-primary py-3 rounded-xl text-sm font-bold hover:bg-primary/90 transition-colors active:scale-[0.98]"
+            className="w-full bg-primary text-on-primary py-3 rounded-xl min-h-[56px] text-sm font-bold hover:bg-primary/90 transition-colors"
           >
             Confirmar {fmt2(hour)}:{fmt2(minute)}
           </button>
@@ -183,8 +183,8 @@ export default function TimePicker({ value, onChange, error, placeholder = 'Sele
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className={`w-full flex items-center gap-3 bg-surface px-4 py-3.5 rounded-xl text-sm transition outline-none ${
-          error ? 'ring-2 ring-danger' : open ? 'ring-2 ring-fg' : ''
+        className={`field w-full flex items-center gap-3 px-4 py-3.5 text-sm ${
+          error ? 'border-danger ring-1 ring-danger' : open ? 'border-fg ring-1 ring-fg' : ''
         }`}
       >
         <Clock size={15} weight="duotone" className="text-fg-faint flex-shrink-0" />

@@ -58,16 +58,25 @@ export default {
         // Burbuja de no leídos: idéntica en ambos temas, siempre con texto blanco
         notify: token('notify'),
       },
+      // Cuatro pisos de elevación, de menos a más urgente: la tarjeta apoyada,
+      // el control que flota sobre el mapa, la hoja que sube y el aviso que
+      // interrumpe. Todos salen de `--shadow`, así que la sombra se adapta al
+      // tema en vez de ser un negro fijo que en oscuro no se ve.
       boxShadow: {
         card:  '0 2px 10px rgb(var(--shadow) / 0.04)',
         float: '0 4px 20px rgb(var(--shadow) / 0.07), 0 1px 3px rgb(var(--shadow) / 0.04)',
+        lift:  '0 8px 20px -2px rgb(var(--shadow) / 0.10)',
         sheet: '0 -10px 30px -4px rgb(var(--shadow) / 0.12)',
         bar:   '0 -4px 16px rgb(var(--shadow) / 0.04)',
+        pop:   '0 20px 40px -8px rgb(var(--shadow) / 0.20)',
       },
       fontSize: {
         // Escala del rediseño. Antes casi todo vivía entre 11 y 16px, y esa
         // falta de contraste era una de las causas de que se viera plano.
         label: ['0.625rem', { lineHeight: '0.875rem', letterSpacing: '0.06em', fontWeight: '700' }],
+        // Rótulo en versalitas para placas y distintivos de categoría: un punto
+        // más grande que `label` porque va solo, sin un valor debajo que lo ancle.
+        caps:  ['0.6875rem', { lineHeight: '0.875rem', letterSpacing: '0.06em', fontWeight: '700' }],
         hero:  ['1.5rem',   { lineHeight: '1.75rem',  letterSpacing: '-0.03em', fontWeight: '800' }],
         display: ['1.75rem', { lineHeight: '2.125rem', letterSpacing: '-0.035em', fontWeight: '800' }],
       },

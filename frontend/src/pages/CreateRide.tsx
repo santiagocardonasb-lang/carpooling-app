@@ -96,8 +96,8 @@ export default function CreateRide() {
   const hasErrors = Object.values(fieldErrors).some(Boolean);
 
   const inputCls = (field: keyof FieldErrors) =>
-    `w-full bg-surface text-fg placeholder-fg-faint px-4 py-3.5 rounded-xl text-sm transition ${
-      fieldErrors[field] ? 'ring-2 ring-danger placeholder-danger/60' : 'focus:ring-2 focus:ring-fg'
+    `field w-full px-4 py-3.5 text-sm ${
+      fieldErrors[field] ? 'border-danger ring-1 ring-danger placeholder-danger/60' : ''
     }`;
 
   // Pantalla de bloqueo si no hay datos de vehículo
@@ -282,7 +282,7 @@ export default function CreateRide() {
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               rows={2}
               placeholder="Ej. Salgo puntual, música suave..."
-              className="w-full bg-surface text-fg placeholder-fg-faint px-4 py-3.5 rounded-xl text-sm resize-none focus:ring-2 focus:ring-fg transition"
+              className="field w-full px-4 py-3.5 text-sm resize-none"
             />
           </div>
 
@@ -302,7 +302,7 @@ export default function CreateRide() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary text-on-primary font-semibold py-4 rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-colors text-sm"
+            className="w-full bg-primary text-on-primary font-semibold py-4 rounded-xl min-h-[56px] hover:bg-primary/90 disabled:opacity-50 transition-colors text-sm"
           >
             {loading ? 'Publicando...' : 'Publicar viaje'}
           </button>

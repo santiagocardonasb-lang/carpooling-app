@@ -110,7 +110,7 @@ export default function DatePicker({ value, onChange, min, error, placeholder = 
   const calendar = open && (
     <div
       ref={calendarRef}
-      className="bg-surface border border-line rounded-2xl shadow-2xl overflow-hidden"
+      className="bg-surface border border-line rounded-2xl shadow-pop overflow-hidden"
       style={{ position: 'fixed', top: dropdownPos.top, left: dropdownPos.left, width: dropdownPos.width, zIndex: 9999 }}
     >
       {/* header */}
@@ -174,8 +174,8 @@ export default function DatePicker({ value, onChange, min, error, placeholder = 
         ref={triggerRef}
         type="button"
         onClick={openCalendar}
-        className={`w-full flex items-center gap-3 bg-surface px-4 py-3.5 rounded-xl text-sm transition outline-none ${
-          error ? 'ring-2 ring-danger' : open ? 'ring-2 ring-fg' : ''
+        className={`field w-full flex items-center gap-3 px-4 py-3.5 text-sm ${
+          error ? 'border-danger ring-1 ring-danger' : open ? 'border-fg ring-1 ring-fg' : ''
         }`}
       >
         <CalendarBlank size={15} weight="duotone" className="text-fg-faint flex-shrink-0" />

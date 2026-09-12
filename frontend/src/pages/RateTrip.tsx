@@ -115,7 +115,7 @@ export default function RateTrip() {
               onMouseEnter={() => setHover(n)}
               onMouseLeave={() => setHover(0)}
               onClick={() => setRating(n)}
-              className="transition-transform hover:scale-110 active:scale-95"
+              className="transition-transform hover:scale-110"
             >
               <Star
                 size={42}
@@ -138,7 +138,7 @@ export default function RateTrip() {
           placeholder="Cuéntanos cómo fue (opcional)"
           rows={3}
           maxLength={500}
-          className="w-full bg-surface text-fg placeholder-fg-faint px-4 py-3 rounded-xl text-sm resize-none focus:ring-2 focus:ring-fg outline-none mb-4"
+          className="field w-full px-4 py-3 text-sm resize-none mb-4"
         />
 
         <button

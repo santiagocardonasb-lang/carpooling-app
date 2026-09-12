@@ -60,7 +60,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           {/* ── popup card ── */}
           <div
             className={`relative bg-primary rounded-3xl px-8 py-8 w-full max-w-xs flex flex-col items-center gap-4
-              shadow-2xl transition-all duration-300
+              shadow-pop transition-all duration-300
               ${visible ? 'scale-100 translate-y-0' : 'scale-90 translate-y-4'}`}
             onClick={(e) => e.stopPropagation()}
           >

@@ -63,7 +63,7 @@ export default function AutocompleteInput({ value, onChange, options, placeholde
       </div>
 
       {showDropdown && (
-        <div className={`absolute ${openUp ? 'bottom-full mb-1' : 'top-full mt-1'} left-0 right-0 bg-surface border border-line rounded-xl shadow-2xl overflow-hidden z-[200]`}>
+        <div className={`absolute ${openUp ? 'bottom-full mb-1' : 'top-full mt-1'} left-0 right-0 bg-surface border border-line rounded-xl shadow-pop overflow-hidden z-[200]`}>
           {filtered.map(opt => (
             <button
               key={opt}

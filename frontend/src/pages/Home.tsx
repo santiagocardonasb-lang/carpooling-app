@@ -81,7 +81,7 @@ export default function Home() {
               <LocationInput value={destination} onChange={setDestination} placeholder="¿A dónde vas?" dot="destination" />
             </div>
             <button type="submit"
-              className="w-full bg-primary text-on-primary font-bold py-3.5 rounded-xl
+              className="w-full bg-primary text-on-primary font-bold py-3.5 rounded-xl min-h-[56px]
                 hover:bg-primary/90 transition-colors text-sm">
               Buscar viajes
             </button>
@@ -164,8 +164,8 @@ export default function Home() {
               label: 'Historial', sub: 'Viajes cerrados' },
           ].map(({ to, Icon, label, sub }) => (
             <Link key={to} to={to}
-              className="flex items-center gap-2.5 p-3 rounded-xl bg-surface border border-line
-                shadow-card hover:shadow-float transition-shadow">
+              className="lift flex items-center gap-2.5 p-3 rounded-xl bg-surface border border-line
+                shadow-card hover:shadow-lift">
               <span className="w-8 h-8 rounded-lg bg-subtle text-fg
                 flex items-center justify-center flex-shrink-0">
                 <Icon size={17} weight="bold" />

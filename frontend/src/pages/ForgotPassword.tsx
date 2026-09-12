@@ -140,7 +140,7 @@ export default function ForgotPassword() {
             </p>
 
             <form onSubmit={requestCode} className="space-y-3">
-              <div className="flex items-stretch bg-surface rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-fg transition">
+              <div className="field flex items-stretch overflow-hidden">
                 <input
                   type="text"
                   value={emailUser}
@@ -164,7 +164,7 @@ export default function ForgotPassword() {
               <button
                 type="submit"
                 disabled={loading || !emailUser.trim()}
-                className="w-full bg-primary text-on-primary font-semibold py-4 rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-colors text-sm"
+                className="w-full bg-primary text-on-primary font-semibold py-4 rounded-xl min-h-[56px] hover:bg-primary/90 disabled:opacity-50 transition-colors text-sm"
               >
                 {loading ? 'Enviando...' : 'Enviarme el código'}
               </button>
@@ -280,7 +280,7 @@ export default function ForgotPassword() {
               <button
                 type="submit"
                 disabled={loading || !pwCheck.valid || password !== confirm}
-                className="w-full bg-primary text-on-primary font-semibold py-4 rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-colors text-sm mt-2"
+                className="w-full bg-primary text-on-primary font-semibold py-4 rounded-xl min-h-[56px] hover:bg-primary/90 disabled:opacity-50 transition-colors text-sm mt-2"
               >
                 {loading ? 'Guardando...' : 'Cambiar contraseña'}
               </button>
@@ -300,7 +300,7 @@ export default function ForgotPassword() {
             </p>
             <button
               onClick={() => navigate('/login')}
-              className="w-full bg-primary text-on-primary font-semibold py-4 rounded-xl hover:bg-primary/90 transition-colors text-sm"
+              className="w-full bg-primary text-on-primary font-semibold py-4 rounded-xl min-h-[56px] hover:bg-primary/90 transition-colors text-sm"
             >
               Iniciar sesión
             </button>

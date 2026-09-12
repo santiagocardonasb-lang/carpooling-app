@@ -106,7 +106,7 @@ export default function Navbar() {
               </button>
 
               {dropdownOpen && (
-                <div className="absolute right-0 top-10 w-52 bg-surface border border-line rounded-2xl shadow-2xl overflow-hidden py-1 z-50">
+                <div className="absolute right-0 top-10 w-52 bg-surface border border-line rounded-2xl shadow-pop overflow-hidden py-1 z-50">
                   <Link
                     to="/profile"
                     className="flex items-center gap-3 px-4 py-3 text-sm text-fg hover:bg-subtle transition-colors"

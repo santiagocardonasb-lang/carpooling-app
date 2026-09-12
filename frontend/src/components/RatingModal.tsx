@@ -69,7 +69,7 @@ export default function RatingModal({ bookingId, rateeName, rateeRole, onClose, 
           placeholder="Cuéntale a otros usuarios cómo estuvo (opcional)"
           rows={3}
           maxLength={500}
-          className="w-full bg-subtle text-fg placeholder-fg-faint px-4 py-3 rounded-xl text-sm resize-none focus:ring-2 focus:ring-fg outline-none"
+          className="field w-full bg-subtle px-4 py-3 text-sm resize-none"
         />
 
         <div className="flex gap-2 mt-4">

@@ -196,12 +196,12 @@ export default function ChatPage() {
             }}
             placeholder={`Mensaje a ${otherName?.split(' ')[0] || '...'}...`}
             maxLength={500}
-            className="flex-1 bg-surface text-fg px-4 py-3 rounded-2xl text-sm focus:ring-2 focus:ring-fg outline-none placeholder-fg-faint"
+            className="field flex-1 px-4 py-3 rounded-2xl text-sm"
           />
           <button
             onClick={send}
             disabled={!input.trim() || sending}
-            className="bg-primary text-on-primary p-3 rounded-2xl hover:bg-primary/90 disabled:opacity-40 transition-all active:scale-95 flex-shrink-0"
+            className="bg-primary text-on-primary p-3 rounded-2xl hover:bg-primary/90 disabled:opacity-40 transition-all flex-shrink-0"
           >
             <PaperPlaneRight size={18} weight="duotone" />
           </button>

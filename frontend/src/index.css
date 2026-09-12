@@ -207,6 +207,34 @@ button:not(:disabled), a, [role='button'] {
 button:not(:disabled):active,
 [role='button']:active { transform: scale(.97); }
 
+/* Tarjeta tocable: se levanta dos pixeles y la sombra se abre debajo. Es la
+   diferencia entre una lista de datos y algo que invita a tocarse. Al presionar
+   vuelve a apoyarse y se comprime un poco, para que el dedo sienta el clic.
+   Se declara aqui y no en cada tarjeta porque el gesto tiene que ser el mismo
+   en toda la app. */
+.lift {
+  transition: transform .2s var(--ease-out), box-shadow .2s var(--ease-out);
+}
+@media (hover: hover) {
+  .lift:hover { transform: translateY(-2px); }
+}
+.lift:active { transform: translateY(0) scale(.985); }
+
+/* Campo de texto: borde de un pixel en reposo para que se lea como campo y no
+   como un bloque blanco flotando, y borde negro al enfocar, sin halo separado.
+   Sobre el lienzo claro un campo blanco sin borde queda a 1,03:1 del fondo,
+   que es practicamente invisible. */
+@layer components {
+  .field {
+    @apply bg-surface text-fg placeholder-fg-faint border border-line rounded-xl
+           transition-colors outline-none;
+  }
+  .field:focus,
+  .field:focus-within {
+    @apply border-fg ring-1 ring-fg;
+  }
+}
+
 /* Foco visible solo con teclado */
 :focus-visible {
   outline: 2px solid rgb(var(--fg) / 0.75);

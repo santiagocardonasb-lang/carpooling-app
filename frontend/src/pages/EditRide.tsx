@@ -97,8 +97,8 @@ export default function EditRide() {
   const hasErrors = Object.values(fieldErrors).some(Boolean);
 
   const inputCls = (field: keyof FieldErrors) =>
-    `w-full bg-surface text-fg placeholder-fg-faint px-4 py-3.5 rounded-xl text-sm transition ${
-      fieldErrors[field] ? 'ring-2 ring-danger' : 'focus:ring-2 focus:ring-fg'
+    `field w-full px-4 py-3.5 text-sm ${
+      fieldErrors[field] ? 'border-danger ring-1 ring-danger' : ''
     }`;
 
   if (fetching) {
@@ -219,7 +219,7 @@ export default function EditRide() {
 
           <div>
             <label className="block text-fg-faint text-xs mb-1.5">Nota (opcional)</label>
-            <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} placeholder="Ej. Salgo puntual..." className="w-full bg-surface text-fg placeholder-fg-faint px-4 py-3.5 rounded-xl text-sm resize-none focus:ring-2 focus:ring-fg transition" />
+            <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} placeholder="Ej. Salgo puntual..." className="field w-full px-4 py-3.5 text-sm resize-none" />
           </div>
 
           {hasErrors && (
@@ -229,7 +229,7 @@ export default function EditRide() {
             </div>
           )}
 
-          <button type="submit" disabled={loading} className="w-full bg-primary text-on-primary font-semibold py-4 rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-colors text-sm">
+          <button type="submit" disabled={loading} className="w-full bg-primary text-on-primary font-semibold py-4 rounded-xl min-h-[56px] hover:bg-primary/90 disabled:opacity-50 transition-colors text-sm">
             {loading ? 'Guardando...' : 'Guardar cambios'}
           </button>
         </form>

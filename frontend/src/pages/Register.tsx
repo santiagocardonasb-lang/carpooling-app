@@ -119,7 +119,7 @@ export default function Register() {
           <button
             disabled={!role}
             onClick={() => setStep('info')}
-            className="w-full bg-primary text-on-primary font-semibold py-4 rounded-xl hover:bg-primary/90 disabled:opacity-30 transition-colors text-sm"
+            className="w-full bg-primary text-on-primary font-semibold py-4 rounded-xl min-h-[56px] hover:bg-primary/90 disabled:opacity-30 transition-colors text-sm"
           >
             Continuar →
           </button>
@@ -152,11 +152,11 @@ export default function Register() {
             required
             placeholder="Nombre completo"
             autoComplete="name"
-            className="w-full bg-surface text-fg placeholder-fg-faint px-4 py-4 rounded-xl text-sm focus:ring-2 focus:ring-fg transition"
+            className="field w-full px-4 py-4 text-sm"
           />
 
           {/* Email dividido: usuario | @dominio fijo */}
-          <div className="flex items-stretch bg-surface rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-fg transition">
+          <div className="field flex items-stretch overflow-hidden">
             <input
               type="text"
               value={form.emailUser}
@@ -215,7 +215,7 @@ export default function Register() {
             value={form.phone}
             onChange={(e) => setForm({ ...form, phone: e.target.value })}
             placeholder="Teléfono (opcional)"
-            className="w-full bg-surface text-fg placeholder-fg-faint px-4 py-4 rounded-xl text-sm focus:ring-2 focus:ring-fg transition"
+            className="field w-full px-4 py-4 text-sm"
           />
 
           {error && (
@@ -227,7 +227,7 @@ export default function Register() {
           <button
             type="submit"
             disabled={loading || !canSubmit}
-            className="w-full bg-primary text-on-primary font-semibold py-4 rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-colors text-sm mt-2"
+            className="w-full bg-primary text-on-primary font-semibold py-4 rounded-xl min-h-[56px] hover:bg-primary/90 disabled:opacity-50 transition-colors text-sm mt-2"
           >
             {loading ? 'Creando cuenta...' : 'Crear cuenta'}
           </button>

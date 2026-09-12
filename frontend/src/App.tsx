@@ -140,7 +140,7 @@ function TripStartedWatcher() {
 
   return (
     <div className="fixed inset-0 z-[300] bg-black/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-5">
-      <div className="bg-surface w-full max-w-sm rounded-3xl border border-line overflow-hidden shadow-2xl">
+      <div className="bg-surface w-full max-w-sm rounded-3xl border border-line overflow-hidden shadow-pop">
         {/* Banner amarillo */}
         <div className="bg-warn-soft border-b border-warn/30 px-6 py-6 text-center">
           <Car size={34} weight="fill" className="mx-auto mb-2 text-star" />
@@ -163,7 +163,7 @@ function TripStartedWatcher() {
           {/* Aceptar */}
           <button
             onClick={accept}
-            className="w-full flex items-center justify-center gap-2 bg-primary text-on-primary font-bold py-4 rounded-2xl hover:bg-primary/90 transition-colors text-sm active:scale-[0.98]"
+            className="w-full flex items-center justify-center gap-2 bg-primary text-on-primary font-bold py-4 rounded-2xl min-h-[56px] hover:bg-primary/90 transition-colors text-sm"
           >
             <CheckCircle size={17} weight="fill" /> Estoy listo, vamos
           </button>
@@ -172,13 +172,13 @@ function TripStartedWatcher() {
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => requestDelay(5)}
-              className="flex items-center justify-center gap-1.5 bg-subtle hover:bg-line-strong border border-line text-fg font-medium py-3 rounded-xl text-sm transition-colors active:scale-[0.98]"
+              className="flex items-center justify-center gap-1.5 bg-subtle hover:bg-line-strong border border-line text-fg font-medium py-3 rounded-xl text-sm transition-colors"
             >
               <Clock size={15} weight="fill" /> 5 min
             </button>
             <button
               onClick={() => requestDelay(10)}
-              className="flex items-center justify-center gap-1.5 bg-subtle hover:bg-line-strong border border-line text-fg font-medium py-3 rounded-xl text-sm transition-colors active:scale-[0.98]"
+              className="flex items-center justify-center gap-1.5 bg-subtle hover:bg-line-strong border border-line text-fg font-medium py-3 rounded-xl text-sm transition-colors"
             >
               <Clock size={15} weight="fill" /> 10 min
             </button>

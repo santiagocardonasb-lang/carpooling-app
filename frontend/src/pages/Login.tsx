@@ -42,7 +42,7 @@ export default function Login() {
             onChange={(e) => setEmail(e.target.value)}
             required
             placeholder="Email"
-            className="w-full bg-surface text-fg placeholder-fg-faint px-4 py-4 rounded-xl text-sm focus:ring-2 focus:ring-fg focus:ring-offset-0 transition"
+            className="field w-full px-4 py-4 text-sm"
           />
           <PasswordInput
             value={password}
@@ -74,7 +74,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary text-on-primary font-semibold py-4 rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-colors text-sm mt-2"
+            className="w-full bg-primary text-on-primary font-semibold py-4 rounded-xl min-h-[56px] hover:bg-primary/90 disabled:opacity-50 transition-colors text-sm mt-2"
           >
             {loading ? 'Entrando...' : 'Iniciar sesión'}
           </button>

@@ -106,7 +106,7 @@ export default function ChatModal({ bookingId, onClose }: Props) {
               onKeyDown={(e) => { if (e.key === 'Enter') send(); }}
               placeholder="Escribe un mensaje..."
               maxLength={500}
-              className="flex-1 bg-subtle text-fg px-3 py-2 rounded-xl text-sm focus:ring-2 focus:ring-fg outline-none"
+              className="field flex-1 bg-subtle px-3 py-2 text-sm"
             />
             <button
               onClick={send}

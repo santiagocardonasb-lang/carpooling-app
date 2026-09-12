@@ -71,7 +71,7 @@ export default function LocationInput({ value, onChange, placeholder, dot = 'ori
       </div>
 
       {open && (
-        <div className={`absolute ${openUp ? 'bottom-full mb-2' : 'top-full mt-2'} left-0 right-0 bg-subtle border border-line-strong rounded-xl overflow-hidden z-[100] shadow-2xl`}>
+        <div className={`absolute ${openUp ? 'bottom-full mb-2' : 'top-full mt-2'} left-0 right-0 bg-subtle border border-line-strong rounded-xl overflow-hidden z-[100] shadow-pop`}>
           {suggestions.length === 0 ? (
             <div className="px-4 py-3 flex items-center gap-2 text-fg-faint text-sm">
               <MapPin size={14} weight="duotone" />
