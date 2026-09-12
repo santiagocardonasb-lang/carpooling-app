@@ -229,7 +229,7 @@ export default function EditRide() {
             </div>
           )}
 
-          <button type="submit" disabled={loading} className="w-full bg-primary text-on-primary font-semibold py-4 rounded-xl hover:bg-subtle disabled:opacity-50 transition-colors text-sm">
+          <button type="submit" disabled={loading} className="w-full bg-primary text-on-primary font-semibold py-4 rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-colors text-sm">
             {loading ? 'Guardando...' : 'Guardar cambios'}
           </button>
         </form>

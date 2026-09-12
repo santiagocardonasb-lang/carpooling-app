@@ -168,7 +168,7 @@ export default function TimePicker({ value, onChange, error, placeholder = 'Sele
           <button
             type="button"
             onClick={confirm}
-            className="w-full bg-primary text-on-primary py-3 rounded-xl text-sm font-bold hover:bg-subtle transition-colors active:scale-[0.98]"
+            className="w-full bg-primary text-on-primary py-3 rounded-xl text-sm font-bold hover:bg-primary/90 transition-colors active:scale-[0.98]"
           >
             Confirmar {fmt2(hour)}:{fmt2(minute)}
           </button>

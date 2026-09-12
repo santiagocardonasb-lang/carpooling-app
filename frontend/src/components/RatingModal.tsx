@@ -79,7 +79,7 @@ export default function RatingModal({ bookingId, rateeName, rateeRole, onClose, 
           <button
             onClick={submit}
             disabled={rating < 1 || saving}
-            className="flex-1 bg-primary text-on-primary font-semibold py-2.5 rounded-xl text-sm hover:bg-subtle disabled:opacity-40 transition-colors"
+            className="flex-1 bg-primary text-on-primary font-semibold py-2.5 rounded-xl text-sm hover:bg-primary/90 disabled:opacity-40 transition-colors"
           >
             {saving ? 'Enviando...' : 'Enviar'}
           </button>

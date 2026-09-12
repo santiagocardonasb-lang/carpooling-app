@@ -152,7 +152,7 @@ export default function DatePicker({ value, onChange, min, error, placeholder = 
                     : isDisabled(day)
                       ? 'text-fg-faint cursor-not-allowed'
                       : isTodayCell(day)
-                        ? 'text-fg ring-1 ring-line hover:bg-subtle'
+                        ? 'text-fg ring-1 ring-line hover:bg-primary/90'
                         : 'text-fg-muted hover:bg-subtle hover:text-fg'
                 }`}
               >

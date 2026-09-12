@@ -12,6 +12,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import BottomNav from './components/BottomNav';
+import { Car, CheckCircle, Clock } from '@phosphor-icons/react';
 import api from './api';
 
 // Pantallas que no hacen falta en la primera pintura: se descargan al entrar.
@@ -112,7 +113,7 @@ function TripStartedWatcher() {
   const requestDelay = async (minutes: 5 | 10) => {
     try {
       await api.patch(`/bookings/${alert.id}/passenger-delay`, { minutes });
-      showToast(`✅ Le avisamos al conductor que llegas en ${minutes} min`);
+      showToast(`Le avisamos al conductor que llegas en ${minutes} min`);
     } catch {
       showToast('No se pudo enviar el aviso', 'error');
     }
@@ -142,7 +143,7 @@ function TripStartedWatcher() {
       <div className="bg-surface w-full max-w-sm rounded-3xl border border-line overflow-hidden shadow-2xl">
         {/* Banner amarillo */}
         <div className="bg-warn-soft border-b border-warn/30 px-6 py-6 text-center">
-          <div className="text-4xl mb-2">🚗</div>
+          <Car size={34} weight="fill" className="mx-auto mb-2 text-star" />
           <h2 className="text-star font-black text-xl">¡Tu viaje inició!</h2>
           <p className="text-star/70 text-sm mt-1 leading-relaxed">
             {alert.driver_name} arrancó el recorrido
@@ -162,24 +163,24 @@ function TripStartedWatcher() {
           {/* Aceptar */}
           <button
             onClick={accept}
-            className="w-full bg-primary text-on-primary font-bold py-4 rounded-2xl hover:bg-subtle transition-colors text-sm active:scale-[0.98]"
+            className="w-full flex items-center justify-center gap-2 bg-primary text-on-primary font-bold py-4 rounded-2xl hover:bg-primary/90 transition-colors text-sm active:scale-[0.98]"
           >
-            ✅ Estoy listo, vamos
+            <CheckCircle size={17} weight="fill" /> Estoy listo, vamos
           </button>
 
           {/* Pedir tiempo */}
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => requestDelay(5)}
-              className="bg-subtle hover:bg-line-strong border border-line-strong text-fg font-medium py-3 rounded-xl text-sm transition-colors active:scale-[0.98]"
+              className="flex items-center justify-center gap-1.5 bg-subtle hover:bg-line-strong border border-line text-fg font-medium py-3 rounded-xl text-sm transition-colors active:scale-[0.98]"
             >
-              ⏰ 5 min
+              <Clock size={15} weight="fill" /> 5 min
             </button>
             <button
               onClick={() => requestDelay(10)}
-              className="bg-subtle hover:bg-line-strong border border-line-strong text-fg font-medium py-3 rounded-xl text-sm transition-colors active:scale-[0.98]"
+              className="flex items-center justify-center gap-1.5 bg-subtle hover:bg-line-strong border border-line text-fg font-medium py-3 rounded-xl text-sm transition-colors active:scale-[0.98]"
             >
-              ⏰ 10 min
+              <Clock size={15} weight="fill" /> 10 min
             </button>
           </div>
 
@@ -188,7 +189,7 @@ function TripStartedWatcher() {
             onClick={decline}
             className="w-full text-danger hover:text-danger text-xs py-2 transition-colors"
           >
-            ❌ Cancelar reserva
+            Cancelar reserva
           </button>
         </div>
       </div>

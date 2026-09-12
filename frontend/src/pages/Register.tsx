@@ -119,7 +119,7 @@ export default function Register() {
           <button
             disabled={!role}
             onClick={() => setStep('info')}
-            className="w-full bg-primary text-on-primary font-semibold py-4 rounded-xl hover:bg-subtle disabled:opacity-30 transition-colors text-sm"
+            className="w-full bg-primary text-on-primary font-semibold py-4 rounded-xl hover:bg-primary/90 disabled:opacity-30 transition-colors text-sm"
           >
             Continuar →
           </button>
@@ -227,7 +227,7 @@ export default function Register() {
           <button
             type="submit"
             disabled={loading || !canSubmit}
-            className="w-full bg-primary text-on-primary font-semibold py-4 rounded-xl hover:bg-subtle disabled:opacity-50 transition-colors text-sm mt-2"
+            className="w-full bg-primary text-on-primary font-semibold py-4 rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-colors text-sm mt-2"
           >
             {loading ? 'Creando cuenta...' : 'Crear cuenta'}
           </button>

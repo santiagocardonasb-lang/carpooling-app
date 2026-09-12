@@ -189,7 +189,7 @@ export default function Navbar() {
             </Link>
             <Link
               to="/register"
-              className="bg-primary text-on-primary text-sm font-semibold px-4 py-2 rounded-full hover:bg-subtle transition-colors"
+              className="bg-primary text-on-primary text-sm font-semibold px-4 py-2 rounded-full hover:bg-primary/90 transition-colors"
             >
               Registrarse
             </Link>

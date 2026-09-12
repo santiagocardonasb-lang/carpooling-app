@@ -5,6 +5,7 @@ import api from '../api';
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
 import { parseDate } from '../utils/date';
+import StatusPill from '../components/StatusPill';
 
 interface Message {
   id: number;
@@ -117,7 +118,7 @@ export default function ChatPage() {
             {loading ? 'Cargando...' : otherName}
           </h2>
           <p className="text-fg-faint text-xs">
-            {bookingStatus === 'in_progress' ? '🚗 Viaje en curso' : bookingStatus === 'confirmed' ? '✓ Reserva confirmada' : ''}
+            {bookingStatus ? <StatusPill status={bookingStatus} bare /> : null}
           </p>
         </div>
       </div>
@@ -200,7 +201,7 @@ export default function ChatPage() {
           <button
             onClick={send}
             disabled={!input.trim() || sending}
-            className="bg-primary text-on-primary p-3 rounded-2xl hover:bg-subtle disabled:opacity-40 transition-all active:scale-95 flex-shrink-0"
+            className="bg-primary text-on-primary p-3 rounded-2xl hover:bg-primary/90 disabled:opacity-40 transition-all active:scale-95 flex-shrink-0"
           >
             <PaperPlaneRight size={18} weight="duotone" />
           </button>

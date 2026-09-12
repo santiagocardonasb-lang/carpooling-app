@@ -235,7 +235,7 @@ export default function Profile() {
             <button
               onClick={() => fileRef.current?.click()}
               disabled={avatarLoading}
-              className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center hover:bg-subtle transition-colors shadow-lg"
+              className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center hover:bg-primary/90 transition-colors shadow-lg"
             >
               {avatarLoading
                 ? <div className="w-4 h-4 border-2 border-line-strong border-t-line rounded-full animate-spin" />
@@ -327,7 +327,7 @@ export default function Profile() {
           <button
             onClick={saveInfo}
             disabled={saving}
-            className="w-full mt-3 bg-primary text-on-primary font-semibold py-3 rounded-xl hover:bg-subtle disabled:opacity-50 transition-colors text-sm"
+            className="w-full mt-3 bg-primary text-on-primary font-semibold py-3 rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-colors text-sm"
           >
             {saving ? 'Guardando...' : 'Guardar cambios'}
           </button>

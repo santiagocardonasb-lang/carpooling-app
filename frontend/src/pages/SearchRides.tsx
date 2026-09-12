@@ -6,6 +6,7 @@ import { useToast } from '../context/ToastContext';
 import RideCard from '../components/RideCard';
 import LocationInput from '../components/LocationInput';
 import DatePicker from '../components/DatePicker';
+import SegmentedControl from '../components/SegmentedControl';
 import { useAuth } from '../context/AuthContext';
 
 interface Ride {
@@ -116,7 +117,7 @@ export default function SearchRides() {
               <button
                 onClick={fetchRides}
                 disabled={loading || !canSearch}
-                className="w-full bg-primary text-on-primary font-semibold py-3 rounded-xl hover:bg-subtle disabled:opacity-40 transition-colors text-sm flex items-center justify-center gap-2"
+                className="w-full bg-primary text-on-primary font-bold py-3.5 rounded-xl hover:bg-primary/90 disabled:opacity-40 transition-colors text-sm flex items-center justify-center gap-2"
               >
                 <MagnifyingGlass size={15} weight="duotone" />
                 {loading ? 'Buscando...' : 'Buscar'}
@@ -124,42 +125,28 @@ export default function SearchRides() {
             </div>
           </div>
 
-          {/* Vehicle filter */}
-          <div className="flex gap-2">
-            {([
-              { key: 'all', label: 'Todos', icon: <SquaresFour size={13} weight="duotone" /> },
-              { key: 'car', label: 'Carro', icon: <Car size={13} weight="duotone" /> },
-              { key: 'moto', label: 'Moto', icon: <Motorcycle size={13} weight="duotone" /> },
-            ] as const).map(({ key, label, icon }) => (
-              <button
-                key={key}
-                onClick={() => setVehicleType(key)}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-medium transition-all border ${
-                  vehicleType === key ? 'bg-primary text-on-primary border-primary' : 'bg-transparent text-fg-faint border-line hover:border-line-strong'
-                }`}
-              >
-                {icon} {label}
-              </button>
-            ))}
-          </div>
+          {/* Modalidad de viaje */}
+          <SegmentedControl
+            ariaLabel="Tipo de vehículo"
+            value={vehicleType}
+            onChange={setVehicleType}
+            scroll
+            options={[
+              { value: 'all',  label: 'Todos', icon: <SquaresFour size={16} weight="fill" /> },
+              { value: 'car',  label: 'Carro', icon: <Car size={16} weight="fill" /> },
+              { value: 'moto', label: 'Moto',  icon: <Motorcycle size={16} weight="fill" /> },
+            ]}
+          />
 
-          {/* Orden — solo tiene sentido cuando ya hay resultados */}
+          {/* Ordenar solo tiene sentido cuando hay más de un resultado */}
           {searched && rides.length > 1 && (
-            <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
-              {SORTS.map(({ key, label }) => (
-                <button
-                  key={key}
-                  onClick={() => setSort(key)}
-                  className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all border ${
-                    sort === key
-                      ? 'bg-primary text-on-primary border-primary'
-                      : 'bg-transparent text-fg-faint border-line hover:border-line-strong'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
+            <SegmentedControl
+              ariaLabel="Ordenar resultados"
+              value={sort}
+              onChange={setSort}
+              scroll
+              options={SORTS.map(({ key, label }) => ({ value: key, label }))}
+            />
           )}
         </div>
 
@@ -194,7 +181,7 @@ export default function SearchRides() {
                 </button>
                 <button
                   onClick={() => navigate('/create-ride')}
-                  className="block w-full bg-primary text-on-primary py-3 rounded-xl text-sm font-medium hover:bg-subtle transition-colors"
+                  className="block w-full bg-primary text-on-primary py-3 rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors"
                 >
                   ¿Tienes auto? Publica tu viaje →
                 </button>

@@ -156,7 +156,7 @@ export default function VehicleProfile() {
         <button
           onClick={save}
           disabled={saving}
-          className="w-full bg-primary text-on-primary font-semibold py-3 rounded-xl hover:bg-subtle disabled:opacity-50 transition-colors text-sm"
+          className="w-full bg-primary text-on-primary font-semibold py-3 rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-colors text-sm"
         >
           {saving ? 'Guardando...' : 'Guardar vehículo'}
         </button>

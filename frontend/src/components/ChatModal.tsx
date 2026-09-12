@@ -111,7 +111,7 @@ export default function ChatModal({ bookingId, onClose }: Props) {
             <button
               onClick={send}
               disabled={!input.trim() || sending}
-              className="bg-primary text-on-primary p-2 rounded-xl hover:bg-subtle disabled:opacity-40 transition-colors"
+              className="bg-primary text-on-primary p-2 rounded-xl hover:bg-primary/90 disabled:opacity-40 transition-colors"
             >
               <PaperPlaneRight size={16} weight="duotone" />
             </button>

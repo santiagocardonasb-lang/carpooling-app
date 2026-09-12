@@ -92,7 +92,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
                 className={`py-3.5 rounded-2xl text-sm font-bold ${
                   opts.danger
                     ? 'bg-notify text-fg hover:bg-notify'
-                    : 'bg-primary text-on-primary hover:bg-subtle'
+                    : 'bg-primary text-on-primary hover:bg-primary/90'
                 }`}
               >
                 {opts.confirmText || 'Confirmar'}

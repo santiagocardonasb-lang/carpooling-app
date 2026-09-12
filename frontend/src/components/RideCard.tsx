@@ -226,7 +226,7 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
               {!requesting ? (
                 <button
                   onClick={() => setRequesting(true)}
-                  className="w-full bg-primary text-on-primary font-semibold py-3 rounded-xl hover:bg-subtle transition-colors text-sm"
+                  className="w-full bg-primary text-on-primary font-semibold py-3 rounded-xl hover:bg-primary/90 transition-colors text-sm"
                 >
                   Reservar días
                 </button>
@@ -291,7 +291,7 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
                     <button
                       onClick={handleRequest}
                       disabled={loading || !bookingDate || bookingDays.length === 0}
-                      className="flex-1 bg-primary text-on-primary font-semibold py-2.5 rounded-xl text-sm hover:bg-subtle disabled:opacity-40 transition-colors"
+                      className="flex-1 bg-primary text-on-primary font-semibold py-2.5 rounded-xl text-sm hover:bg-primary/90 disabled:opacity-40 transition-colors"
                     >
                       {loading ? 'Enviando...' : 'Confirmar'}
                     </button>
@@ -307,7 +307,7 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
               {!requesting ? (
                 <button
                   onClick={() => setRequesting(true)}
-                  className="w-full bg-primary text-on-primary font-semibold py-3 rounded-xl hover:bg-subtle transition-colors text-sm"
+                  className="w-full bg-primary text-on-primary font-semibold py-3 rounded-xl hover:bg-primary/90 transition-colors text-sm"
                 >
                   Solicitar viaje
                 </button>
@@ -329,7 +329,7 @@ export default function RideCard({ ride, onBook, showActions = false, onCancel }
                     <button
                       onClick={handleRequest}
                       disabled={loading}
-                      className="flex-1 bg-primary text-on-primary font-semibold py-2.5 rounded-xl text-sm hover:bg-subtle disabled:opacity-50 transition-colors"
+                      className="flex-1 bg-primary text-on-primary font-semibold py-2.5 rounded-xl text-sm hover:bg-primary/90 disabled:opacity-50 transition-colors"
                     >
                       {loading ? 'Enviando...' : 'Confirmar'}
                     </button>

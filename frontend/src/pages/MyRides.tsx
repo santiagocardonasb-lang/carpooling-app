@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
-import { ShareNetwork, ChatCircle, CaretRight } from '@phosphor-icons/react';
+import { ShareNetwork, ChatCircle, CaretRight, Star, CheckCircle, HandWaving, Car, Play } from '@phosphor-icons/react';
 import api from '../api';
 import { useConfirm } from '../context/ConfirmContext';
 import RideCard from '../components/RideCard';
+import StatusPill from '../components/StatusPill';
+import SegmentedControl from '../components/SegmentedControl';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { shareTrip } from '../utils/share';
@@ -122,7 +124,7 @@ export default function MyRides() {
   const notifyReady = async (bookingId: number) => {
     try {
       await api.patch(`/bookings/${bookingId}/passenger-ready`);
-      showToast('✅ Conductor notificado');
+      showToast('Conductor notificado');
       fetchData();
     } catch (err: unknown) {
       showToast((err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'No se pudo enviar la notificación', 'error');
@@ -186,7 +188,7 @@ export default function MyRides() {
         <div className="max-w-xl mx-auto mt-4">
           <h1 className="text-2xl font-black text-fg mb-6">Mis reservas</h1>
           {loading ? (
-            <div className="text-center py-16 text-fg-faint text-sm">Cargando...</div>
+            <div className="space-y-3">{[0,1,2].map(i => <div key={i} className="skeleton h-32 rounded-2xl" />)}</div>
           ) : activeBookings.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-fg-faint font-semibold">No tienes reservas</p>
@@ -226,19 +228,7 @@ export default function MyRides() {
                         <p className="text-fg-muted text-xs mt-0.5">Tu hora propuesta: {b.proposed_time}</p>
                       )}
                     </div>
-                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full flex-shrink-0 ${
-                      b.status === 'in_progress' ? 'bg-warn-soft text-star animate-pulse' :
-                      b.status === 'confirmed'   ? 'bg-live-soft text-live' :
-                      b.status === 'completed'   ? 'bg-info-soft text-info' :
-                      b.status === 'pending'     ? 'bg-warn-soft text-star' :
-                      'bg-subtle text-fg-faint'
-                    }`}>
-                      {b.status === 'in_progress' ? '🚗 En curso' :
-                       b.status === 'confirmed'   ? 'Confirmado' :
-                       b.status === 'completed'   ? 'Completado' :
-                       b.status === 'pending'     ? 'Pendiente'  :
-                       b.status === 'rejected'    ? 'Rechazado'  : 'Cancelado'}
-                    </span>
+                    <span className="flex-shrink-0"><StatusPill status={b.status} /></span>
                   </div>
 
                   {/* Acciones */}
@@ -268,7 +258,7 @@ export default function MyRides() {
                           onClick={() => navigate(`/rate/${b.id}`)}
                           className="flex items-center gap-1 text-xs text-star hover:text-star font-semibold transition-colors"
                         >
-                          ⭐ Calificar
+                          <Star size={13} weight="fill" /> Calificar
                         </button>
                       )}
                       {['pending', 'confirmed'].includes(b.status) && (
@@ -283,14 +273,14 @@ export default function MyRides() {
                   {b.status === 'confirmed' && (
                     b.passenger_ready ? (
                       <p className="mt-3 text-center text-xs text-live py-2">
-                        ✅ Ya notificaste al conductor que estás listo
+                        <><CheckCircle size={14} weight="fill" /> Ya notificaste al conductor que estás listo</>
                       </p>
                     ) : (
                       <button
                         onClick={() => notifyReady(b.id)}
                         className="mt-3 w-full flex items-center justify-center gap-2 bg-subtle hover:bg-line-strong border border-line-strong px-4 py-2.5 rounded-xl transition-colors"
                       >
-                        <span className="text-fg text-sm">✋ Listo para salir</span>
+                        <span className="text-fg text-sm flex items-center gap-1.5"><HandWaving size={15} weight="fill" /> Listo para salir</span>
                       </button>
                     )
                   )}
@@ -301,7 +291,7 @@ export default function MyRides() {
                       onClick={() => navigate(`/trip/${b.id}`)}
                       className="mt-3 w-full flex items-center justify-between gap-2 bg-warn-soft hover:bg-warn-soft border border-warn/30 px-4 py-3 rounded-xl transition-colors"
                     >
-                      <span className="text-star text-sm font-semibold">🚗 Ver viaje en curso</span>
+                      <span className="text-live text-sm font-bold flex items-center gap-1.5"><Car size={15} weight="fill" /> Ver viaje en curso</span>
                       <CaretRight size={16} weight="bold" className="text-star" />
                     </button>
                   )}
@@ -355,39 +345,26 @@ export default function MyRides() {
 
         <div className="flex items-center justify-between mb-5">
           <h1 className="text-2xl font-black text-fg">Mis viajes</h1>
-          <Link to="/create-ride" className="bg-primary text-on-primary text-xs font-semibold px-4 py-2 rounded-full hover:bg-subtle transition-colors">
+          <Link to="/create-ride" className="bg-primary text-on-primary text-xs font-semibold px-4 py-2 rounded-full hover:bg-primary/90 transition-colors">
             + Publicar
           </Link>
         </div>
 
-        <div className="flex gap-1 bg-surface p-1 rounded-xl mb-5">
-          <button
-            onClick={() => setTab('rides')}
-            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
-              tab === 'rides' ? 'bg-primary text-on-primary' : 'text-fg-faint hover:text-fg'
-            }`}
-          >
-            Mis viajes
-          </button>
-          <button
-            onClick={() => setTab('requests')}
-            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${
-              tab === 'requests' ? 'bg-primary text-on-primary' : 'text-fg-faint hover:text-fg'
-            }`}
-          >
-            Solicitudes
-            {pendingCount > 0 && (
-              <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center ${
-                tab === 'requests' ? 'bg-canvas text-fg' : 'bg-warn text-on-primary'
-              }`}>
-                {pendingCount}
-              </span>
-            )}
-          </button>
+        <div className="mb-5">
+          <SegmentedControl
+            ariaLabel="Vista de conductor"
+            variant="group"
+            value={tab}
+            onChange={setTab}
+            options={[
+              { value: 'rides',    label: 'Mis viajes' },
+              { value: 'requests', label: 'Solicitudes', badge: pendingCount },
+            ]}
+          />
         </div>
 
         {loading ? (
-          <div className="text-center py-16 text-fg-faint text-sm">Cargando...</div>
+          <div className="space-y-3">{[0,1,2].map(i => <div key={i} className="skeleton h-32 rounded-2xl" />)}</div>
         ) : tab === 'rides' ? (
           activeRides.length === 0 ? (
             <div className="text-center py-16">
@@ -472,7 +449,7 @@ export default function MyRides() {
                           </button>
                           <button
                             onClick={() => handleAccept(req.id)}
-                            className="px-3 py-1.5 rounded-lg bg-primary text-on-primary text-xs font-semibold hover:bg-subtle transition-colors"
+                            className="px-3 py-1.5 rounded-lg bg-primary text-on-primary text-xs font-semibold hover:bg-primary/90 transition-colors"
                           >
                             Confirmar
                           </button>
@@ -490,7 +467,7 @@ export default function MyRides() {
                           onClick={() => navigate(`/rate/${req.id}`)}
                           className="flex items-center gap-1 text-xs text-star hover:text-star font-semibold flex-shrink-0"
                         >
-                          ⭐ Calificar
+                          <Star size={13} weight="fill" /> Calificar
                         </button>
                       ) : null}
                     </div>
@@ -506,7 +483,7 @@ export default function MyRides() {
                       }`}
                     >
                       <span className={`text-sm font-semibold ${req.status === 'in_progress' ? 'text-star' : 'text-fg'}`}>
-                        {req.status === 'in_progress' ? '🚗 Continuar viaje' : '▶ Iniciar viaje'}
+                        <span className="flex items-center gap-1.5">{req.status === 'in_progress' ? <><Car size={15} weight="fill" /> Continuar viaje</> : <><Play size={15} weight="fill" /> Iniciar viaje</>}</span>
                       </span>
                       <CaretRight size={16} weight="bold" className={req.status === 'in_progress' ? 'text-star' : 'text-fg-muted'} />
                     </button>

@@ -144,7 +144,7 @@ export default function RateTrip() {
         <button
           onClick={submit}
           disabled={rating < 1 || submitting}
-          className="w-full bg-primary text-on-primary font-bold py-4 rounded-xl hover:bg-subtle disabled:opacity-40 transition-colors"
+          className="w-full bg-primary text-on-primary font-bold py-4 rounded-xl hover:bg-primary/90 disabled:opacity-40 transition-colors"
         >
           {submitting ? 'Enviando...' : 'Enviar calificación'}
         </button>

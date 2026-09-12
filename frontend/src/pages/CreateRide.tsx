@@ -116,7 +116,7 @@ export default function CreateRide() {
           <Link
             to="/vehicle"
             state={{ from: '/create-ride' }}
-            className="inline-block bg-primary text-on-primary font-semibold px-6 py-3 rounded-xl hover:bg-subtle transition-colors text-sm"
+            className="inline-block bg-primary text-on-primary font-semibold px-6 py-3 rounded-xl hover:bg-primary/90 transition-colors text-sm"
           >
             Agregar información del vehículo →
           </Link>
@@ -302,7 +302,7 @@ export default function CreateRide() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary text-on-primary font-semibold py-4 rounded-xl hover:bg-subtle disabled:opacity-50 transition-colors text-sm"
+            className="w-full bg-primary text-on-primary font-semibold py-4 rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-colors text-sm"
           >
             {loading ? 'Publicando...' : 'Publicar viaje'}
           </button>
