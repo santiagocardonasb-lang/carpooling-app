@@ -98,7 +98,7 @@ export default function MessagesPage() {
                     : <span className="text-fg font-bold">{c.other.name[0]?.toUpperCase()}</span>
                   }
                   {c.unread > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-notify rounded-full flex items-center justify-center text-fg text-[9px] font-bold px-1 ring-2 ring-line">
+                    <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-notify rounded-full flex items-center justify-center text-white text-[9px] font-bold px-1 ring-2 ring-line">
                       {c.unread > 9 ? '9+' : c.unread}
                     </span>
                   )}

@@ -100,7 +100,7 @@ export default function Navbar() {
                 </div>
                 {unreadTotal > 0 && (
                   <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-notify rounded-full flex items-center justify-center px-1 pointer-events-none z-10">
-                    <span className="text-fg text-[9px] font-bold leading-none">{unreadTotal > 9 ? '9+' : unreadTotal}</span>
+                    <span className="text-white text-[9px] font-bold leading-none">{unreadTotal > 9 ? '9+' : unreadTotal}</span>
                   </span>
                 )}
               </button>
@@ -132,7 +132,7 @@ export default function Navbar() {
                     <ChatCircle size={15} weight="duotone" className="text-fg-muted flex-shrink-0" />
                     <span className="flex-1">Mensajes</span>
                     {unreadMsgs > 0 && (
-                      <span className="bg-notify text-fg text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
+                      <span className="bg-notify text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
                         {unreadMsgs > 9 ? '9+' : unreadMsgs}
                       </span>
                     )}
@@ -145,7 +145,7 @@ export default function Navbar() {
                     <Bell size={15} weight="duotone" className="text-fg-muted flex-shrink-0" />
                     <span className="flex-1">Notificaciones</span>
                     {unreadNotifs > 0 && (
-                      <span className="bg-notify text-fg text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
+                      <span className="bg-notify text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
                         {unreadNotifs > 9 ? '9+' : unreadNotifs}
                       </span>
                     )}

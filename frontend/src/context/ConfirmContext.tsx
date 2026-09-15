@@ -53,7 +53,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
       {children}
       {opts && createPortal(
         <div
-          className="fixed inset-0 z-[500] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-md p-4 animate-fade"
+          className="fixed inset-0 z-[500] flex items-end sm:items-center justify-center scrim p-4 animate-fade"
           onClick={() => close(false)}
           style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom, 0px))' }}
         >
@@ -61,7 +61,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
             role="alertdialog"
             aria-modal="true"
             onClick={(e) => e.stopPropagation()}
-            className="glass w-full sm:max-w-sm rounded-3xl overflow-hidden animate-pop"
+            className="bg-surface border border-line shadow-pop w-full sm:max-w-sm rounded-3xl overflow-hidden animate-pop"
           >
             <div className="px-6 pt-6 pb-5 text-center">
               <div className={`w-12 h-12 rounded-2xl mx-auto mb-4 flex items-center justify-center ${
@@ -91,7 +91,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
                 onClick={() => close(true)}
                 className={`py-3.5 rounded-2xl text-sm font-bold ${
                   opts.danger
-                    ? 'bg-notify text-fg hover:bg-notify'
+                    ? 'bg-notify text-white hover:bg-notify/90'
                     : 'bg-primary text-on-primary hover:bg-primary/90'
                 }`}
               >

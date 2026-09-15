@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useRef } from 'react';
+import { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
 import { CheckCircle, XCircle, X } from '@phosphor-icons/react';
 
 interface Toast {
@@ -14,100 +14,103 @@ interface ToastContextValue {
 
 const ToastContext = createContext<ToastContextValue | null>(null);
 
+/** Cuánto se queda el aviso en pantalla. La barra se vacía en el mismo tiempo. */
+const DURATION = 3200;
+/** Espera antes de desmontar: tiene que cubrir la animación de salida más larga. */
+const EXIT = 300;
+
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toast, setToast] = useState<Toast | null>(null);
   const [visible, setVisible] = useState(false);
   const counter = useRef(0);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hideTimer = useRef<ReturnType<typeof setTimeout>>();
+  const unmountTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  const dismiss = useCallback(() => {
+    clearTimeout(hideTimer.current);
+    clearTimeout(unmountTimer.current);
+    setVisible(false);
+    unmountTimer.current = setTimeout(() => setToast(null), EXIT);
+  }, []);
 
   const showToast = useCallback((
     message: string,
     type: 'success' | 'error' = 'success',
     detail?: string,
   ) => {
-    // clear any pending auto-dismiss
-    if (timerRef.current) clearTimeout(timerRef.current);
+    // También se cancela el desmontaje pendiente: si llegaba un aviso mientras
+    // el anterior salía, ese temporizador lo borraba apenas aparecía.
+    clearTimeout(hideTimer.current);
+    clearTimeout(unmountTimer.current);
 
-    const id = ++counter.current;
-    setToast({ id, type, message, detail });
+    setToast({ id: ++counter.current, type, message, detail });
     setVisible(true);
+    hideTimer.current = setTimeout(dismiss, DURATION);
+  }, [dismiss]);
 
-    timerRef.current = setTimeout(() => {
-      setVisible(false);
-      setTimeout(() => setToast(null), 300);
-    }, 3200);
+  useEffect(() => () => {
+    clearTimeout(hideTimer.current);
+    clearTimeout(unmountTimer.current);
   }, []);
 
-  const dismiss = () => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    setVisible(false);
-    setTimeout(() => setToast(null), 300);
-  };
+  const ok = toast?.type === 'success';
 
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
 
-      {/* ── full-screen dimmed backdrop ── */}
+      {/* Entra y sale igual que la confirmación: el fondo se oscurece y se
+          desenfoca, y la tarjeta aparece con un pequeño rebote. Antes el fondo
+          solo se oscurecía, y la tarjeta montaba ya visible, así que la entrada
+          no tenía animación; solo la salida. */}
       {toast && (
         <div
-          className={`fixed inset-0 z-[9999] flex items-center justify-center px-6
-            transition-all duration-300
-            ${visible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-          style={{ background: 'rgba(0,0,0,0.65)' }}
+          className={`fixed inset-0 z-[9999] flex items-center justify-center px-6 scrim
+            ${visible ? 'animate-fade' : 'animate-fade-out pointer-events-none'}`}
           onClick={dismiss}
         >
-          {/* ── popup card ── */}
+          {/* La clave por id hace que un aviso que reemplaza a otro vuelva a
+              entrar y que su barra arranque llena. */}
           <div
-            className={`relative bg-primary rounded-3xl px-8 py-8 w-full max-w-xs flex flex-col items-center gap-4
-              shadow-pop transition-all duration-300
-              ${visible ? 'scale-100 translate-y-0' : 'scale-90 translate-y-4'}`}
+            key={toast.id}
+            className={`relative bg-surface border border-line rounded-3xl px-8 py-8 w-full max-w-xs
+              flex flex-col items-center gap-4 shadow-pop
+              ${visible ? 'animate-pop' : 'animate-pop-out'}`}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* close button */}
             <button
               onClick={dismiss}
-              className="absolute top-4 right-4 text-fg-muted hover:text-fg-faint transition-colors"
+              aria-label="Cerrar"
+              className="absolute top-4 right-4 text-fg-faint hover:text-fg transition-colors"
             >
               <X size={18} weight="bold" />
             </button>
 
-            {/* icon */}
             <div className={`w-20 h-20 rounded-full flex items-center justify-center
-              ${toast.type === 'success' ? 'bg-live-soft' : 'bg-danger-soft'}`}>
-              {toast.type === 'success'
+              ${ok ? 'bg-live-soft' : 'bg-danger-soft'}`}>
+              {ok
                 ? <CheckCircle size={44} weight="duotone" className="text-live" />
-                : <XCircle    size={44} weight="duotone" className="text-danger"   />
-              }
+                : <XCircle     size={44} weight="duotone" className="text-danger" />}
             </div>
 
-            {/* text */}
             <div className="text-center">
-              <p className="text-on-primary font-bold text-lg leading-tight">{toast.message}</p>
+              <p className="text-fg font-bold text-lg leading-tight">{toast.message}</p>
               {toast.detail && (
-                <p className="text-fg-faint text-sm mt-1">{toast.detail}</p>
+                <p className="text-fg-muted text-sm mt-1">{toast.detail}</p>
               )}
             </div>
 
-            {/* progress bar */}
+            {/* Se anima con transform y no con width: así no recalcula el
+                layout en cada cuadro. */}
             <div className="w-full h-1 bg-subtle rounded-full overflow-hidden">
               <div
-                className={`h-full rounded-full ${toast.type === 'success' ? 'bg-live' : 'bg-notify'}`}
-                style={{
-                  animation: visible ? 'toast-progress 3.2s linear forwards' : 'none',
-                }}
+                className={`h-full w-full rounded-full origin-left ${ok ? 'bg-live' : 'bg-danger'}`}
+                style={{ animation: `drain ${DURATION}ms linear forwards` }}
               />
             </div>
           </div>
         </div>
       )}
-
-      <style>{`
-        @keyframes toast-progress {
-          from { width: 100%; }
-          to   { width: 0%; }
-        }
-      `}</style>
     </ToastContext.Provider>
   );
 }

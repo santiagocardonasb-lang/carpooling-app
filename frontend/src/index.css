@@ -144,6 +144,15 @@ h1 { letter-spacing: -0.045em; }
   -webkit-backdrop-filter: blur(20px) saturate(180%);
 }
 
+/* Fondo de las ventanas que interrumpen: oscurece y desenfoca lo que hay
+   detrás para que la atención vaya a la tarjeta. La confirmación y el aviso
+   usan esta misma clase, así que interrumpir se ve igual en los dos casos. */
+.scrim {
+  background-color: rgb(0 0 0 / 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
 /* ═══════════════════════════════════════════════════════════════
    MOVIMIENTO
    ═══════════════════════════════════════════════════════════════ */
@@ -169,6 +178,21 @@ h1 { letter-spacing: -0.045em; }
   from { background-position: -200% 0; }
   to   { background-position: 200% 0; }
 }
+/* Salidas: más cortas que las entradas, porque lo que se va ya no necesita
+   que se lo mire. `both` deja el elemento invisible hasta que se desmonta. */
+@keyframes fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes pop-out {
+  from { opacity: 1; transform: none; }
+  to   { opacity: 0; transform: scale(.94) translate3d(0, 8px, 0); }
+}
+/* Barra que se vacía mientras el aviso sigue en pantalla */
+@keyframes drain {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
+}
 /* Halo que se expande desde el marcador del carro en el mapa */
 @keyframes radar {
   0%   { transform: scale(0.65); opacity: 0.8; }
@@ -181,6 +205,8 @@ h1 { letter-spacing: -0.045em; }
 .animate-pop   { animation: pop .38s var(--ease-spring) both; }
 .animate-sheet { animation: sheet-up .42s var(--ease-out) both; }
 .animate-radar { animation: radar 2.4s cubic-bezier(.215,.61,.355,1) infinite; }
+.animate-fade-out { animation: fade-out .28s var(--ease-in-out) both; }
+.animate-pop-out  { animation: pop-out .24s var(--ease-in-out) both; }
 
 /* Escalonado: cada hijo entra un poco después que el anterior. Es el
    detalle que hace que una lista se sienta viva y no aparezca de golpe. */

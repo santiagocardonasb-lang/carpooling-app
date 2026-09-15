@@ -7,7 +7,7 @@ function Badge({ count }: { count: number }) {
   if (count <= 0) return null;
   return (
     <span className="absolute -top-1 -right-1.5 min-w-[15px] h-[15px] bg-notify rounded-full flex items-center justify-center px-0.5 pointer-events-none">
-      <span className="text-fg text-[8px] font-bold leading-none">{count > 9 ? '9+' : count}</span>
+      <span className="text-white text-[8px] font-bold leading-none">{count > 9 ? '9+' : count}</span>
     </span>
   );
 }
