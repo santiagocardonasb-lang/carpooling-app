@@ -6,6 +6,7 @@ import {
 import api from '../api';
 import { parseDate } from '../utils/date';
 import { apiError } from '../utils/apiError';
+import { HistorySkeleton } from '../components/Skeleton';
 
 interface HistoryItem {
   id: number;
@@ -81,9 +82,7 @@ export default function History() {
         <p className="text-fg-faint text-sm mb-6">Todos tus viajes cerrados.</p>
 
         {loading ? (
-          <div className="space-y-2">
-            {[0, 1, 2].map(i => <div key={i} className="skeleton h-20 rounded-2xl" />)}
-          </div>
+          <HistorySkeleton />
         ) : error ? (
           <div className="bg-surface rounded-2xl p-5 text-center">
             <p className="text-fg-muted text-sm">{error}</p>

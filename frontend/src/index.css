@@ -53,9 +53,10 @@
   /* Base de las sombras: casi negro en claro, negro puro en oscuro */
   --shadow:       9 9 11;
 
-  /* Cuánto tapa la barra inferior: su alto más lo que sobresale el botón
-     central. Es la única medida que las páginas necesitan conocer. */
-  --nav-clear:    5rem;
+  /* Cuánto tapa la barra inferior: sus 58px más los 11 que sobresale el
+     botón central, con un poco de aire. Es la única medida que las páginas
+     necesitan conocer. */
+  --nav-clear:    4.5rem;
 
   /* ── Curvas de animación ──
      La de resorte se pasa un poco del destino y vuelve: es lo que hace
@@ -142,8 +143,11 @@ h1 { letter-spacing: -0.045em; }
    también lo usan.
    ═══════════════════════════════════════════════════════════════ */
 
+/* Barras fijas, arriba y abajo. Dejan ver el contenido que pasa por debajo,
+   desenfocado para que los rótulos se sigan leyendo encima: con 92% de
+   opacidad el contenido no se alcanzaba a ver. */
 .glass-bar {
-  background-color: rgb(var(--surface) / 0.92);
+  background-color: rgb(var(--surface) / 0.72);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
 }
@@ -272,17 +276,25 @@ button:not(:disabled):active,
   border-radius: 6px;
 }
 
-/* Carga: un brillo que recorre el bloque. Es el único indicador de carga
-   de la app; antes había tres distintos (spinner, texto y cambio de
-   etiqueta) según la pantalla. */
+/* Carga: un brillo que recorre el bloque. Las piezas con forma están en
+   components/Skeleton.tsx.
+   Los tonos son el color del texto con poca opacidad y no grises fijos: así
+   se ven igual sobre el lienzo, sobre una tarjeta o dentro de una caja gris,
+   y en tema oscuro. Con `subtle` y `line`, en oscuro el brillo quedaba a
+   1.03:1 y no se notaba. */
 .skeleton {
   background: linear-gradient(90deg,
-    rgb(var(--subtle)) 25%,
-    rgb(var(--line)) 50%,
-    rgb(var(--subtle)) 75%);
+    rgb(var(--fg) / 0.06) 25%,
+    rgb(var(--fg) / 0.12) 50%,
+    rgb(var(--fg) / 0.06) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.4s linear infinite;
 }
+
+/* Entrada retrasada del esqueleto. Si los datos llegan antes de 150ms el
+   esqueleto no alcanza a verse, y no hay un parpadeo gris en cada carga
+   rápida. Si tardan, aparece suave. */
+.loading-in { animation: fade .3s var(--ease-out) .15s both; }
 
 /* Barra de scroll discreta */
 ::-webkit-scrollbar { width: 10px; height: 10px; }

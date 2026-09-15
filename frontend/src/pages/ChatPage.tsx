@@ -6,6 +6,7 @@ import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
 import { parseDate } from '../utils/date';
 import StatusPill from '../components/StatusPill';
+import { Bone, ChatSkeleton } from '../components/Skeleton';
 
 interface Message {
   id: number;
@@ -115,7 +116,7 @@ export default function ChatPage() {
         </button>
         <div className="flex-1 min-w-0">
           <h2 className="text-fg font-bold truncate">
-            {loading ? 'Cargando...' : otherName}
+            {loading ? <Bone className="h-4 w-32 rounded-full my-1" /> : otherName}
           </h2>
           <p className="text-fg-faint text-xs">
             {bookingStatus ? <StatusPill status={bookingStatus} bare /> : null}
@@ -142,9 +143,7 @@ export default function ChatPage() {
       {!fatalRef.current && (
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
         {loading ? (
-          <div className="flex justify-center py-16">
-            <div className="w-6 h-6 border-2 border-line-strong border-t-fg rounded-full animate-spin" />
-          </div>
+          <ChatSkeleton />
         ) : messages.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-12 h-12 rounded-2xl bg-surface flex items-center justify-center mx-auto mb-3">

@@ -7,6 +7,7 @@ import { useConfirm } from '../context/ConfirmContext';
 import { useAuth } from '../context/AuthContext';
 import { parseDate } from '../utils/date';
 import VerifyEmailBanner, { VerifiedBadge } from '../components/VerifyEmailBanner';
+import { ProfileSkeleton, RatingsSkeleton } from '../components/Skeleton';
 import { checkPassword, passwordError, PASSWORD_MIN } from '../utils/password';
 
 interface ProfileData {
@@ -60,6 +61,7 @@ export default function Profile() {
   const [fetchError, setFetchError] = useState('');
 
   const [ratingStats, setRatingStats] = useState<RatingStats | null>(null);
+  const [ratingsFailed, setRatingsFailed] = useState(false);
   const [ratings, setRatings] = useState<Rating[]>([]);
   const [showAllRatings, setShowAllRatings] = useState(false);
 
@@ -78,7 +80,9 @@ export default function Profile() {
           setRatingStats(statsRes.data);
           setRatings(listRes.data);
         }).catch(() => {
-          // No bloquear el perfil si fallan las calificaciones
+          // No bloquear el perfil si fallan las calificaciones, pero decirlo:
+          // si no, el esqueleto se quedaría brillando para siempre.
+          setRatingsFailed(true);
         });
       })
       .catch((err) => {
@@ -187,16 +191,23 @@ export default function Profile() {
   };
 
   if (!profile) {
+    if (!fetchError) {
+      return (
+        <div className="min-h-screen bg-canvas pt-20 px-6 pb-12">
+          <div className="max-w-sm mx-auto mt-4">
+            <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-fg-faint hover:text-fg transition-colors text-sm mb-6">
+              <ArrowLeft size={16} weight="bold" />
+              Volver
+            </button>
+            <ProfileSkeleton />
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen bg-canvas flex flex-col items-center justify-center pt-16 gap-3">
-        {fetchError ? (
-          <>
-            <p className="text-fg-muted text-sm">{fetchError}</p>
-            <button onClick={() => navigate('/login')} className="text-fg underline text-sm">Volver al inicio</button>
-          </>
-        ) : (
-          <div className="w-6 h-6 border-2 border-line-strong border-t-fg rounded-full animate-spin" />
-        )}
+        <p className="text-fg-muted text-sm">{fetchError}</p>
+        <button onClick={() => navigate('/login')} className="text-fg underline text-sm">Volver al inicio</button>
       </div>
     );
   }
@@ -338,9 +349,13 @@ export default function Profile() {
           <h3 className="text-fg-muted text-xs font-semibold uppercase tracking-wider mb-3">Calificaciones</h3>
 
           {ratingStats === null ? (
-            <div className="bg-surface rounded-2xl p-5 text-center">
-              <div className="w-5 h-5 border-2 border-line-strong border-t-fg rounded-full animate-spin mx-auto" />
-            </div>
+            ratingsFailed ? (
+              <div className="bg-surface rounded-2xl p-5 text-center">
+                <p className="text-fg-muted text-sm">No pudimos cargar las calificaciones.</p>
+              </div>
+            ) : (
+              <RatingsSkeleton />
+            )
           ) : ratingStats.count === 0 ? (
             <div className="bg-surface rounded-2xl p-5 text-center">
               <Star size={28} weight="duotone" className="text-fg-faint mx-auto mb-2" />

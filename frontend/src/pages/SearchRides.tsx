@@ -7,6 +7,7 @@ import RideCard from '../components/RideCard';
 import LocationInput from '../components/LocationInput';
 import DatePicker from '../components/DatePicker';
 import SegmentedControl from '../components/SegmentedControl';
+import { List, RideCardSkeleton } from '../components/Skeleton';
 import { useAuth } from '../context/AuthContext';
 
 interface Ride {
@@ -160,8 +161,11 @@ export default function SearchRides() {
           </div>
         )}
 
-        {/* Results */}
-        {searched && (
+        {/* Resultados. Mientras llega la respuesta va el esqueleto: antes se
+            mostraba "Sin viajes disponibles" aunque todavía no se sabía. */}
+        {searched && loading ? (
+          <List count={3}><RideCardSkeleton /></List>
+        ) : searched && (
           rides.length === 0 ? (
             <div className="text-center py-14 px-4">
               <div className="w-14 h-14 bg-surface rounded-2xl flex items-center justify-center mx-auto mb-4">

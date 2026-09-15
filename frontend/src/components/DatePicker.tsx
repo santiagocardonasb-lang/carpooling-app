@@ -25,7 +25,7 @@ export default function DatePicker({ value, onChange, min, error, placeholder = 
   const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, width: 0 });
 
   const CALENDAR_H  = 310; // altura aproximada del calendario
-  const BOTTOM_SAFE = 88;  // barra inferior con el botón central (80px) + margen
+  const BOTTOM_SAFE = 80;  // barra inferior con el botón central (72px) + margen
 
   const triggerRef  = useRef<HTMLButtonElement>(null);
   const wrapperRef  = useRef<HTMLDivElement>(null);

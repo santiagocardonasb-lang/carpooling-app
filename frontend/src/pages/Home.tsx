@@ -9,7 +9,7 @@ import { useAuth } from '../context/AuthContext';
 import LocationInput from '../components/LocationInput';
 import RouteLine from '../components/RouteLine';
 import StatusPill from '../components/StatusPill';
-import Wordmark from '../components/Wordmark';
+import { NextTripSkeleton } from '../components/Skeleton';
 import { formatClock } from '../utils/time';
 
 /** Lo mínimo que la portada necesita de un viaje próximo. */
@@ -95,11 +95,6 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="border-t border-line pt-8 pb-nav px-5">
-          <div className="max-w-md mx-auto flex justify-center">
-            <Wordmark size="lg" />
-          </div>
-        </div>
       </div>
     );
   }
@@ -188,7 +183,7 @@ export default function Home() {
           </div>
 
           {loadingNext ? (
-            <div className="skeleton h-28 rounded-2xl" />
+            <NextTripSkeleton />
           ) : next ? (
             <div className="bg-surface rounded-2xl border border-line shadow-card p-4 space-y-3.5">
               <div className="flex items-baseline gap-1.5">
@@ -229,11 +224,6 @@ export default function Home() {
         </section>
       </div>
 
-      <div className="border-t border-line pt-7 pb-nav px-5">
-        <div className="max-w-md mx-auto flex justify-center">
-          <Wordmark size="lg" />
-        </div>
-      </div>
     </div>
   );
 }

@@ -12,6 +12,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import BottomNav from './components/BottomNav';
+import { PageSkeleton } from './components/Skeleton';
 import { Car, CheckCircle, Clock } from '@phosphor-icons/react';
 import api from './api';
 
@@ -198,15 +199,10 @@ function TripStartedWatcher() {
 }
 
 
-// Mientras se descarga la pantalla. Discreto a propósito: en conexiones
-// normales aparece unos pocos cuadros y un spinner llamativo se sentiría
-// peor que un vacío breve.
+// Mientras se descarga la pantalla. El esqueleto entra con retraso, así que
+// en conexiones normales no llega a verse.
 function RouteFallback() {
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="w-6 h-6 border-2 border-line-strong border-t-fg rounded-full animate-spin" />
-    </div>
-  );
+  return <PageSkeleton />;
 }
 
 function AppRoutes() {

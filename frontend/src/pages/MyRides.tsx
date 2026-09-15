@@ -6,6 +6,7 @@ import { useConfirm } from '../context/ConfirmContext';
 import RideCard from '../components/RideCard';
 import StatusPill from '../components/StatusPill';
 import SegmentedControl from '../components/SegmentedControl';
+import { List, RideCardSkeleton, BookingCardSkeleton, RequestCardSkeleton } from '../components/Skeleton';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { shareTrip } from '../utils/share';
@@ -188,7 +189,7 @@ export default function MyRides() {
         <div className="max-w-xl mx-auto mt-4">
           <h1 className="text-2xl font-black text-fg mb-6">Mis reservas</h1>
           {loading ? (
-            <div className="space-y-3">{[0,1,2].map(i => <div key={i} className="skeleton h-32 rounded-2xl" />)}</div>
+            <List count={3}><BookingCardSkeleton /></List>
           ) : activeBookings.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-fg-faint font-semibold">No tienes reservas</p>
@@ -364,7 +365,9 @@ export default function MyRides() {
         </div>
 
         {loading ? (
-          <div className="space-y-3">{[0,1,2].map(i => <div key={i} className="skeleton h-32 rounded-2xl" />)}</div>
+          tab === 'rides'
+            ? <List count={3}><RideCardSkeleton /></List>
+            : <List count={3}><RequestCardSkeleton /></List>
         ) : tab === 'rides' ? (
           activeRides.length === 0 ? (
             <div className="text-center py-16">

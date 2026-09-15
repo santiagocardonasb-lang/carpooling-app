@@ -13,6 +13,7 @@ import Sheet from '../components/Sheet';
 import RouteLine from '../components/RouteLine';
 import DriverRow from '../components/DriverRow';
 import LiveDot from '../components/LiveDot';
+import { TripSkeleton } from '../components/Skeleton';
 
 interface TripData {
   booking: {
@@ -159,14 +160,7 @@ export default function TripInProgress() {
     }
   };
 
-  if (loading || !data) {
-    return (
-      <div className="min-h-screen bg-canvas p-5 pt-20 space-y-4 max-w-md mx-auto">
-        <div className="skeleton h-52 rounded-2xl" />
-        <div className="skeleton h-40 rounded-2xl" />
-      </div>
-    );
-  }
+  if (loading || !data) return <TripSkeleton />;
 
   const isDriver = data.my_role === 'driver';
   const otherParty = isDriver ? data.passenger : data.driver;

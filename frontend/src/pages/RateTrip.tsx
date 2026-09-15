@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Star, ArrowRight } from '@phosphor-icons/react';
 import api from '../api';
 import { useToast } from '../context/ToastContext';
+import { RateTripSkeleton } from '../components/Skeleton';
 
 interface TripData {
   booking: { id: number; status: string };
@@ -55,13 +56,7 @@ export default function RateTrip() {
     }
   };
 
-  if (loading || !data) {
-    return (
-      <div className="min-h-screen bg-canvas flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-line-strong border-t-fg rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (loading || !data) return <RateTripSkeleton />;
 
   const isDriver = data.my_role === 'driver';
   const otherParty = isDriver ? data.passenger : data.driver;

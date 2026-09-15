@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChatCircle, ArrowLeft, CaretRight } from '@phosphor-icons/react';
 import api from '../api';
 import { parseDate } from '../utils/date';
+import { List, ConversationSkeleton } from '../components/Skeleton';
 
 interface Conversation {
   booking_id: number;
@@ -70,7 +71,7 @@ export default function MessagesPage() {
         <p className="text-fg-faint text-sm mb-6">Tus conversaciones de viajes activos</p>
 
         {loading ? (
-          <div className="text-center py-16 text-fg-faint text-sm">Cargando...</div>
+          <List count={4} gap="space-y-2"><ConversationSkeleton /></List>
         ) : convs.length === 0 ? (
           <div className="text-center py-16">
             <ChatCircle size={36} weight="duotone" className="text-fg-faint mx-auto mb-3" />

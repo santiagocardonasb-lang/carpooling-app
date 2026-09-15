@@ -51,6 +51,11 @@ function Once({ play, animation, className = '', children }: {
  *
  * El movimiento al cambiar de pestaña está descrito en index.css, en la
  * sección de la barra inferior.
+ *
+ * Las pestañas inactivas van en `fg-muted` y no en `fg-faint`: la barra es
+ * translúcida, y cuando pasa algo oscuro por debajo el gris más claro quedaba
+ * a 2.6:1. Lo activo se sigue distinguiendo por el icono relleno y el
+ * indicador.
  */
 export default function BottomNav() {
   const { user } = useAuth();
@@ -114,7 +119,7 @@ export default function BottomNav() {
         to={to}
         aria-current={active ? 'page' : undefined}
         className={`relative flex-1 flex flex-col items-center justify-end pb-2 gap-1 active:opacity-70 ${
-          active ? 'text-fg' : 'text-fg-faint'
+          active ? 'text-fg' : 'text-fg-muted'
         }`}
       >
         <Once
@@ -167,9 +172,9 @@ export default function BottomNav() {
           className="group relative flex-1 flex flex-col items-center justify-end pb-2 gap-1"
         >
           <span
-            className={`nav-fab relative w-14 h-14 rounded-full bg-primary text-on-primary shadow-lift
+            className={`nav-fab relative w-12 h-12 rounded-full bg-primary text-on-primary shadow-lift
               flex items-center justify-center ring-primary/15 group-active:scale-[.97]
-              ${mainActive ? 'ring-4' : 'ring-0'}`}
+              ${mainActive ? 'ring-[3px]' : 'ring-0'}`}
           >
             <Once
               key={mainActive ? 'on' : 'off'}
@@ -178,7 +183,7 @@ export default function BottomNav() {
               className="absolute inset-0 rounded-full bg-primary opacity-0 pointer-events-none"
             />
             <Once key={main.to} play={mounted.current} animation="nav-swap" className="relative flex">
-              <MainIcon size={26} weight="bold" />
+              <MainIcon size={22} weight="bold" />
             </Once>
           </span>
           <Once
@@ -186,7 +191,7 @@ export default function BottomNav() {
             play={mounted.current}
             animation="animate-fade"
             className={`text-[9px] font-semibold tracking-tight leading-none transition-colors ${
-              mainActive ? 'text-fg' : 'text-fg-faint'
+              mainActive ? 'text-fg' : 'text-fg-muted'
             }`}
           >
             {main.label}

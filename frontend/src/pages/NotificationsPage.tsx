@@ -8,6 +8,7 @@ import api from '../api';
 import { useToast } from '../context/ToastContext';
 import { useConfirm } from '../context/ConfirmContext';
 import { useAuth } from '../context/AuthContext';
+import { List, NotificationSkeleton } from '../components/Skeleton';
 
 type NotifType =
   | 'ride_cancelled' | 'booking_accepted' | 'booking_rejected'
@@ -153,7 +154,7 @@ export default function NotificationsPage() {
         <h1 className="text-2xl font-black text-fg mb-6">Notificaciones</h1>
 
         {loading ? (
-          <div className="text-center py-16 text-fg-faint text-sm">Cargando...</div>
+          <List count={4} gap="space-y-2"><NotificationSkeleton /></List>
         ) : notifs.length === 0 ? (
           <div className="text-center py-16">
             <Bell size={36} weight="duotone" className="text-fg-faint mx-auto mb-3" />
