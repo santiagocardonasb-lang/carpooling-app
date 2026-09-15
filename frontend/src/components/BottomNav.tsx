@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { House, MagnifyingGlass, BookOpen, ChatCircle, Plus, Bell } from '@phosphor-icons/react';
 import type { Icon } from '@phosphor-icons/react';
@@ -11,6 +12,9 @@ interface Tab {
   badge?: number;
 }
 
+/** Posición del botón principal entre las cinco pestañas. */
+const MAIN = 2;
+
 function Badge({ count }: { count: number }) {
   if (count <= 0) return null;
   return (
@@ -21,6 +25,23 @@ function Badge({ count }: { count: number }) {
 }
 
 /**
+ * Anima lo que envuelve una sola vez, al montarse.
+ *
+ * La decisión se congela al montar, así que un re-render cualquiera (llega un
+ * mensaje, cambia un contador) no corta ni repite la animación. Para volver a
+ * animar se cambia la `key`, que monta una instancia nueva.
+ */
+function Once({ play, animation, className = '', children }: {
+  play: boolean;
+  animation: string;
+  className?: string;
+  children?: ReactNode;
+}) {
+  const [on] = useState(play);
+  return <span className={`${className} ${on ? animation : ''}`}>{children}</span>;
+}
+
+/**
  * Barra inferior del móvil.
  *
  * La acción principal de cada rol va en el centro, levantada sobre la barra:
@@ -28,8 +49,8 @@ function Badge({ count }: { count: number }) {
  * app le pide a cada uno, así que es lo único que va en negro. A los lados,
  * lo propio a la izquierda y lo que llega a la derecha.
  *
- * El botón sobresale por encima de la barra; `--nav-clear` en index.css
- * cuenta ese alto para que ninguna página termine debajo de él.
+ * El movimiento al cambiar de pestaña está descrito en index.css, en la
+ * sección de la barra inferior.
  */
 export default function BottomNav() {
   const { user } = useAuth();
@@ -53,6 +74,38 @@ export default function BottomNav() {
     { to: '/notifications', Icon: Bell,       label: 'Alertas',  badge: unreadNotifs },
   ];
 
+  // -1 cuando la pantalla no corresponde a ninguna pestaña: perfil, historial...
+  const activeIndex = [...left, main, ...right].findIndex((t) => isActive(t.to));
+
+  // Nada de la barra se anima en el primer render, solo en los cambios.
+  const mounted = useRef(false);
+  useEffect(() => { mounted.current = true; }, []);
+
+  // De dónde viene cada cambio de pestaña. Se deriva durante el render y se
+  // guarda en estado, no en un ref: así un re-render cualquiera (llega un
+  // mensaje, cambia un contador) no altera cómo se anima el cambio en curso.
+  // Con un ref, un segundo render antes del siguiente cuadro borraba
+  // `is-appearing` y el indicador volvía a deslizarse desde donde estaba.
+  const [move, setMove] = useState({
+    index: activeIndex,
+    // Sin pestaña activa, el indicador se desvanece donde estaba en vez de
+    // viajar a la primera posición.
+    shown: Math.max(activeIndex, 0),
+    // Si no había pestaña activa no hay de dónde deslizarse.
+    appearing: false,
+  });
+  if (activeIndex !== move.index) {
+    setMove({
+      index: activeIndex,
+      shown: activeIndex >= 0 ? activeIndex : move.shown,
+      appearing: move.index < 0,
+    });
+  }
+
+  const { shown, appearing } = move;
+  const mainActive = activeIndex === MAIN;
+  const pillVisible = activeIndex >= 0 && !mainActive;
+
   const tab = ({ to, Icon, label, badge = 0 }: Tab) => {
     const active = isActive(to);
     return (
@@ -60,21 +113,25 @@ export default function BottomNav() {
         key={to}
         to={to}
         aria-current={active ? 'page' : undefined}
-        className={`flex-1 flex flex-col items-center justify-end pb-2 gap-1 active:opacity-70 ${
+        className={`relative flex-1 flex flex-col items-center justify-end pb-2 gap-1 active:opacity-70 ${
           active ? 'text-fg' : 'text-fg-faint'
         }`}
       >
-        <span className="relative">
+        <Once
+          key={active ? 'on' : 'off'}
+          play={active && mounted.current}
+          animation="nav-pop"
+          className="relative flex"
+        >
           <Icon size={22} weight={active ? 'fill' : 'regular'} />
           <Badge count={badge} />
-        </span>
+        </Once>
         <span className="text-[9px] font-medium tracking-tight leading-none">{label}</span>
       </Link>
     );
   };
 
   const { Icon: MainIcon } = main;
-  const mainActive = isActive(main.to);
 
   return (
     <nav
@@ -83,27 +140,57 @@ export default function BottomNav() {
     >
       {/* `items-end` apoya cada pestaña en el borde inferior; la del centro es
           más alta que la barra y por eso asoma por arriba. */}
-      <div className="flex items-end h-[58px]">
+      <div className="relative flex items-end h-[58px]">
+
+        {/* Indicador: ocupa una de las cinco columnas y se traslada entre
+            ellas. Va primero para quedar debajo de las pestañas, que son
+            `relative`; al pasar por el centro se esconde bajo el botón. */}
+        <span
+          aria-hidden
+          className={`nav-track ${appearing ? 'is-appearing' : ''}
+            absolute inset-y-0 left-0 w-1/5 pointer-events-none`}
+          style={{ transform: `translateX(${shown * 100}%)`, opacity: pillVisible ? 1 : 0 }}
+        >
+          <Once
+            key={shown}
+            play={mounted.current && !appearing}
+            animation="nav-stretch"
+            className="absolute left-1/2 top-[10px] -ml-6 w-12 h-8 rounded-full bg-fg/[0.08]"
+          />
+        </span>
+
         {left.map(tab)}
 
         <Link
           to={main.to}
           aria-current={mainActive ? 'page' : undefined}
-          className="group flex-1 flex flex-col items-center justify-end pb-2 gap-1"
+          className="group relative flex-1 flex flex-col items-center justify-end pb-2 gap-1"
         >
           <span
-            className={`w-14 h-14 rounded-full bg-primary text-on-primary shadow-lift
-              flex items-center justify-center
-              transition-transform duration-150 group-active:scale-[.97]
-              ${mainActive ? 'ring-4 ring-primary/15' : ''}`}
+            className={`nav-fab relative w-14 h-14 rounded-full bg-primary text-on-primary shadow-lift
+              flex items-center justify-center ring-primary/15 group-active:scale-[.97]
+              ${mainActive ? 'ring-4' : 'ring-0'}`}
           >
-            <MainIcon size={26} weight="bold" />
+            <Once
+              key={mainActive ? 'on' : 'off'}
+              play={mainActive && mounted.current}
+              animation="nav-ripple"
+              className="absolute inset-0 rounded-full bg-primary opacity-0 pointer-events-none"
+            />
+            <Once key={main.to} play={mounted.current} animation="nav-swap" className="relative flex">
+              <MainIcon size={26} weight="bold" />
+            </Once>
           </span>
-          <span className={`text-[9px] font-semibold tracking-tight leading-none ${
-            mainActive ? 'text-fg' : 'text-fg-faint'
-          }`}>
+          <Once
+            key={main.to}
+            play={mounted.current}
+            animation="animate-fade"
+            className={`text-[9px] font-semibold tracking-tight leading-none transition-colors ${
+              mainActive ? 'text-fg' : 'text-fg-faint'
+            }`}
+          >
             {main.label}
-          </span>
+          </Once>
         </Link>
 
         {right.map(tab)}

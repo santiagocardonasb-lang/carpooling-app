@@ -318,6 +318,57 @@ button:not(:disabled):active,
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   BARRA INFERIOR
+
+   Cambiar de pestaña es un solo gesto con tres partes: el indicador se
+   desliza con resorte hasta la pestaña nueva y se estira en el camino, el
+   icono que se activa da un pequeño salto, y si la nueva es la principal,
+   el indicador se hunde bajo el botón central y este responde con un halo.
+   Nada dura más de medio segundo: la barra se toca muchas veces al día.
+
+   Las animaciones de un solo disparo no usan `both`: si se quedaran
+   congeladas en el último cuadro pisarían la compresión al presionar.
+   ═══════════════════════════════════════════════════════════════ */
+
+.nav-track {
+  transition: transform .5s var(--ease-spring), opacity .22s var(--ease-out);
+}
+/* Si no había pestaña activa no hay de dónde deslizarse: aparece en su sitio */
+.nav-track.is-appearing { transition: opacity .22s var(--ease-out); }
+
+@keyframes nav-stretch {
+  0%   { transform: scaleX(1); }
+  30%  { transform: scaleX(1.5); }
+  100% { transform: scaleX(1); }
+}
+.nav-stretch { animation: nav-stretch .5s var(--ease-out); }
+
+@keyframes nav-pop {
+  0%   { transform: scale(.7); }
+  50%  { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+.nav-pop { animation: nav-pop .4s var(--ease-out); }
+
+.nav-fab {
+  transition: box-shadow .3s var(--ease-out), transform .18s var(--ease-spring);
+}
+
+/* Onda que sale del botón central cuando su pantalla se abre */
+@keyframes nav-ripple {
+  from { transform: scale(1);   opacity: .28; }
+  to   { transform: scale(1.7); opacity: 0; }
+}
+.nav-ripple { animation: nav-ripple .65s var(--ease-out); }
+
+/* El icono central gira al cambiar de rol: publicar se vuelve buscar */
+@keyframes nav-swap {
+  from { transform: rotate(-90deg) scale(.4); opacity: 0; }
+  to   { transform: none; opacity: 1; }
+}
+.nav-swap { animation: nav-swap .45s var(--ease-spring); }
+
+/* ═══════════════════════════════════════════════════════════════
    PANTALLA DE ENTRADA
    ═══════════════════════════════════════════════════════════════ */
 
