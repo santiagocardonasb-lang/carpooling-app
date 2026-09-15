@@ -11,7 +11,7 @@ interface Props {
 }
 
 const DROPDOWN_H  = 220; // altura estimada del dropdown (6 items × ~36px)
-const BOTTOM_SAFE = 72;  // BottomNav + margen
+const BOTTOM_SAFE = 88;  // barra inferior con el botón central (80px) + margen
 
 export default function LocationInput({ value, onChange, placeholder, dot = 'origin', error }: Props) {
   const [open, setOpen]   = useState(false);

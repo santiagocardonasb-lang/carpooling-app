@@ -219,7 +219,7 @@ function AppRoutes() {
   const showBottomNav = isAuthenticated && !focusedRoute && !authRoute;
 
   return (
-    <div className={`min-h-screen ${showBottomNav ? 'pb-16 sm:pb-0' : ''}`}>
+    <div className={`min-h-screen ${showBottomNav ? 'pb-bar' : ''}`}>
       {!focusedRoute && <Navbar />}
       <Suspense fallback={<RouteFallback />}>
       <Routes>

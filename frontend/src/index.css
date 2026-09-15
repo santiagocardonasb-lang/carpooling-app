@@ -53,6 +53,10 @@
   /* Base de las sombras: casi negro en claro, negro puro en oscuro */
   --shadow:       9 9 11;
 
+  /* Cuánto tapa la barra inferior: su alto más lo que sobresale el botón
+     central. Es la única medida que las páginas necesitan conocer. */
+  --nav-clear:    5rem;
+
   /* ── Curvas de animación ──
      La de resorte se pasa un poco del destino y vuelve: es lo que hace
      que un movimiento se sienta físico. La de salida es la misma que
@@ -303,9 +307,15 @@ button:not(:disabled):active,
 /* Hueco para la barra inferior.
    Las páginas usan `min-h-screen`, que mide la ventana completa e ignora que
    la barra está fija encima; sin esto, lo último de la página queda debajo de
-   ella. En escritorio la barra no existe, así que el hueco desaparece. */
-.pb-nav { padding-bottom: calc(4rem + max(env(safe-area-inset-bottom, 0px), 12px)); }
-@media (min-width: 640px) { .pb-nav { padding-bottom: 2rem; } }
+   ella. `.pb-bar` lo pone el contenedor de la app en todas las páginas;
+   `.pb-nav` es para un pie que además quiere aire propio. En escritorio la
+   barra no existe, así que el hueco desaparece. */
+.pb-bar { padding-bottom: calc(var(--nav-clear) + env(safe-area-inset-bottom, 0px)); }
+.pb-nav { padding-bottom: calc(var(--nav-clear) + max(env(safe-area-inset-bottom, 0px), 12px)); }
+@media (min-width: 640px) {
+  .pb-bar { padding-bottom: 0; }
+  .pb-nav { padding-bottom: 2rem; }
+}
 
 /* ═══════════════════════════════════════════════════════════════
    PANTALLA DE ENTRADA

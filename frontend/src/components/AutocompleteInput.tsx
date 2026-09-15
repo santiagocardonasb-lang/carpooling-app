@@ -9,7 +9,7 @@ interface Props {
 }
 
 const DROPDOWN_H  = 280; // altura estimada (8 items × ~35px)
-const BOTTOM_SAFE = 72;  // BottomNav + margen
+const BOTTOM_SAFE = 88;  // barra inferior con el botón central (80px) + margen
 
 export default function AutocompleteInput({ value, onChange, options, placeholder, icon }: Props) {
   const [open, setOpen]   = useState(false);
